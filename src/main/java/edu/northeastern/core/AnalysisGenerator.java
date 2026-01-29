@@ -24,7 +24,7 @@ public class AnalysisGenerator {
         DETECTORS.put("feature-envy", FeatureEnvyDetector::new);
         DETECTORS.put("long-method", LongMethodDetector::new);
         DETECTORS.put("temp-field", TemporaryFieldDetector::new);
-        DETECTORS.put("long-params", LongMethodDetector::new);
+        DETECTORS.put("long-params", LongParameterListDetector::new);
         DETECTORS.put("refused-bequest", RefusedBequestDetector::new);
         DETECTORS.put("comments", CommentsDetector::new);
     }
