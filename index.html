@@ -1,0 +1,318 @@
+<!-- AI Generated HTML by Google's Gemini 3 Pro -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StaticNose Report Viewer</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-vsc-dark-plus.min.css" rel="stylesheet" />
+
+    <style>
+        /* --- Layout & Reset --- */
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1e1e1e; color: #d4d4d4; display: flex; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; }
+
+        /* --- Drag & Drop Overlay --- */
+        #drop-zone {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(30, 30, 30, 0.98); z-index: 1000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.3s ease;
+        }
+        #drop-zone.hidden { opacity: 0; pointer-events: none; }
+        #drop-zone h1 { color: #4ec9b0; font-weight: 300; font-size: 2.5rem; margin-bottom: 1rem; }
+        .btn-upload {
+            background: #007acc; color: white; border: none; padding: 12px 24px; font-size: 1rem; cursor: pointer; border-radius: 4px;
+        }
+
+        /* --- Sidebar --- */
+        #sidebar { width: 320px; background: #252526; border-right: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
+
+        .sidebar-header { padding: 15px; background: #333; border-bottom: 1px solid #3e3e42; }
+        .header-group { margin-bottom: 12px; }
+        .header-group:last-child { margin-bottom: 0; }
+
+        .header-title { font-weight: 600; color: #fff; font-size: 0.75rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; }
+
+        select {
+            width: 100%; padding: 6px; background: #1e1e1e; color: #d4d4d4;
+            border: 1px solid #3e3e42; border-radius: 4px; font-size: 0.85rem; outline: none;
+        }
+        select:focus { border-color: #007acc; }
+
+        #file-list { flex: 1; overflow-y: auto; list-style: none; padding: 0; margin: 0; }
+        .file-item { padding: 8px 15px; cursor: pointer; border-bottom: 1px solid #2d2d30; display: flex; justify-content: space-between; align-items: center; }
+        .file-item:hover { background: #2a2d2e; }
+        .file-item.active { background: #37373d; border-left: 3px solid #4ec9b0; }
+        .file-name { font-size: 0.85rem; color: #cccccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+        .badge { background: #f44336; color: white; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; min-width: 20px; text-align: center; }
+
+        /* --- Main Code Viewer --- */
+        #main-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #1e1e1e; }
+        #code-header { padding: 10px 20px; background: #2d2d30; border-bottom: 1px solid #3e3e42; font-family: 'Consolas', monospace; color: #9cdcfe; font-size: 0.9rem; }
+        #code-container { flex: 1; overflow: auto; position: relative; padding-bottom: 50px; }
+
+        /* --- TABLE LAYOUT --- */
+        .code-table {
+            width: 100%; border-collapse: collapse; font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px; line-height: 1.5; table-layout: auto;
+        }
+
+        .line-num-cell {
+            width: 50px; text-align: right; padding-right: 15px; color: #6e7681;
+            user-select: none; border-right: 1px solid #3e3e42; vertical-align: top;
+            background: #1e1e1e;
+        }
+
+        .code-cell {
+            padding-left: 15px; white-space: pre; color: #d4d4d4; vertical-align: top; width: 100%;
+        }
+
+        .info-cell {
+            width: 1px; white-space: nowrap; vertical-align: top; padding-right: 10px;
+        }
+
+        .has-smell { background-color: rgba(244, 67, 54, 0.15); }
+        .has-smell .line-num-cell { color: #f44336; font-weight: bold; }
+
+        .smell-tag {
+            display: inline-block; font-size: 11px; font-family: 'Segoe UI', sans-serif;
+            background: #d32f2f; color: white; padding: 2px 8px; border-radius: 10px;
+            margin-left: 20px; opacity: 0.9; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div id="drop-zone">
+    <h1>StaticNose</h1>
+    <p>Drag your project folder here</p>
+    <button class="btn-upload" onclick="document.getElementById('dirInput').click()">Browse Folder</button>
+    <input type="file" id="dirInput" webkitdirectory directory multiple style="display:none">
+</div>
+
+<div id="sidebar">
+    <div class="sidebar-header">
+        <div class="header-group">
+            <div class="header-title">Run Date</div>
+            <select id="report-select"></select>
+        </div>
+        <div class="header-group">
+            <div class="header-title">Filter by Type</div>
+            <select id="smell-filter">
+                <option value="ALL">All Smells</option>
+            </select>
+        </div>
+    </div>
+    <div id="file-list"></div>
+</div>
+
+<div id="main-view">
+    <div id="code-header">No file selected</div>
+    <div id="code-container"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+
+<script>
+    let filesMap = {};
+    let issuesMap = {};
+    let availableReports = [];
+
+    const dropZone = document.getElementById('drop-zone');
+    const reportSelect = document.getElementById('report-select');
+    const smellFilter = document.getElementById('smell-filter');
+
+    window.addEventListener('dragover', e => e.preventDefault());
+    window.addEventListener('drop', handleDrop);
+    document.getElementById('dirInput').addEventListener('change', handleInput);
+
+    reportSelect.addEventListener('change', (e) => loadReport(availableReports[e.target.value]));
+    smellFilter.addEventListener('change', () => renderSidebar()); // Re-render sidebar on filter change
+
+    async function handleInput(e) { await processFiles(Array.from(e.target.files)); }
+
+    async function handleDrop(e) {
+        e.preventDefault();
+        const items = Array.from(e.dataTransfer.items);
+        const files = await getAllFilesFromItems(items);
+        await processFiles(files);
+    }
+
+    async function getAllFilesFromItems(items) {
+        const files = [];
+        async function traverse(entry) {
+            if (entry.isFile) {
+                const file = await new Promise(r => entry.file(r));
+                Object.defineProperty(file, 'webkitRelativePath', { value: entry.fullPath.substring(1) });
+                files.push(file);
+            } else if (entry.isDirectory) {
+                const reader = entry.createReader();
+                const entries = await new Promise(r => reader.readEntries(r));
+                for (const e of entries) await traverse(e);
+            }
+        }
+        for (const item of items) {
+            const entry = item.webkitGetAsEntry();
+            if (entry) await traverse(entry);
+        }
+        return files;
+    }
+
+    async function processFiles(files) {
+        filesMap = {}; availableReports = [];
+        for (const file of files) {
+            filesMap[file.webkitRelativePath] = file;
+            if (file.webkitRelativePath.includes('staticnose-report') && file.name.endsWith('.json')) {
+                availableReports.push(file);
+            }
+        }
+
+        if (availableReports.length === 0) {
+            alert("No JSON reports found."); return;
+        }
+
+        availableReports.sort((a, b) => b.name.localeCompare(a.name));
+        reportSelect.innerHTML = '';
+        availableReports.forEach((file, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.textContent = file.name.replace(/report-|results-|\.json/g, '').replace(/_/g, ' ');
+            reportSelect.appendChild(opt);
+        });
+
+        loadReport(availableReports[0]);
+        dropZone.classList.add('hidden');
+    }
+
+    async function loadReport(jsonFile) {
+        const text = await jsonFile.text();
+        let reportData;
+        try { reportData = JSON.parse(text); } catch(e) { return; }
+
+        issuesMap = {};
+        const uniqueSmells = new Set(); // Track unique smell names
+
+        reportData.forEach(entry => {
+            if (!entry.lineNumbers || entry.lineNumbers.length === 0) return;
+            if (entry.lineNumbers.length === 1 && entry.lineNumbers[0] === -1) return;
+
+            const path = entry.relativeFilePath;
+            if (!issuesMap[path]) issuesMap[path] = {};
+
+            const smellName = entry.smellName || "Code Smell";
+            uniqueSmells.add(smellName);
+
+            entry.lineNumbers.forEach(line => {
+                if(!issuesMap[path][line]) issuesMap[path][line] = [];
+                if (!issuesMap[path][line].includes(smellName)) issuesMap[path][line].push(smellName);
+            });
+        });
+
+        // Populate Filter Dropdown
+        populateFilter(uniqueSmells);
+
+        // Clear view
+        document.getElementById('code-container').innerHTML = '';
+        document.getElementById('code-header').textContent = 'Select a file to view';
+        renderSidebar();
+    }
+
+    function populateFilter(smellSet) {
+        smellFilter.innerHTML = '<option value="ALL">All Smells</option>';
+        Array.from(smellSet).sort().forEach(smell => {
+            const opt = document.createElement('option');
+            opt.value = smell;
+            opt.textContent = smell;
+            smellFilter.appendChild(opt);
+        });
+        smellFilter.value = 'ALL';
+    }
+
+    function renderSidebar() {
+        const list = document.getElementById('file-list');
+        list.innerHTML = '';
+        const filter = smellFilter.value; // Get current filter
+
+        let visibleFiles = 0;
+
+        Object.keys(issuesMap).forEach(path => {
+            const fileIssues = issuesMap[path]; // { lineNum: ["Smell1", "Smell2"] }
+
+            // Calculate count based on Filter
+            let count = 0;
+            Object.values(fileIssues).forEach(smellList => {
+                // Check if this line has the filtered smell
+                if (filter === 'ALL' || smellList.includes(filter)) {
+                    count++;
+                }
+            });
+
+            // If file has 0 issues matching the filter, skip it
+            if (count === 0) return;
+
+            visibleFiles++;
+            const li = document.createElement('li');
+            li.className = 'file-item';
+            li.innerHTML = `<span class="file-name" title="${path}">${path.split('/').pop()}</span><span class="badge">${count}</span>`;
+            li.onclick = () => loadFile(path, li);
+            list.appendChild(li);
+        });
+
+        if (visibleFiles === 0) {
+            list.innerHTML = '<div style="padding:15px; color:#888; font-size:0.9rem">No files match filter.</div>';
+        }
+    }
+
+    async function loadFile(path, listItem) {
+        document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+        listItem.classList.add('active');
+        document.getElementById('code-header').textContent = path;
+
+        const file = filesMap[path];
+        if (!file) return;
+
+        const content = await file.text();
+        const container = document.getElementById('code-container');
+        const lines = content.split(/\r?\n/);
+        const allIssues = issuesMap[path] || {};
+        const filter = smellFilter.value;
+
+        let html = `<table class="code-table">`;
+
+        lines.forEach((lineText, index) => {
+            const lineNum = index + 1;
+            const lineSmells = allIssues[lineNum];
+
+            let visibleTags = [];
+
+            if (lineSmells) {
+                if (filter === 'ALL') {
+                    visibleTags = lineSmells;
+                } else if (lineSmells.includes(filter)) {
+                    visibleTags = [filter];
+                }
+            }
+
+            let rowClass = visibleTags.length > 0 ? 'has-smell' : '';
+            let tagHtml = visibleTags.map(s => `<span class="smell-tag">${s}</span>`).join(' ');
+
+            const highlightedCode = Prism.highlight(lineText, Prism.languages.java, 'java');
+
+            html += `
+                    <tr class="${rowClass}">
+                        <td class="line-num-cell">${lineNum}</td>
+                        <td class="code-cell">${highlightedCode}</td>
+                        <td class="info-cell">${tagHtml}</td>
+                    </tr>`;
+        });
+
+        html += `</table>`;
+        container.innerHTML = html;
+    }
+</script>
+</body>
+</html>
