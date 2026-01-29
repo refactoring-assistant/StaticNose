@@ -3,6 +3,7 @@ package edu.northeastern.cli;
 import edu.northeastern.core.AnalysisGenerator;
 import edu.northeastern.reporting.CSVReportGenerator;
 import edu.northeastern.reporting.IReportGenerator;
+import edu.northeastern.reporting.JSONReportGenerator;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ArgGroup;
@@ -79,17 +80,20 @@ public class CommandLineInterface implements Callable<Integer> {
             // Start analysis
             // 1. Create the ReportGenerator object with the requested format type
 
+            IReportGenerator reportGenerator;
 
-            IReportGenerator CsvReportGenerator = new CSVReportGenerator();
-
-
-            // 2. Create the AnalysisGenerator object with the params
-            AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmell, CsvReportGenerator);
-            analysisGenerator.start();
-
-            //    analysisgen will automatically call the report generator object so no worries
-            // 3. program end?
-
+            if(reportFormat == ReportFormat.JSON) {
+                reportGenerator = new JSONReportGenerator(sourceFolder.toString());
+                AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmell, reportGenerator);
+                analysisGenerator.start();
+            } else if(reportFormat == ReportFormat.CSV) {
+                reportGenerator = new CSVReportGenerator(sourceFolder.toString());
+                AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmell, reportGenerator);
+                analysisGenerator.start();
+            } else {
+                System.err.println("Unknown report format specified.");
+                System.exit(0);
+            }
         }
         return 0;
     }
