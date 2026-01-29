@@ -12,48 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class TemporaryFieldDetector implements IDetector{
+public class TemporaryFieldDetector extends AbstractDetector{
 
-    List<String> javaFilePaths;
-
-    public TemporaryFieldDetector(List<String> javaFilePaths) {
-        this.javaFilePaths = javaFilePaths;
+    public TemporaryFieldDetector(List<String> javaFilePaths, String inputDirPath) {
+        super(javaFilePaths, inputDirPath);
     }
 
     @Override
-    public List<ReportStruct> run() {
-        List<ReportStruct> reportStructList = new ArrayList<>();
-
-        for(String javaFilePath: javaFilePaths) {
-            List<ReportStruct> fileReportStructList = analyzeJavaFile(javaFilePath);
-            reportStructList.addAll(fileReportStructList);
-        }
-
-        return reportStructList;
-    }
-
-    private List<ReportStruct> analyzeJavaFile(String javaFilePath) {
-        Launcher launcher = new Launcher();
-        launcher.addInputResource(javaFilePath);
-        launcher.getEnvironment().setComplianceLevel(17);
-        launcher.buildModel();
-
-        CtModel model = launcher.getModel();
-        List<ReportStruct> fileReportStructList = new ArrayList<>();
-
-        for (CtType<?> type : model.getAllTypes()) {
-
-            ReportStruct classReportStruct = analyzeClass(type, javaFilePath);
-
-            if(classReportStruct != null) {
-                fileReportStructList.add(classReportStruct);
-            }
-        }
-
-        return fileReportStructList;
-    }
-
-    private ReportStruct analyzeClass(CtType<?> type, String javaFilePath) {
+    protected List<Integer> analyzeType(CtType<?> type) {
 
         List<Integer> detectedLines = new ArrayList<>();
 
@@ -126,16 +92,7 @@ public class TemporaryFieldDetector implements IDetector{
             }
         }
 
-        boolean hasCodeSmell = !detectedLines.isEmpty();
-        ReportStruct report = new ReportStruct(javaFilePath, type.getSimpleName(), hasCodeSmell);
-
-        if(hasCodeSmell) {
-            report.addLineNumbers(detectedLines);
-        } else {
-            report.addLineNumber(-1);
-        }
-
-        return report;
+        return detectedLines;
     }
 
     private boolean isGuaranteedAssignment(CtElement element, CtField<?> targetField, Set<String> visitedMethods) {

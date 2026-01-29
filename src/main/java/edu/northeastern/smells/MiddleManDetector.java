@@ -1,8 +1,5 @@
 package edu.northeastern.smells;
 
-import edu.northeastern.reporting.ReportStruct;
-import spoon.Launcher;
-import spoon.reflect.CtModel;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -12,49 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class MiddleManDetector implements IDetector {
-    List<String> javaFilePaths;
+public class MiddleManDetector extends AbstractDetector {
 
-    public MiddleManDetector(List<String> javaFilePaths) {
-        this.javaFilePaths = javaFilePaths;
+    public MiddleManDetector(List<String> javaFilePaths, String inputDirPath) {
+        super(javaFilePaths, inputDirPath);
     }
 
     @Override
-    public List<ReportStruct> run() {
-        List<ReportStruct> reportStructList = new ArrayList<>();
-
-        for(String javaFilePath: javaFilePaths) {
-            List<ReportStruct> fileReportStructList = analyzeJavaFile(javaFilePath);
-            reportStructList.addAll(fileReportStructList);
-        }
-
-        return reportStructList;
-    }
-
-    private List<ReportStruct> analyzeJavaFile(String javaFilePath) {
-        Launcher launcher = new Launcher();
-        launcher.addInputResource(javaFilePath);
-        launcher.getEnvironment().setComplianceLevel(17);
-        launcher.buildModel();
-
-        CtModel model = launcher.getModel();
-        List<ReportStruct> fileReportStructList = new ArrayList<>();
-
-        for (CtType<?> type : model.getAllTypes()) {
-
-            ReportStruct classReportStruct = analyzeClass(type, javaFilePath);
-
-            if(classReportStruct != null) {
-                fileReportStructList.add(classReportStruct);
-            }
-        }
-
-        System.out.println(fileReportStructList.get(0).getFilePath());
-
-        return fileReportStructList;
-    }
-
-    private ReportStruct analyzeClass(CtType<?> type, String javaFilePath) {
+    protected List<Integer> analyzeType(CtType<?> type) {
+        List<Integer> detectedLines = new ArrayList<>();
         // fan out
 
         Set<CtTypeReference<?>> referencedTypes = type.getReferencedTypes();
@@ -67,9 +30,7 @@ public class MiddleManDetector implements IDetector {
 
         Set<CtMethod<?>> methods = type.getMethods();
         if(methods.isEmpty()) {
-            ReportStruct report = new ReportStruct(javaFilePath, type.getSimpleName(), false);
-            report.addLineNumber(-1);
-            return report;
+            return detectedLines;
         }
 
         int singleLineDelegates = 0;
@@ -103,19 +64,12 @@ public class MiddleManDetector implements IDetector {
         // code smell check
         boolean hasCodeSmell = false;
         if(ratio > 0.5 && fanOut > 0) {
-            hasCodeSmell = true;
+            if (type.getPosition().isValidPosition()) {
+                detectedLines.add(type.getPosition().getLine());
+            }
         }
 
-        ReportStruct report = new ReportStruct(javaFilePath, type.getSimpleName(), hasCodeSmell);
-
-
-        if(hasCodeSmell) {
-            report.addLineNumber(1);
-        } else {
-            report.addLineNumber(-1);
-        }
-
-        return report;
+        return detectedLines;
     }
 
     private boolean isInvocataion(CtStatement stmt) {

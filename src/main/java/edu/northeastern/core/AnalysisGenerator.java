@@ -7,12 +7,27 @@ import edu.northeastern.smells.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 public class AnalysisGenerator {
     private final File sourceFolder;
     private final CodeSmell codeSmell;
     private final IReportGenerator reportGenerator;
+
+    private static final Map<String, BiFunction<List<String>, String, IDetector>> DETECTORS = new HashMap<>();
+
+    static {
+        DETECTORS.put("middle-man", MiddleManDetector::new);
+        DETECTORS.put("feature-envy", FeatureEnvyDetector::new);
+        DETECTORS.put("long-method", LongMethodDetector::new);
+        DETECTORS.put("temp-field", TemporaryFieldDetector::new);
+        DETECTORS.put("long-params", LongMethodDetector::new);
+        DETECTORS.put("refused-bequest", RefusedBequestDetector::new);
+        DETECTORS.put("comments", CommentsDetector::new);
+    }
 
     public AnalysisGenerator(File sourceFolder, CodeSmell codeSmell, IReportGenerator reportGenerator) {
         this.sourceFolder = sourceFolder;
@@ -30,30 +45,14 @@ public class AnalysisGenerator {
         // 3. after you get a file, based on the code smell you recieved from the command
         //    line interface, make the appropriate detector and send the file.
 
-        List<ReportStruct> reportStructList = new ArrayList<>();
+        BiFunction<List<String>, String, IDetector> detectorConstructor = DETECTORS.get(codeSmell.toString());
 
-        if(codeSmell.toString().equals("middle-man")) {
-            IDetector middleManDetector = new MiddleManDetector(javaFilePaths);
-            reportStructList = middleManDetector.run();
-        } else if(codeSmell.toString().equals("feature-envy")) {
-            IDetector featureEnvyDetector = new FeatureEnvyDetector(javaFilePaths);
-            reportStructList = featureEnvyDetector.run();
-        } else if(codeSmell.toString().equals("long-method")) {
-            IDetector longMethodDetector = new LongMethodDetector(javaFilePaths);
-            reportStructList = longMethodDetector.run();
-        } else if(codeSmell.toString().equals("temp-field")) {
-            IDetector tempFieldDetector = new TemporaryFieldDetector(javaFilePaths);
-            reportStructList = tempFieldDetector.run();
-        } else if(codeSmell.toString().equals("long-params")) {
-            IDetector longParamsDetector = new LongParameterListDetector(javaFilePaths);
-            reportStructList = longParamsDetector.run();
-        } else if(codeSmell.toString().equals("refused-bequest")) {
-            IDetector refusedBequestDetector = new RefusedBequestDetector(javaFilePaths);
-            reportStructList = refusedBequestDetector.run();
-        } else if(codeSmell.toString().equals("comments")) {
-            IDetector commentsDetector = new CommentsDetector(javaFilePaths);
-            reportStructList = commentsDetector.run();
+        if(detectorConstructor == null) {
+            throw new IllegalArgumentException("No detector found for smell: " + codeSmell.toString());
         }
+
+        IDetector detector = detectorConstructor.apply(javaFilePaths, sourceFolder.toString());
+        List<ReportStruct> reportStructList = detector.run();
 
         // 4. the detector should run analyzeFile and return a ReportStruct which contains
         //    the report of the file
@@ -73,6 +72,5 @@ public class AnalysisGenerator {
             result.add(file.getAbsolutePath());
         }
     }
-
 
 }
