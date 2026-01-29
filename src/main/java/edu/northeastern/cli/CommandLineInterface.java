@@ -11,7 +11,7 @@ import picocli.CommandLine.ArgGroup;
 import java.io.File;
 import java.util.concurrent.Callable;
 
-@Command(name = "ELASTIC", mixinStandardHelpOptions = true,  version = "ELASTIC 0.1.0",
+@Command(name = "StaticNose", mixinStandardHelpOptions = true,  version = "StaticNose 0.1.0",
 description = "Detect code smells using Static Analysis.")
 public class CommandLineInterface implements Callable<Integer> {
 
