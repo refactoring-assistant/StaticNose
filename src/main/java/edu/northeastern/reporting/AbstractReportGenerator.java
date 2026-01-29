@@ -16,13 +16,13 @@ public abstract class AbstractReportGenerator implements IReportGenerator{
     }
 
     public String prepareOutputPath() {
-        String resultDirPath = inputDirPath;
-        File resultDir = FileUtils.safeCreateDir(resultDirPath);
+        String reportDirPath = inputDirPath + "/staticnose-report/";
+        File reportDir = FileUtils.safeCreateDir(reportDirPath);
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
         String timestamp = now.format(dtf);
-        String outputPath = resultDirPath + "/results-"+timestamp+".json";
+        String outputPath = reportDirPath + "report-"+timestamp+".json";
 
         return outputPath;
     }
