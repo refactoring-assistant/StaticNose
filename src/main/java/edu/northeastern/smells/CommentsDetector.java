@@ -1,5 +1,6 @@
 package edu.northeastern.smells;
 
+import spoon.Launcher;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtStatement;
@@ -14,6 +15,11 @@ public class CommentsDetector extends AbstractDetector{
 
     public CommentsDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+    }
+
+    @Override
+    protected void configureLauncher(Launcher launcher) {
+        launcher.getEnvironment().setCommentEnabled(true);
     }
 
     @Override
