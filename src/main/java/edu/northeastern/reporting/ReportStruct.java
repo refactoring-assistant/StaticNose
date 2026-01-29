@@ -1,6 +1,7 @@
 package edu.northeastern.reporting;
 
-import java.io.File;
+import edu.northeastern.utils.PathHelper;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,19 +15,24 @@ import java.util.List;
 public class ReportStruct {
     private final String filePath;
     private final String className;
-    private List<Integer> lineNumbers;
+    private final List<Integer> lineNumbers;
     private final boolean hasCodeSmell;
+    private final String relativeFilePath;
 
-    public ReportStruct(String filePath, String className, boolean hasCodeSmell) {
+    public ReportStruct(String filePath, String inputDirPath, String className, boolean hasCodeSmell) {
         this.filePath = filePath;
         this.className = className;
         this.hasCodeSmell = hasCodeSmell;
         this.lineNumbers = new ArrayList<>();
+
+        this.relativeFilePath = PathHelper.getPathFromInputFolder(filePath, inputDirPath);
     }
 
     public String getFilePath() {
         return filePath;
     }
+
+    public String getRelativeFilePath() { return relativeFilePath; }
 
     public String getClassName() {
         return className;
