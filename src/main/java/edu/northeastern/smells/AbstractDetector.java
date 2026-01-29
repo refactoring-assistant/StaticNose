@@ -44,23 +44,18 @@ public abstract class AbstractDetector implements IDetector{
         for(CtType<?> type : model.getAllTypes()) {
             List<Integer> detectedLines = analyzeType(type);
 
-            boolean hasCodeSmell = !detectedLines.isEmpty();
-
-            ReportStruct report = new ReportStruct(
+            if(!detectedLines.isEmpty()) {
+                ReportStruct report = new ReportStruct(
                     getSmellName(),
                     javaFilePath,
                     this.inputDirPath,
-                    type.getSimpleName(),
-                    hasCodeSmell
-            );
+                    type.getSimpleName()
+                );
 
-            if(hasCodeSmell) {
-                report.addLineNumbers(detectedLines);
-            } else {
-                report.addLineNumber(-1);
+             report.addLineNumbers(detectedLines);
+             fileReportStructList.add(report);
             }
 
-            fileReportStructList.add(report);
         }
 
         return fileReportStructList;

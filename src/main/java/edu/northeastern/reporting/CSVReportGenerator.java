@@ -16,7 +16,7 @@ public class CSVReportGenerator extends AbstractReportGenerator{
 
     @Override
     public void generate(List<ReportStruct> reportStructList) {
-        String[] HEADERS = { "File Path", "Class Name", "Has Code Smell", "Line Numbers" };
+        String[] HEADERS = { "File Path", "Class Name", "Line Numbers" };
 
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
 
@@ -34,7 +34,6 @@ public class CSVReportGenerator extends AbstractReportGenerator{
                 printer.printRecord(
                         report.getFilePath(),
                         report.getClassName(),
-                        report.getHasCodeSmell(),
                         lineNumbersString
                 );
             }

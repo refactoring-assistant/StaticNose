@@ -17,14 +17,12 @@ public class ReportStruct {
     private final String filePath;
     private final String className;
     private final List<Integer> lineNumbers;
-    private final boolean hasCodeSmell;
     private final String relativeFilePath;
 
-    public ReportStruct(String smellName, String filePath, String inputDirPath, String className, boolean hasCodeSmell) {
+    public ReportStruct(String smellName, String filePath, String inputDirPath, String className) {
         this.smellName = smellName;
         this.filePath = filePath;
         this.className = className;
-        this.hasCodeSmell = hasCodeSmell;
         this.lineNumbers = new ArrayList<>();
 
         this.relativeFilePath = PathHelper.getPathFromInputFolder(filePath, inputDirPath);
@@ -38,10 +36,6 @@ public class ReportStruct {
 
     public String getClassName() {
         return className;
-    }
-
-    public boolean getHasCodeSmell() {
-        return hasCodeSmell;
     }
 
     public List<Integer> getLineNumbers() {
