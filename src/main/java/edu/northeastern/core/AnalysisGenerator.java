@@ -28,6 +28,7 @@ public class AnalysisGenerator {
         DETECTORS.put("refused-bequest", RefusedBequestDetector::new);
         DETECTORS.put("comments", CommentsDetector::new);
         DETECTORS.put("data-clumps", DataClumpsDetector::new);
+        DETECTORS.put("data-class", DataClassDetector::new);
     }
 
     public AnalysisGenerator(File sourceFolder, List<CodeSmell> codeSmells, IReportGenerator reportGenerator) {
