@@ -17,6 +17,12 @@ public class FeatureEnvyDetector extends AbstractDetector{
     }
 
     @Override
+    protected String getSmellName() {
+        return "Feature Envy";
+    }
+
+
+    @Override
     protected List<Integer> analyzeType(CtType<?> type) {
 
         List<Integer> detectedLines = new ArrayList<>();

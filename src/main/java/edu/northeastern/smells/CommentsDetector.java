@@ -23,6 +23,11 @@ public class CommentsDetector extends AbstractDetector{
     }
 
     @Override
+    protected String getSmellName() {
+        return "Comments";
+    }
+
+    @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
 

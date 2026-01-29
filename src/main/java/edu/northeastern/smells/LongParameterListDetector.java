@@ -12,6 +12,12 @@ public class LongParameterListDetector extends AbstractDetector{
     }
 
     @Override
+    protected String getSmellName() {
+        return "Long Parameter List";
+    }
+
+
+    @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
 

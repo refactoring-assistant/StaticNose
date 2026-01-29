@@ -18,6 +18,8 @@ public abstract class AbstractDetector implements IDetector{
         this.inputDirPath = inputDirPath;
     }
 
+    protected abstract String getSmellName();
+
     @Override
     public List<ReportStruct> run() {
         List<ReportStruct> reportStructList = new ArrayList<>();
@@ -45,6 +47,7 @@ public abstract class AbstractDetector implements IDetector{
             boolean hasCodeSmell = !detectedLines.isEmpty();
 
             ReportStruct report = new ReportStruct(
+                    getSmellName(),
                     javaFilePath,
                     this.inputDirPath,
                     type.getSimpleName(),

@@ -1,8 +1,5 @@
 package edu.northeastern.smells;
 
-import edu.northeastern.reporting.ReportStruct;
-import spoon.Launcher;
-import spoon.reflect.CtModel;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.*;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -16,6 +13,11 @@ public class TemporaryFieldDetector extends AbstractDetector{
 
     public TemporaryFieldDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+    }
+
+    @Override
+    protected String getSmellName() {
+        return "Temporary Field";
     }
 
     @Override

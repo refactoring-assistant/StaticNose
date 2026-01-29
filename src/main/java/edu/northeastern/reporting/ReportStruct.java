@@ -13,13 +13,15 @@ import java.util.List;
  * the list of line numbers where it occurred.
  */
 public class ReportStruct {
+    private final String smellName;
     private final String filePath;
     private final String className;
     private final List<Integer> lineNumbers;
     private final boolean hasCodeSmell;
     private final String relativeFilePath;
 
-    public ReportStruct(String filePath, String inputDirPath, String className, boolean hasCodeSmell) {
+    public ReportStruct(String smellName, String filePath, String inputDirPath, String className, boolean hasCodeSmell) {
+        this.smellName = smellName;
         this.filePath = filePath;
         this.className = className;
         this.hasCodeSmell = hasCodeSmell;
@@ -44,6 +46,10 @@ public class ReportStruct {
 
     public List<Integer> getLineNumbers() {
         return lineNumbers;
+    }
+
+    public String getSmellName() {
+        return smellName;
     }
 
     public void addLineNumber(int lineNumber) {

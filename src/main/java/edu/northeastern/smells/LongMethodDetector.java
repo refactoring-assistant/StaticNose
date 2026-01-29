@@ -15,6 +15,12 @@ public class LongMethodDetector extends AbstractDetector{
     }
 
     @Override
+    protected String getSmellName() {
+        return "Long Method";
+    }
+
+
+    @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
 

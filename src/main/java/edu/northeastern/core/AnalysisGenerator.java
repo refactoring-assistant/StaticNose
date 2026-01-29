@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 
 public class AnalysisGenerator {
     private final File sourceFolder;
-    private final CodeSmell codeSmell;
+    private final List<CodeSmell> codeSmells;
     private final IReportGenerator reportGenerator;
 
     private static final Map<String, BiFunction<List<String>, String, IDetector>> DETECTORS = new HashMap<>();
@@ -29,36 +29,34 @@ public class AnalysisGenerator {
         DETECTORS.put("comments", CommentsDetector::new);
     }
 
-    public AnalysisGenerator(File sourceFolder, CodeSmell codeSmell, IReportGenerator reportGenerator) {
+    public AnalysisGenerator(File sourceFolder, List<CodeSmell> codeSmells, IReportGenerator reportGenerator) {
         this.sourceFolder = sourceFolder;
-        this.codeSmell = codeSmell;
+        this.codeSmells = codeSmells;
         this.reportGenerator = reportGenerator;
     }
 
     public void start() {
-        // 1. Get all java files
-
         List<String> javaFilePaths = new ArrayList<>();
         collectJavaFilePaths(sourceFolder, javaFilePaths);
 
+        List<ReportStruct> masterReportList = new ArrayList<>();
 
-        // 3. after you get a file, based on the code smell you recieved from the command
-        //    line interface, make the appropriate detector and send the file.
+        for (CodeSmell smell : codeSmells) {
+            String smellKey = smell.toString();
 
-        BiFunction<List<String>, String, IDetector> detectorConstructor = DETECTORS.get(codeSmell.toString());
+            BiFunction<List<String>, String, IDetector> detectorConstructor = DETECTORS.get(smellKey);
 
-        if(detectorConstructor == null) {
-            throw new IllegalArgumentException("No detector found for smell: " + codeSmell.toString());
+            if(detectorConstructor == null) {
+                throw new IllegalArgumentException("No detector found for smell: " + smellKey);
+            }
+
+            System.out.println("Running " + smellKey + " detector...");
+
+            IDetector detector = detectorConstructor.apply(javaFilePaths, sourceFolder.toString());
+            masterReportList.addAll(detector.run());
         }
 
-        IDetector detector = detectorConstructor.apply(javaFilePaths, sourceFolder.toString());
-        List<ReportStruct> reportStructList = detector.run();
-
-        // 4. the detector should run analyzeFile and return a ReportStruct which contains
-        //    the report of the file
-        // 5. Once you get a list of ReportStructs send it to the ReportGenerator
-
-        reportGenerator.generate(reportStructList);
+        reportGenerator.generate(masterReportList);
 
     }
 

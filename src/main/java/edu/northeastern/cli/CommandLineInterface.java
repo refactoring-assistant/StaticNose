@@ -9,14 +9,15 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ArgGroup;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(name = "StaticNose", mixinStandardHelpOptions = true,  version = "StaticNose 0.1.0",
 description = "Detect code smells using Static Analysis.")
 public class CommandLineInterface implements Callable<Integer> {
 
-    @Option(names = {"-s", "--smell"}, converter = CodeSmellConverter.class, required = true, description = "The code smell to detect. Valid values: ${COMPLETION-CANDIDATES}")
-    private CodeSmell codeSmell;
+    @Option(names = {"-s", "--smell"}, split = ",", converter = CodeSmellConverter.class, required = true, description = "The code smells to detect. Separate with commas or use multiple -s flags. Valid values: ${COMPLETION-CANDIDATES}")
+    private List<CodeSmell> codeSmells;
 
     @Option(names = {"-f", "--folder"}, converter = DirectoryValidator.class, required = true, description = "The folder to detect code smells in.")
     private File sourceFolder;
@@ -57,7 +58,7 @@ public class CommandLineInterface implements Callable<Integer> {
 
         if(isOracleGenMode) {
             System.out.println("Generating oracle for: " + sourceFolder);
-            System.out.println("Code Smell to generate oracle for: " + codeSmell);
+            System.out.println("Code Smells to generate oracle for: " + codeSmells);
 
             // Generate oracle
             // 1. Create oracle generator object with sourceFolder, codeSmell
@@ -68,7 +69,7 @@ public class CommandLineInterface implements Callable<Integer> {
             boolean verbose = (mode != null && mode.analysisOptions != null) && mode.analysisOptions.verbose;
 
             System.out.println("Starting Analysis on: " + sourceFolder);
-            System.out.println("Code Smell to detect: " + codeSmell);
+            System.out.println("Code Smells to detect: " + codeSmells);
 
             if (oracleFile != null) {
                 System.out.println("Oracle file chosen: " + oracleFile);
@@ -84,16 +85,12 @@ public class CommandLineInterface implements Callable<Integer> {
 
             if(reportFormat == ReportFormat.JSON) {
                 reportGenerator = new JSONReportGenerator(sourceFolder.toString());
-                AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmell, reportGenerator);
-                analysisGenerator.start();
-            } else if(reportFormat == ReportFormat.CSV) {
-                reportGenerator = new CSVReportGenerator(sourceFolder.toString());
-                AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmell, reportGenerator);
-                analysisGenerator.start();
             } else {
-                System.err.println("Unknown report format specified.");
-                System.exit(0);
+                reportGenerator = new CSVReportGenerator(sourceFolder.toString());
             }
+
+            AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmells, reportGenerator);
+            analysisGenerator.start();
         }
         return 0;
     }

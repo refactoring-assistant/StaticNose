@@ -16,6 +16,11 @@ public class RefusedBequestDetector extends AbstractDetector{
     }
 
     @Override
+    protected String getSmellName() {
+        return "Refused Bequest";
+    }
+
+    @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
 
