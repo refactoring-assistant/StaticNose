@@ -9,7 +9,9 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CommentsDetector extends AbstractDetector{
 
@@ -29,7 +31,7 @@ public class CommentsDetector extends AbstractDetector{
 
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
-        List<Integer> detectedLines = new ArrayList<>();
+        Set<Integer> detectedLines = new HashSet<>();
 
         for(CtMethod<?> method : type.getMethods()) {
 
@@ -37,6 +39,7 @@ public class CommentsDetector extends AbstractDetector{
 
             List<CtComment> comments = method.getBody().getElements(new TypeFilter<>(CtComment.class));
 
+            List<CtComment> contributingComments = new ArrayList<>();
             int commentLineCount = 0;
 
             for(CtComment comment : comments) {
@@ -48,6 +51,8 @@ public class CommentsDetector extends AbstractDetector{
                 if (content.startsWith("TODO") || content.startsWith("FIXME")) {
                     continue;
                 }
+
+                contributingComments.add(comment);
 
                 int lines = comment.getContent().split("\r\n|\r|\n").length;
                 commentLineCount += lines;
@@ -69,12 +74,14 @@ public class CommentsDetector extends AbstractDetector{
                 double ratio = (double) commentLineCount / lloc;
 
                 if(ratio > .3) {
-                    addLineIfValid(method, detectedLines);
+                    for(CtComment c : contributingComments) {
+                        addLineIfValid(c, detectedLines);
+                    }
                 }
             }
         }
 
-        return detectedLines;
+        return new ArrayList<>(detectedLines);
     }
 
     private int calculateLLOC(CtMethod<?> method) {
@@ -90,7 +97,7 @@ public class CommentsDetector extends AbstractDetector{
         return lloc;
     }
 
-    private void addLineIfValid(spoon.reflect.declaration.CtElement element, List<Integer> lines) {
+    private void addLineIfValid(spoon.reflect.declaration.CtElement element, Set<Integer> lines) {
         if (element.getPosition() != null && element.getPosition().isValidPosition()) {
             lines.add(element.getPosition().getLine());
         }
