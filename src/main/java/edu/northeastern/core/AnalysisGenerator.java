@@ -20,15 +20,26 @@ public class AnalysisGenerator {
     private static final Map<String, BiFunction<List<String>, String, IDetector>> DETECTORS = new HashMap<>();
 
     static {
-        DETECTORS.put("middle-man", MiddleManDetector::new);
-        DETECTORS.put("feature-envy", FeatureEnvyDetector::new);
-        DETECTORS.put("long-method", LongMethodDetector::new);
-        DETECTORS.put("temp-field", TemporaryFieldDetector::new);
-        DETECTORS.put("long-params", LongParameterListDetector::new);
-        DETECTORS.put("refused-bequest", RefusedBequestDetector::new);
+        DETECTORS.put("alt-classes", AlternativeClassesDetector::new);
         DETECTORS.put("comments", CommentsDetector::new);
-        DETECTORS.put("data-clumps", DataClumpsDetector::new);
         DETECTORS.put("data-class", DataClassDetector::new);
+        DETECTORS.put("data-clumps", DataClumpsDetector::new);
+        DETECTORS.put("divergent-change", DivergentChangeDetector::new);
+        DETECTORS.put("dup-code", DuplicateCodeDetector::new);
+        DETECTORS.put("feature-envy", FeatureEnvyDetector::new);
+        DETECTORS.put("intimacy", InappropriateIntimacyDetector::new);
+        DETECTORS.put("large-class", LargeClassDetector::new);
+        DETECTORS.put("lazy-class", LazyClassDetector::new);
+        DETECTORS.put("long-method", LongMethodDetector::new);
+        DETECTORS.put("long-params", LongParameterListDetector::new);
+        DETECTORS.put("message-chains", MessageChainsDetector::new);
+        DETECTORS.put("middle-man", MiddleManDetector::new);
+        DETECTORS.put("parallel-hierarchy", ParallelInheritanceHierarchyDetector::new);
+        DETECTORS.put("prim-obsession", PrimitiveObsessionDetector::new);
+        DETECTORS.put("refused-bequest", RefusedBequestDetector::new);
+        DETECTORS.put("shotgun", ShotgunSurgeryDetector::new);
+        DETECTORS.put("switch-stmts", SwitchStatementDetector::new);
+        DETECTORS.put("temp-field", TemporaryFieldDetector::new);
     }
 
     public AnalysisGenerator(File sourceFolder, List<CodeSmell> codeSmells, IReportGenerator reportGenerator) {

@@ -18,18 +18,23 @@ public class ReportStruct {
     private final String className;
     private final List<Integer> lineNumbers;
     private final String relativeFilePath;
+    private final String additionalInfo;
 
-    public ReportStruct(String smellName, String filePath, String inputDirPath, String className) {
+    public ReportStruct(String smellName, String filePath, String inputDirPath, String className, String additionalInfo) {
         this.smellName = smellName;
         this.filePath = filePath;
         this.className = className;
         this.lineNumbers = new ArrayList<>();
-
         this.relativeFilePath = PathHelper.getPathFromInputFolder(filePath, inputDirPath);
+        this.additionalInfo = additionalInfo;
     }
 
     public String getFilePath() {
         return filePath;
+    }
+
+    public String getAdditionalInfo() {
+        return additionalInfo;
     }
 
     public String getRelativeFilePath() { return relativeFilePath; }

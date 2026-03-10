@@ -1,5 +1,6 @@
 package edu.northeastern.smells;
 
+import spoon.Launcher;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
