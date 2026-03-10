@@ -1,5 +1,3 @@
-<!-- AI Generated HTML by Google's Gemini 3 Pro -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -119,7 +117,7 @@
 
 <script>
     let filesMap = {};
-    let issuesMap = {};
+    let issuesMap = {}; // { filePath: { lineNum: [ {name: "Smell", info: "Group 1"} ] } }
     let availableReports = [];
 
     const dropZone = document.getElementById('drop-zone');
@@ -131,7 +129,7 @@
     document.getElementById('dirInput').addEventListener('change', handleInput);
 
     reportSelect.addEventListener('change', (e) => loadReport(availableReports[e.target.value]));
-    smellFilter.addEventListener('change', () => renderSidebar()); // Re-render sidebar on filter change
+    smellFilter.addEventListener('change', () => renderSidebar());
 
     async function handleInput(e) { await processFiles(Array.from(e.target.files)); }
 
@@ -194,7 +192,7 @@
         try { reportData = JSON.parse(text); } catch(e) { return; }
 
         issuesMap = {};
-        const uniqueSmells = new Set(); // Track unique smell names
+        const uniqueSmells = new Set();
 
         reportData.forEach(entry => {
             if (!entry.lineNumbers || entry.lineNumbers.length === 0) return;
@@ -204,18 +202,27 @@
             if (!issuesMap[path]) issuesMap[path] = {};
 
             const smellName = entry.smellName || "Code Smell";
+            const additionalInfo = entry.additionalInfo || "";
+
             uniqueSmells.add(smellName);
 
             entry.lineNumbers.forEach(line => {
                 if(!issuesMap[path][line]) issuesMap[path][line] = [];
-                if (!issuesMap[path][line].includes(smellName)) issuesMap[path][line].push(smellName);
+
+                // Construct issue object
+                const issueObj = { name: smellName, info: additionalInfo };
+
+                // Prevent duplicate entries for the same line
+                const exists = issuesMap[path][line].some(i => i.name === smellName && i.info === additionalInfo);
+
+                if (!exists) {
+                    issuesMap[path][line].push(issueObj);
+                }
             });
         });
 
-        // Populate Filter Dropdown
         populateFilter(uniqueSmells);
 
-        // Clear view
         document.getElementById('code-container').innerHTML = '';
         document.getElementById('code-header').textContent = 'Select a file to view';
         renderSidebar();
@@ -235,23 +242,21 @@
     function renderSidebar() {
         const list = document.getElementById('file-list');
         list.innerHTML = '';
-        const filter = smellFilter.value; // Get current filter
+        const filter = smellFilter.value;
 
         let visibleFiles = 0;
 
         Object.keys(issuesMap).forEach(path => {
-            const fileIssues = issuesMap[path]; // { lineNum: ["Smell1", "Smell2"] }
+            const fileIssues = issuesMap[path]; // { lineNum: [ {name, info} ] }
 
-            // Calculate count based on Filter
             let count = 0;
-            Object.values(fileIssues).forEach(smellList => {
-                // Check if this line has the filtered smell
-                if (filter === 'ALL' || smellList.includes(filter)) {
+            Object.values(fileIssues).forEach(issueList => {
+                // Check if any issue on this line matches the filter
+                if (filter === 'ALL' || issueList.some(issue => issue.name === filter)) {
                     count++;
                 }
             });
 
-            // If file has 0 issues matching the filter, skip it
             if (count === 0) return;
 
             visibleFiles++;
@@ -285,20 +290,25 @@
 
         lines.forEach((lineText, index) => {
             const lineNum = index + 1;
-            const lineSmells = allIssues[lineNum];
+            const lineIssues = allIssues[lineNum];
 
-            let visibleTags = [];
+            let visibleIssues = [];
 
-            if (lineSmells) {
+            if (lineIssues) {
                 if (filter === 'ALL') {
-                    visibleTags = lineSmells;
-                } else if (lineSmells.includes(filter)) {
-                    visibleTags = [filter];
+                    visibleIssues = lineIssues;
+                } else {
+                    visibleIssues = lineIssues.filter(i => i.name === filter);
                 }
             }
 
-            let rowClass = visibleTags.length > 0 ? 'has-smell' : '';
-            let tagHtml = visibleTags.map(s => `<span class="smell-tag">${s}</span>`).join(' ');
+            let rowClass = visibleIssues.length > 0 ? 'has-smell' : '';
+
+            // Generate Tags with Info (Group ID)
+            let tagHtml = visibleIssues.map(i => {
+                const displayText = i.info ? `${i.name}: ${i.info}` : i.name;
+                return `<span class="smell-tag">${displayText}</span>`;
+            }).join(' ');
 
             const highlightedCode = Prism.highlight(lineText, Prism.languages.java, 'java');
 
