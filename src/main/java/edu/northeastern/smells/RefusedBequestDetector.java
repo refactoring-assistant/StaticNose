@@ -24,15 +24,27 @@ public class RefusedBequestDetector extends AbstractDetector{
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
 
-        CtTypeReference<?> superClass = type.getSuperclass();
-        var superInterfaces = type.getSuperInterfaces();
+        CtTypeReference<?> superRef = type.getSuperclass();
+        if(superRef == null || "java.lang.Object".equals(superRef.getQualifiedName())) {
+            return detectedLines;
+        }
+
+        CtType<?> parentClass = superRef.getTypeDeclaration();
+        if(parentClass == null) {
+            return detectedLines;
+        }
 
         // check if inherits at all
-        boolean hasSuperClass = (superClass != null && !"java.lang.Object".equals(superClass.getQualifiedName()));
-        boolean hasInterfaces = !superInterfaces.isEmpty();
+        for(CtMethod<?> parentMethod : parentClass.getMethods()) {
+            if(!parentMethod.isAbstract() && isEmptyBody(parentMethod)) {
+                CtMethod<?> childOverride = type.getMethod(parentMethod.getSignature());
 
-        if (!hasSuperClass && !hasInterfaces) {
-            return detectedLines;
+                if(childOverride == null) {
+                    if(type.getPosition().isValidPosition()) {
+                        detectedLines.add(type.getPosition().getLine());
+                    }
+                }
+            }
         }
 
         for(CtMethod<?> method : type.getMethods()) {
@@ -40,13 +52,10 @@ public class RefusedBequestDetector extends AbstractDetector{
                 continue;
             }
 
-            if(method.getBody() == null) continue;
+            if(method.getBody() == null) continue; // should flag as refused bequest
 
-            // check if throws specific non-implementation exceptions
-            if(throwsRefusalException(method)) {
-                detectedLines.add(method.getPosition().getLine());
-            } // check if empty body with void return
-            else if (method.getType().getSimpleName().equals("void") && method.getBody().getStatements().isEmpty()) {
+            // check if throws specific non-implementation exceptions and check if empty body with void return
+            if(throwsRefusalException(method) || isEmptyBody(method)) {
                 detectedLines.add(method.getPosition().getLine());
             }
 
@@ -59,6 +68,10 @@ public class RefusedBequestDetector extends AbstractDetector{
         }
 
         return detectedLines;
+    }
+
+    private boolean isEmptyBody(CtMethod<?> method) {
+        return method.getType().getSimpleName().equals("void") && method.getBody() != null && method.getBody().getStatements().isEmpty();
     }
 
     private boolean hasOverrideAnnotation(CtMethod<?> method) {
