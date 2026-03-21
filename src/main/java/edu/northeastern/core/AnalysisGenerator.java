@@ -6,10 +6,7 @@ import edu.northeastern.reporting.ReportStruct;
 import edu.northeastern.smells.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 
 public class AnalysisGenerator {
@@ -48,7 +45,7 @@ public class AnalysisGenerator {
         this.reportGenerator = reportGenerator;
     }
 
-    public void start() {
+    public List<ReportStruct> start() {
         List<String> javaFilePaths = new ArrayList<>();
         collectJavaFilePaths(sourceFolder, javaFilePaths);
 
@@ -71,12 +68,13 @@ public class AnalysisGenerator {
 
         reportGenerator.generate(masterReportList);
 
+        return masterReportList;
     }
 
     protected void collectJavaFilePaths(File file, List<String> result) {
 
         if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
+            for (File f : Objects.requireNonNull(file.listFiles())) {
                 collectJavaFilePaths(f, result);
             }
         } else if (file.isFile() && file.getName().endsWith(".java")) {

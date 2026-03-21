@@ -12,7 +12,7 @@ import java.util.List;
 public abstract class AbstractDetector implements IDetector{
 
     protected final List<String> javaFilePaths;
-    protected String inputDirPath;
+    protected final String inputDirPath;
 
     public AbstractDetector(List<String> javaFilePaths, String inputDirPath) {
         this.javaFilePaths = javaFilePaths;

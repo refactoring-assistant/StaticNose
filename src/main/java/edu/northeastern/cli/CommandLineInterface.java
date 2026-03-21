@@ -4,6 +4,8 @@ import edu.northeastern.core.AnalysisGenerator;
 import edu.northeastern.reporting.CSVReportGenerator;
 import edu.northeastern.reporting.IReportGenerator;
 import edu.northeastern.reporting.JSONReportGenerator;
+import edu.northeastern.reporting.OracleEvaluator;
+import edu.northeastern.reporting.ReportStruct;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ArgGroup;
@@ -13,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(name = "StaticNose", mixinStandardHelpOptions = true,  version = "StaticNose 0.1.0",
-description = "Detect code smells using Static Analysis.")
+        description = "Detect code smells using Static Analysis.")
 public class CommandLineInterface implements Callable<Integer> {
 
     @Option(names = {"-s", "--smell"}, split = ",", converter = CodeSmellConverter.class, required = true, description = "The code smells to detect. Separate with commas or use multiple -s flags. Valid values: ${COMPLETION-CANDIDATES}")
@@ -50,7 +52,7 @@ public class CommandLineInterface implements Callable<Integer> {
     }
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
 
         boolean isOracleGenMode = mode != null
                 && mode.oracleGenerationOptions != null
@@ -72,15 +74,13 @@ public class CommandLineInterface implements Callable<Integer> {
             System.out.println("Code Smells to detect: " + codeSmells);
 
             if (oracleFile != null) {
-                System.out.println("Oracle file chosen: " + oracleFile);
+                System.out.println("Oracle file chosen: " + oracleFile.getAbsolutePath());
             }
             if (verbose) {
                 System.out.println("Verbose mode is on");
             }
 
             // Start analysis
-            // 1. Create the ReportGenerator object with the requested format type
-
             IReportGenerator reportGenerator;
 
             if(reportFormat == ReportFormat.JSON) {
@@ -90,9 +90,22 @@ public class CommandLineInterface implements Callable<Integer> {
             }
 
             AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmells, reportGenerator);
-            analysisGenerator.start();
+
+            // 1. Capture the generated reports from the analysis
+            List<ReportStruct> generatedReports = analysisGenerator.start();
+
+            // 2. Hook in the Oracle Evaluator if the -t flag was provided
+            if (oracleFile != null) {
+                System.out.println("\nStarting Oracle Evaluation...");
+                OracleEvaluator evaluator = new OracleEvaluator(
+                        oracleFile,
+                        generatedReports,
+                        codeSmells,
+                        sourceFolder.toString()
+                );
+                evaluator.evaluateAndReport();
+            }
         }
         return 0;
     }
-
 }
