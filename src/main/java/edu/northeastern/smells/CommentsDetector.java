@@ -13,6 +13,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static edu.northeastern.utils.Metrics.calculateLLOC;
+
+/**
+ * This class detects the presence of the Comments code smell.
+ * Comments that are smelly are those which simply restate the existing
+ * readable line of code, commented out code, or which simply do not add
+ * sufficient information to the already existing code and bloat the code.
+ */
 public class CommentsDetector extends AbstractDetector{
 
     public CommentsDetector(List<String> javaFilePaths, String inputDirPath) {
@@ -47,8 +55,15 @@ public class CommentsDetector extends AbstractDetector{
                     addLineIfValid(comment, detectedLines);
                 }
 
-                String content = comment.getContent().trim().toUpperCase();
-                if (content.startsWith("TODO") || content.startsWith("FIXME")) {
+                String content = comment.getContent().trim();
+                String upperContent = content.toUpperCase();
+
+                if (upperContent.startsWith("TODO") || upperContent.startsWith("FIXME")) {
+                    continue;
+                }
+
+                if (isCommentedOutCode(content)) {
+                    addLineIfValid(comment, detectedLines);
                     continue;
                 }
 
@@ -68,10 +83,11 @@ public class CommentsDetector extends AbstractDetector{
                 }
             }
 
-            int lloc = calculateLLOC(method);
+            int LLOC = calculateLLOC(method);
 
-            if(lloc > 0) {
-                double ratio = (double) commentLineCount / lloc;
+            // TODO: explain this in comments
+            if(LLOC > 0) {
+                double ratio = (double) commentLineCount / LLOC;
 
                 if(ratio > .3) {
                     for(CtComment c : contributingComments) {
@@ -84,19 +100,48 @@ public class CommentsDetector extends AbstractDetector{
         return new ArrayList<>(detectedLines);
     }
 
-    private int calculateLLOC(CtMethod<?> method) {
-        List<CtStatement> statements = method.getBody().getStatements();
+    /**
+     * Best estimate of whether a comment is a piece of code.
+     * Comments can contain broken/unfinished code which cannot be compiled
+     * and Spoon will throw an error. Instead, get the best estimate of if
+     * the comment is a piece of code.
+     * @param commentContent the piece of comment to check for code
+     * @return boolean
+     */
+    private boolean isCommentedOutCode(String commentContent) {
 
-        int lloc = 0;
-        for(CtStatement stmt : statements) {
-            if(!(stmt instanceof CtBlock)) {
-                lloc++;
-            }
+        String cleanContent = commentContent.trim();
+        if (cleanContent.isEmpty()) return false;
+
+        // statement ending
+        if (cleanContent.endsWith(";")) {
+            return true;
         }
 
-        return lloc;
+        // structural java chars.
+        if (cleanContent.contains(";") && (cleanContent.contains("=") || cleanContent.contains("."))) {
+            return true;
+        }
+
+        // method signature or control flow
+        if (cleanContent.matches(".*\\b(if|for|while|switch|catch)\\s*\\(.*")) {
+            return true;
+        }
+
+        // braces in code context
+        if (cleanContent.contains("{") && cleanContent.contains("}")) {
+            return true;
+        }
+
+        return false;
     }
 
+    /**
+     * Check if line is valid and only then add it.
+     *
+     * @param element The line to check
+     * @param lines Set of lines
+     */
     private void addLineIfValid(spoon.reflect.declaration.CtElement element, Set<Integer> lines) {
         if (element.getPosition() != null && element.getPosition().isValidPosition()) {
             lines.add(element.getPosition().getLine());

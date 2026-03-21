@@ -36,14 +36,11 @@ public class TemporaryFieldDetector extends AbstractDetector{
 
             boolean inConstructor = false;
 
-            if(type instanceof spoon.reflect.declaration.CtClass) {
-                spoon.reflect.declaration.CtClass<?> clazz = (spoon.reflect.declaration.CtClass<?>) type;
+            if(type instanceof CtClass<?> clazz) {
                 @SuppressWarnings("unchecked")
                 Set<CtConstructor<?>> constructors = (Set<CtConstructor<?>>) (Set) clazz.getConstructors();
 
-                if(constructors.isEmpty()) {
-                    inConstructor = false;
-                } else {
+                if(!constructors.isEmpty()) {
                     boolean allConstructorsInit = true;
                     for(CtConstructor<?> constructor : constructors) {
                         // start of recursion to check all branches and method invocations in constructor
@@ -61,19 +58,21 @@ public class TemporaryFieldDetector extends AbstractDetector{
 
             Set<String> usageMethods = new HashSet<>();
 
-            List<CtFieldAccess<?>> accesses = type.getElements(new TypeFilter<CtFieldAccess<?>>(CtFieldAccess.class) {
+            List<CtFieldAccess<?>> globalAccesses = field.getFactory().getModel().getElements(new TypeFilter<>(CtFieldAccess.class) {
                 @Override
                 public boolean matches(CtFieldAccess<?> element) {
-                        return super.matches(element) &&
-                                element.getVariable().getSimpleName().equals(field.getSimpleName());
-                    }
+                    // Make sure we are talking about THIS exact field declaration
+                    return super.matches(element) &&
+                            element.getVariable().getDeclaration() != null &&
+                            element.getVariable().getDeclaration().equals(field);
+                }
             });
 
-            for(CtFieldAccess<?> access : accesses) {
+            for(CtFieldAccess<?> access : globalAccesses) {
                 CtMethod<?> method = access.getParent(CtMethod.class);
-
                 if(method != null) {
-                    usageMethods.add(method.getSignature());
+                    // Use getSignature() to uniquely identify methods across different classes
+                    usageMethods.add(method.getParent(CtType.class).getQualifiedName() + "#" + method.getSignature());
                 }
             }
 
@@ -101,8 +100,7 @@ public class TemporaryFieldDetector extends AbstractDetector{
         if(element == null) return false;
 
         // check statement in block
-        if(element instanceof CtBlock) {
-            CtBlock<?> block = (CtBlock<?>) element;
+        if(element instanceof CtBlock<?> block) {
             for(CtStatement stmt : block.getStatements()) {
                 if(isGuaranteedAssignment(stmt, targetField, visitedMethods)) {
                     return true;
@@ -112,19 +110,16 @@ public class TemporaryFieldDetector extends AbstractDetector{
         }
 
         // check if the actual assignment
-        if(element instanceof CtAssignment) {
-            CtAssignment<?, ?> assign = (CtAssignment<?, ?>) element;
+        if(element instanceof CtAssignment<?, ?> assign) {
             CtExpression<?> assigned = assign.getAssigned();
-            if(assigned instanceof CtFieldAccess) {
-                CtFieldAccess<?> access = (CtFieldAccess<?>) assigned;
+            if(assigned instanceof CtFieldAccess<?> access) {
                 return access.getVariable().getSimpleName().equals(targetField.getSimpleName());
             }
             return false;
         }
 
         // check method invocations
-        if(element instanceof CtInvocation) {
-            CtInvocation<?> invocation = (CtInvocation<?>) element;
+        if(element instanceof CtInvocation<?> invocation) {
             CtExecutable<?> executable = invocation.getExecutable().getDeclaration();
 
             if(executable == null || executable.getBody() == null) return false;
@@ -139,8 +134,7 @@ public class TemporaryFieldDetector extends AbstractDetector{
         }
 
         // check inside if
-        if(element instanceof CtIf) {
-            CtIf ifStmt = (CtIf) element;
+        if(element instanceof CtIf ifStmt) {
             CtStatement thenStmt = ifStmt.getThenStatement();
             CtStatement elseStmt = ifStmt.getElseStatement();
 
@@ -151,8 +145,7 @@ public class TemporaryFieldDetector extends AbstractDetector{
         }
 
         // check inside switch
-        if(element instanceof CtSwitch) {
-            CtSwitch<?> switchStmt = (CtSwitch<?>) element;
+        if(element instanceof CtSwitch<?> switchStmt) {
             boolean hasDefault = false;
 
             for(CtCase<?> c : switchStmt.getCases()) {
@@ -167,8 +160,7 @@ public class TemporaryFieldDetector extends AbstractDetector{
         }
 
         // check inside case of switch
-        if(element instanceof CtCase) {
-            CtCase<?> c = (CtCase<?>) element;
+        if(element instanceof CtCase<?> c) {
             for (CtStatement stmt : c.getStatements()) {
                 if(isGuaranteedAssignment(stmt, targetField, visitedMethods)) return true;
             }
@@ -181,8 +173,7 @@ public class TemporaryFieldDetector extends AbstractDetector{
         }
 
         // check inside try statements (less strict check)
-        if(element instanceof CtTry) {
-            CtTry tryStmt = (CtTry) element;
+        if(element instanceof CtTry tryStmt) {
             return isGuaranteedAssignment(tryStmt.getBody(), targetField, visitedMethods);
         }
 

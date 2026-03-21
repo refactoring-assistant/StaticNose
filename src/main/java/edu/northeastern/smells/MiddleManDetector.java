@@ -47,8 +47,8 @@ public class MiddleManDetector extends AbstractDetector {
             int statementCount = statements.size();
 
             if(statementCount == 1) {
-                CtStatement stmt = statements.get(0);
-                if(isInvocataion(stmt) || isReturnInvocation(stmt)) {
+                CtStatement stmt = statements.getFirst();
+                if(isInvocation(stmt) || isReturnInvocation(stmt)) {
                     singleLineDelegates++;
                 }
             }
@@ -77,31 +77,26 @@ public class MiddleManDetector extends AbstractDetector {
         return detectedLines;
     }
 
-    private boolean isInvocataion(CtStatement stmt) {
+    private boolean isInvocation(CtStatement stmt) {
         return stmt instanceof CtInvocation;
     }
 
     private boolean isReturnInvocation(CtStatement stmt) {
-        if(stmt instanceof CtReturn) {
-            CtReturn<?> ret = (CtReturn<?>) stmt;
+        if(stmt instanceof CtReturn<?> ret) {
             return ret.getReturnedExpression() instanceof CtInvocation;
         }
         return false;
     }
 
     private boolean isAssignInvocationAndReturn(CtStatement first, CtStatement second) {
-        if(!(first instanceof  CtLocalVariable)) return false;
+        if(!(first instanceof CtLocalVariable<?> local)) return false;
 
-        if(!(second instanceof CtReturn)) return false;
-
-        CtLocalVariable<?> local = (CtLocalVariable<?>) first;
-        CtReturn<?> ret = (CtReturn<?>) second;
+        if(!(second instanceof CtReturn<?> ret)) return false;
 
         if(!(local.getDefaultExpression() instanceof CtInvocation)) return false;
 
-        if(!(ret.getReturnedExpression() instanceof CtVariableRead)) return false;
+        if(!(ret.getReturnedExpression() instanceof CtVariableRead<?> read)) return false;
 
-        CtVariableRead<?> read = (CtVariableRead<?>) ret.getReturnedExpression();
         return read.getVariable().getDeclaration() == local;
     }
 

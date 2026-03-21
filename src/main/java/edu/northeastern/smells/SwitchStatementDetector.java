@@ -80,14 +80,12 @@ public class SwitchStatementDetector extends AbstractDetector {
 
         CtStatement current = firstIf.getElseStatement();
         while (current != null) {
-            if (current instanceof CtIf) {
-                CtIf nextIf = (CtIf) current;
+            if (current instanceof CtIf nextIf) {
                 chain.add(nextIf);
                 current = nextIf.getElseStatement();
-            } else if (current instanceof CtBlock) {
-                CtBlock<?> block = (CtBlock<?>) current;
+            } else if (current instanceof CtBlock<?> block) {
                 if (block.getStatements().size() == 1 && block.getStatement(0) instanceof CtIf) {
-                    CtIf nextIf = (CtIf) block.getStatement(0);
+                    CtIf nextIf = block.getStatement(0);
                     chain.add(nextIf);
                     current = nextIf.getElseStatement();
                 } else {
@@ -124,8 +122,7 @@ public class SwitchStatementDetector extends AbstractDetector {
     }
 
     private String extractVariableFromCondition(CtExpression<?> condition) {
-        if (condition instanceof CtBinaryOperator) {
-            CtBinaryOperator<?> op = (CtBinaryOperator<?>) condition;
+        if (condition instanceof CtBinaryOperator<?> op) {
             if (op.getLeftHandOperand() instanceof CtVariableRead) {
                 return ((CtVariableRead<?>) op.getLeftHandOperand()).getVariable().getSimpleName();
             }
@@ -134,8 +131,7 @@ public class SwitchStatementDetector extends AbstractDetector {
             }
         }
 
-        if (condition instanceof CtInvocation) {
-            CtInvocation<?> inv = (CtInvocation<?>) condition;
+        if (condition instanceof CtInvocation<?> inv) {
             if (inv.getTarget() instanceof CtVariableRead) {
                 return ((CtVariableRead<?>) inv.getTarget()).getVariable().getSimpleName();
             }

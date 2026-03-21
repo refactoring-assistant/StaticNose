@@ -8,7 +8,7 @@ import java.io.File;
 public class FileValidator implements ITypeConverter<File> {
 
     @Override
-    public File convert(String value) throws Exception {
+    public File convert(String value) {
         File file = new File(value);
 
         if (!file.exists()) {

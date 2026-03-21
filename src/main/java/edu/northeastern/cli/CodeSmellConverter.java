@@ -5,7 +5,7 @@ import picocli.CommandLine.ITypeConverter;
 
 public class CodeSmellConverter implements ITypeConverter<CodeSmell> {
     @Override
-    public CodeSmell convert(String value) throws Exception {
+    public CodeSmell convert(String value) {
         CodeSmell smell = CodeSmell.fromLabel(value);
 
         if(smell == null) {

@@ -8,6 +8,9 @@ import spoon.reflect.visitor.filter.TypeFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static edu.northeastern.utils.Metrics.calculateCyclomaticComplexity;
+import static edu.northeastern.utils.Metrics.calculateLLOC;
+
 public class LongMethodDetector extends AbstractDetector{
 
     public LongMethodDetector(List<String> javaFilePaths, String inputDirPath) {
@@ -28,55 +31,35 @@ public class LongMethodDetector extends AbstractDetector{
             if(method.getBody() == null) continue;
 
             int lloc = calculateLLOC(method);
-
             int complexity = calculateCyclomaticComplexity(method);
 
-            if(lloc > 30 && complexity > 5) {
-                detectedLines.add(method.getPosition().getLine());
+            if (lloc > 30 && complexity > 5) {
+                // Always check if the position is valid first
+                if (method.getPosition().isValidPosition()) {
+
+                    // THE FIX: Use the position of the method's body (the '{')
+                    // or the return type. This completely bypasses all Javadoc
+                    // and annotations that sit above the method signature.
+                    if (method.getBody() != null && method.getBody().getPosition().isValidPosition()) {
+
+                        // Points to the exact line where the actual code block starts
+                        detectedLines.add(method.getBody().getPosition().getLine());
+
+                    } else if (method.getType() != null && method.getType().getPosition().isValidPosition()) {
+
+                        // Fallback: Points to the return type (e.g., the 'void' in 'public void main')
+                        detectedLines.add(method.getType().getPosition().getLine());
+
+                    } else {
+
+                        // Absolute fallback
+                        detectedLines.add(method.getPosition().getLine());
+                    }
+                }
             }
         }
 
         return detectedLines;
-    }
-
-    // logical lines of code
-    private int calculateLLOC(CtMethod<?> method) {
-        List<CtStatement> statements = method.getBody().getStatements();
-
-        int lloc = 0;
-        for(CtStatement stmt : statements) {
-            if(!(stmt instanceof CtBlock)) {
-                lloc++;
-            }
-        }
-
-        return lloc;
-    }
-
-    private int calculateCyclomaticComplexity(CtMethod<?> method) {
-        int complexity = 1;
-
-        List<Class<?>> decisionNodes = List.of(
-                CtIf.class,
-                CtFor.class,
-                CtForEach.class,
-                CtWhile.class,
-                CtDo.class,
-                CtCase.class,
-                CtConditional.class
-        );
-
-        for(Class<?> node : decisionNodes) {
-            complexity += method.getElements(new TypeFilter<>(node)).size();
-        }
-
-        for(CtBinaryOperator<?> op : method.getElements(new TypeFilter<>(CtBinaryOperator.class))) {
-            if(op.getKind() == BinaryOperatorKind.AND || op.getKind() == BinaryOperatorKind.OR) {
-                complexity++;
-            }
-        }
-
-        return complexity;
     }
 
 }

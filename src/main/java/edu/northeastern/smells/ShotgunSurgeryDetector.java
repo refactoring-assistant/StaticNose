@@ -1,6 +1,7 @@
 package edu.northeastern.smells;
 
 import edu.northeastern.reporting.ReportStruct;
+import org.jspecify.annotations.NonNull;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -10,12 +11,13 @@ import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.*;
 
+import static edu.northeastern.utils.Metrics.calculateCyclomaticComplexity;
+
 public class ShotgunSurgeryDetector extends AbstractDetector {
 
     private static final int THRESHOLD_CC = 5;
     private static final int THRESHOLD_FAN_OUT = 3;
-    private static final int THRESHOLD_FAN_IN = 5; // Use 2 for your small example
-
+    private static final int THRESHOLD_FAN_IN = 2; // Use 2 for your small exampl
     private final Map<String, MethodMetrics> methodRegistry = new HashMap<>();
 
     private final Map<String, Set<String>> incomingCouplingMap = new HashMap<>();
@@ -46,31 +48,36 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
 
             if (isRippleRisk || isCoordinatorRisk) {
 
-                String riskType;
-                if (isRippleRisk && metrics.cc >= THRESHOLD_CC) {
-                    riskType = "CRITICAL (God Method)";
-                } else if (isRippleRisk) {
-                    riskType = "High Ripple Risk (Many Dependents)";
-                } else {
-                    riskType = "Complex Coordinator (Logic + Dependencies)";
-                }
-
-                String info = String.format("%s [CC=%d, Fan-Out=%d, Fan-In=%d]",
-                        riskType, metrics.cc, metrics.fanOut, fanIn);
-
-                ReportStruct report = new ReportStruct(
-                        getSmellName(),
-                        metrics.filePath,
-                        this.inputDirPath,
-                        metrics.className,
-                        info
-                );
-                report.addLineNumber(metrics.lineNum);
+                ReportStruct report = getReportStruct(isRippleRisk, metrics, fanIn);
                 reports.add(report);
             }
         }
 
         return reports;
+    }
+
+    private @NonNull ReportStruct getReportStruct(boolean isRippleRisk, MethodMetrics metrics, int fanIn) {
+        String riskType;
+        if (isRippleRisk && metrics.cc >= THRESHOLD_CC) {
+            riskType = "CRITICAL (God Method)";
+        } else if (isRippleRisk) {
+            riskType = "High Ripple Risk (Many Dependents)";
+        } else {
+            riskType = "Complex Coordinator (Logic + Dependencies)";
+        }
+
+        String info = String.format("%s [CC=%d, Fan-Out=%d, Fan-In=%d]",
+                riskType, metrics.cc, metrics.fanOut, fanIn);
+
+        ReportStruct report = new ReportStruct(
+                getSmellName(),
+                metrics.filePath,
+                this.inputDirPath,
+                metrics.className,
+                info
+        );
+        report.addLineNumber(metrics.lineNum);
+        return report;
     }
 
     @Override
@@ -82,7 +89,7 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
         for (CtMethod<?> method : type.getMethods()) {
             if (method.getBody() == null) continue;
 
-            int cc = calculateCC(method);
+            int cc = calculateCyclomaticComplexity(method);
             int fanOut = calculateFanOut(method);
 
             String signature = method.getSignature();
@@ -125,80 +132,7 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
         return uniqueCalled.size();
     }
 
-    private int calculateCC(CtMethod<?> method) {
-        ComplexityVisitor v = new ComplexityVisitor();
-        v.scan(method);
-        return v.complexity;
+    private record MethodMetrics(String filePath, String className, int lineNum, int cc, int fanOut) {
     }
 
-    private static class MethodMetrics {
-        String filePath, className;
-        int lineNum, cc, fanOut;
-
-        public MethodMetrics(String f, String c, int l, int cc, int fo) {
-            this.filePath = f; this.className = c; this.lineNum = l;
-            this.cc = cc; this.fanOut = fo;
-        }
-    }
-
-    private static class ComplexityVisitor extends CtScanner {
-        int complexity = 1;
-
-        @Override
-        public void visitCtIf(CtIf ifElement) {
-            complexity++;
-            super.visitCtIf(ifElement);
-        }
-
-        @Override
-        public void visitCtFor(CtFor forLoop) {
-            complexity++;
-            super.visitCtFor(forLoop);
-        }
-
-        @Override
-        public void visitCtForEach(CtForEach forEach) {
-            complexity++;
-            super.visitCtForEach(forEach);
-        }
-
-        @Override
-        public void visitCtWhile(CtWhile whileLoop) {
-            complexity++;
-            super.visitCtWhile(whileLoop);
-        }
-
-        @Override
-        public void visitCtDo(CtDo doLoop) {
-            complexity++;
-            super.visitCtDo(doLoop);
-        }
-
-        @Override
-        public <E> void visitCtCase(CtCase<E> caseElement) {
-            complexity++;
-            super.visitCtCase(caseElement);
-        }
-
-        @Override
-        public void visitCtCatch(CtCatch catchBlock) {
-            complexity++;
-            super.visitCtCatch(catchBlock);
-        }
-
-        @Override
-        public <T> void visitCtConditional(CtConditional<T> conditional) {
-            complexity++;
-            super.visitCtConditional(conditional);
-        }
-
-        @Override
-        public <T> void visitCtBinaryOperator(CtBinaryOperator<T> operator) {
-            BinaryOperatorKind kind = operator.getKind();
-            if (kind == BinaryOperatorKind.AND || kind == BinaryOperatorKind.OR) {
-                complexity++;
-            }
-            super.visitCtBinaryOperator(operator);
-        }
-    }
 }

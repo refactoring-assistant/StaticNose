@@ -10,6 +10,8 @@ import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.*;
 
+import static edu.northeastern.utils.Metrics.calculateLLOC;
+
 public class LazyClassDetector extends AbstractDetector {
 
     private static final int LOW_WEIGHT_THRESHOLD = 5;
@@ -59,8 +61,7 @@ public class LazyClassDetector extends AbstractDetector {
 
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
-        if (type instanceof CtClass && type.getPosition().isValidPosition()) {
-            CtClass<?> ctClass = (CtClass<?>) type;
+        if (type instanceof CtClass<?> ctClass && type.getPosition().isValidPosition()) {
             allConcreteClasses.add(ctClass);
 
             String currentClassName = ctClass.getQualifiedName();
@@ -87,18 +88,13 @@ public class LazyClassDetector extends AbstractDetector {
      */
     private int calculateLogicWeight(CtClass<?> ctClass) {
         int statementCount = 0;
+
         for (CtMethod<?> method : ctClass.getMethods()) {
             if (method.getBody() == null || isBoilerplate(method)) continue;
 
-            List<CtStatement> statements = method.getBody().getElements(new TypeFilter<>(CtStatement.class));
-            for (CtStatement stmt : statements) {
-                if (!stmt.isImplicit() &&
-                        !(stmt instanceof spoon.reflect.code.CtBlock) &&
-                        !(stmt instanceof spoon.reflect.code.CtComment)) {
-                    statementCount++;
-                }
-            }
+            statementCount += calculateLLOC(method);
         }
+
         return statementCount;
     }
 

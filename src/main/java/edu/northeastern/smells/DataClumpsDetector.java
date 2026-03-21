@@ -1,19 +1,26 @@
 package edu.northeastern.smells;
 
 import edu.northeastern.reporting.ReportStruct;
+import org.jspecify.annotations.NonNull;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.*;
 
+/**
+ * This class detects the presence of Data Clumps.
+ * A Data Clump code smell is a repeated set of variables that occur
+ * and which should be extracted into a parameter object
+ */
 public class DataClumpsDetector extends AbstractDetector {
 
+    // How many times the set of variables occur for it to be counted
+    // as a data clump
     private static final int CLUMP_SIZE_THRESHOLD = 3;
 
     private final Map<String, Map<String, List<Integer>>> fileClumpUsageMap = new HashMap<>();
@@ -39,19 +46,7 @@ public class DataClumpsDetector extends AbstractDetector {
                 List<Integer> lines = entry.getValue();
 
                 if (lines.size() >= 2) {
-                    String className = new java.io.File(filePath).getName().replace(".java", "");
-
-                    ReportStruct report = new ReportStruct(
-                            "Data Clumps", // Distinct name so you know WHY it was flagged
-                            filePath,
-                            this.inputDirPath,
-                            className,
-                            "Variables [" + clumpSig + "] passed together " + lines.size() + " times"
-                    );
-
-                    for (Integer line : lines) {
-                        report.addLineNumber(line);
-                    }
+                    ReportStruct report = getReportStruct(filePath, clumpSig, lines);
                     reports.add(report);
                 }
             }
@@ -60,29 +55,56 @@ public class DataClumpsDetector extends AbstractDetector {
         return reports;
     }
 
+    private @NonNull ReportStruct getReportStruct(String filePath, String clumpSig, List<Integer> lines) {
+        String className = new java.io.File(filePath).getName().replace(".java", "");
+
+        ReportStruct report = new ReportStruct(
+                "Data Clumps",
+                filePath,
+                this.inputDirPath,
+                className,
+                "Variables: " + clumpSig
+        );
+
+        for (Integer line : lines) {
+            report.addLineNumber(line);
+        }
+        return report;
+    }
+
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         Set<Integer> detectedLines = new HashSet<>();
         String filePath = type.getPosition().isValidPosition() ? type.getPosition().getFile().getPath() : "";
 
-        List<CtMethod<?>> methods = new ArrayList<>(type.getMethods());
+        List<CtMethod<?>> methods = new ArrayList<>(type.getAllMethods());
+
         for (int i = 0; i < methods.size(); i++) {
             CtMethod<?> m1 = methods.get(i);
-            if (m1.getParameters().size() < CLUMP_SIZE_THRESHOLD) continue;
+
+            if (m1.getParameters().size() < CLUMP_SIZE_THRESHOLD || !m1.getPosition().isValidPosition()) continue;
 
             for (int j = i + 1; j < methods.size(); j++) {
                 CtMethod<?> m2 = methods.get(j);
-                if (m2.getParameters().size() < CLUMP_SIZE_THRESHOLD) continue;
+
+                if (m2.getParameters().size() < CLUMP_SIZE_THRESHOLD || !m2.getPosition().isValidPosition()) continue;
+
+                if (m1.getSimpleName().equals(m2.getSimpleName())) continue;
 
                 if (hasMatchingParams(m1, m2)) {
-                    if (m1.getPosition().isValidPosition()) detectedLines.add(m1.getPosition().getLine());
-                    if (m2.getPosition().isValidPosition()) detectedLines.add(m2.getPosition().getLine());
+                    detectedLines.add(m1.getPosition().getLine());
+                    detectedLines.add(m2.getPosition().getLine());
                 }
             }
         }
 
         List<CtInvocation<?>> invocations = type.getElements(new TypeFilter<>(CtInvocation.class));
 
+        /*
+        TODO: Add logic that checks if method invocations are for the same
+        TODO: method then ignore because multiple invocations for the same
+        TODO: method are not data clumps
+         */
         for (CtInvocation<?> inv : invocations) {
             if (inv.getArguments().size() >= CLUMP_SIZE_THRESHOLD) {
 
@@ -106,6 +128,12 @@ public class DataClumpsDetector extends AbstractDetector {
         return new ArrayList<>(detectedLines);
     }
 
+    /**
+     * Check if two methods have matching params
+     * @param m1 Method 1
+     * @param m2 Method 2
+     * @return boolean
+     */
     private boolean hasMatchingParams(CtMethod<?> m1, CtMethod<?> m2) {
         int matchCount = 0;
         for (CtParameter<?> p1 : m1.getParameters()) {
@@ -121,6 +149,11 @@ public class DataClumpsDetector extends AbstractDetector {
         return matchCount >= CLUMP_SIZE_THRESHOLD;
     }
 
+    /**
+     * Return a list of variable names from a method invocation
+     * @param inv The method invocation
+     * @return List of variable names in String
+     */
     private List<String> extractVariableArguments(CtInvocation<?> inv) {
         List<String> names = new ArrayList<>();
         for (CtExpression<?> arg : inv.getArguments()) {

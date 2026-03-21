@@ -57,8 +57,7 @@ public class MessageChainsDetector extends AbstractDetector {
      */
     private boolean isInnerInvocation(CtInvocation<?> inv) {
         CtElement parent = inv.getParent();
-        if (parent instanceof CtInvocation) {
-            CtInvocation<?> parentInv = (CtInvocation<?>) parent;
+        if (parent instanceof CtInvocation<?> parentInv) {
             return parentInv.getTarget() == inv;
         }
         return false;
@@ -86,13 +85,12 @@ public class MessageChainsDetector extends AbstractDetector {
         CtExpression<?> currentTarget = outermostInv.getTarget();
         CtInvocation<?> currentInv = outermostInv;
 
-        while (currentTarget instanceof CtInvocation) {
-            CtInvocation<?> targetInv = (CtInvocation<?>) currentTarget;
+        while (currentTarget instanceof CtInvocation<?> targetInv) {
 
             CtTypeReference<?> currentType = currentInv.getType();
             CtTypeReference<?> targetType = targetInv.getType();
 
-            if (currentType != null && targetType != null && currentType.equals(targetType)) {
+            if (currentType != null && currentType.equals(targetType)) {
                 return true;
             }
 

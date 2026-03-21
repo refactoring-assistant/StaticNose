@@ -32,8 +32,7 @@ public class LongParameterListDetector extends AbstractDetector{
             }
         }
 
-        if (type instanceof CtClass) {
-            CtClass<?> clazz = (CtClass<?>) type;
+        if (type instanceof CtClass<?> clazz) {
 
             for (CtConstructor<?> constructor : clazz.getConstructors()) {
                 if (constructor.getParameters().size() > 5) {

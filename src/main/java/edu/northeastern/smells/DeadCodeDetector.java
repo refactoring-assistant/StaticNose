@@ -143,8 +143,7 @@ public class DeadCodeDetector extends AbstractDetector {
 
             CtElement declaration = ref.getDeclaration();
 
-            if (declaration instanceof CtNamedElement && usageMap.containsKey(declaration)) {
-                CtNamedElement target = (CtNamedElement) declaration;
+            if (declaration instanceof CtNamedElement target && usageMap.containsKey(declaration)) {
                 usageMap.put(target, usageMap.get(target) + 1);
             }
         }

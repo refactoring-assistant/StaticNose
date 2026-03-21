@@ -14,10 +14,27 @@ public class JSONReportGenerator extends AbstractReportGenerator{
     }
 
     @Override
+    protected String getFileExtension() {
+        return ".json";
+    }
+
+    @Override
     public void generate(List<ReportStruct> reportStructList) {
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        File outputFile = new File(outputPath);
+        File parentDir = outputFile.getParentFile();
+
+        if (parentDir != null) {
+            try {
+                FileUtils.safeCreateDir(parentDir.getAbsolutePath());
+            } catch (RuntimeException e) {
+                System.err.println("Aborting report generation: " + e.getMessage());
+                return; // Stop execution if we can't create the directory
+            }
+        }
 
         try {
             mapper.writeValue(new File(outputPath), reportStructList);
@@ -25,8 +42,7 @@ public class JSONReportGenerator extends AbstractReportGenerator{
             System.out.println("JSON Report generated at: " + outputPath);
 
         } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Failed to write JSON");
+            System.err.println("Failed to write JSON: " + e.getMessage());
         }
     }
 }

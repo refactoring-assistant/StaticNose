@@ -24,6 +24,10 @@ public class RefusedBequestDetector extends AbstractDetector{
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
 
+        if (type.isEnum()) {
+            return detectedLines;
+        }
+
         CtTypeReference<?> superRef = type.getSuperclass();
         if(superRef == null || "java.lang.Object".equals(superRef.getQualifiedName())) {
             return detectedLines;
@@ -58,6 +62,8 @@ public class RefusedBequestDetector extends AbstractDetector{
             if(throwsRefusalException(method) || isEmptyBody(method)) {
                 detectedLines.add(method.getPosition().getLine());
             }
+
+            // add edge case for empty return
 
             // check for single line throws as well for robustness
             if(method.getBody().getStatements().size() == 1) {

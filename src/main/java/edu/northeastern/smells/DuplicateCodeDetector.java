@@ -4,13 +4,22 @@ import edu.northeastern.reporting.ReportStruct;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.*;
 
+import static edu.northeastern.utils.AstNormalizer.generateSkeleton;
+import static edu.northeastern.utils.Metrics.isAccessor;
+
+/**
+ * This class detects Duplicate Code code Smell.
+ * It does so by doing a Type 2 check by converting AST to generics (int x = 5 to $VAR = $LIT)
+ * and then performing a sliding window of the given size and scanning through the code base.
+ */
 public class DuplicateCodeDetector extends AbstractDetector {
 
+    // the size of the sliding window. it will only check pairs of 5 lines and
+    // match them together
     private static final int WINDOW_SIZE = 5;
 
     private final Map<String, List<Location>> globalSequenceMap = new HashMap<>();
@@ -27,8 +36,6 @@ public class DuplicateCodeDetector extends AbstractDetector {
     @Override
     public List<ReportStruct> run() {
         super.run();
-
-        List<ReportStruct> finalReports = new ArrayList<>();
 
         Map<String, ReportStruct> fileReportMap = new HashMap<>();
 
@@ -62,8 +69,7 @@ public class DuplicateCodeDetector extends AbstractDetector {
             }
         }
 
-        finalReports.addAll(fileReportMap.values());
-        return finalReports;
+        return new ArrayList<>(fileReportMap.values());
     }
 
     @Override
@@ -76,6 +82,8 @@ public class DuplicateCodeDetector extends AbstractDetector {
 
         for (CtMethod<?> method : type.getMethods()) {
             if (method.getBody() == null) continue;
+
+            if (isBoilerplateOverride(method)) continue;
 
             List<CtStatement> statements = method.getElements(new TypeFilter<>(CtStatement.class));
             List<CtStatement> cleanStatements = new ArrayList<>();
@@ -110,37 +118,55 @@ public class DuplicateCodeDetector extends AbstractDetector {
         return new ArrayList<>();
     }
 
-    private static class Location {
-        String filePath;
-        String className;
-        int lineNumber;
-
-        public Location(String filePath, String className, int lineNumber) {
-            this.filePath = filePath;
-            this.className = className;
-            this.lineNumber = lineNumber;
-        }
+    private record Location(String filePath, String className, int lineNumber) {
     }
 
-    private String generateSkeleton(CtStatement stmt) {
-        SkeletonVisitor visitor = new SkeletonVisitor();
-        visitor.scan(stmt);
-        return visitor.getSkeleton();
+    /**
+     * Checks if the code is boilerplate code that is required
+     * to stay even if it is duplicate
+     * @param method The method to check
+     * @return boolean
+     */
+    private boolean isBoilerplateOverride(CtMethod<?> method) {
+        if (isObjectMethodOverride(method)) {
+            return true;
+        }
+
+        if (isAccessor(method, false)) {
+            return method.getBody() != null && method.getBody().getStatements().size() <= 2;
+        }
+
+        return false;
     }
 
-    private static class SkeletonVisitor extends CtScanner {
-        private final StringBuilder sb = new StringBuilder();
-        public String getSkeleton() { return sb.toString(); }
+    /**
+     * Checks if the method override is from an Object method.
+     * We need to ignore these in duplicate code checking
+     * because they are supposed to be similar in nature
+     * but are still required for every class
+     * @param method The method to check
+     * @return boolean
+     */
+    private boolean isObjectMethodOverride(CtMethod<?> method) {
+        String name = method.getSimpleName();
+        if (!name.equals("equals") && !name.equals("hashCode") &&
+                !name.equals("toString") && !name.equals("clone")) {
+            return false;
+        }
 
-        @Override public <T> void visitCtVariableRead(spoon.reflect.code.CtVariableRead<T> v) { sb.append("$VAR"); }
-        @Override public <T> void visitCtVariableWrite(spoon.reflect.code.CtVariableWrite<T> v) { sb.append("$VAR"); }
-        @Override public <T> void visitCtLiteral(spoon.reflect.code.CtLiteral<T> l) { sb.append("$LIT"); }
-        @Override public <T> void visitCtLocalVariable(spoon.reflect.code.CtLocalVariable<T> v) { scan(v.getDefaultExpression()); }
-        @Override public <T> void visitCtBinaryOperator(spoon.reflect.code.CtBinaryOperator<T> op) {
-            scan(op.getLeftHandOperand()); sb.append(op.getKind()); scan(op.getRightHandOperand());
+        try {
+            Collection<CtMethod<?>> topDefinitions = method.getTopDefinitions();
+
+            for (CtMethod<?> topDef : topDefinitions) {
+                if (topDef.getDeclaringType() != null &&
+                        topDef.getDeclaringType().getQualifiedName().equals("java.lang.Object")) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
-        @Override public <T> void visitCtInvocation(spoon.reflect.code.CtInvocation<T> inv) {
-            sb.append("CALL(").append(inv.getExecutable().getSimpleName()).append(")");
-        }
+
+        return false;
     }
 }

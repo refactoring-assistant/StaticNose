@@ -6,14 +6,18 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.visitor.CtScanner;
 
 import java.util.*;
 
+import static edu.northeastern.utils.AstNormalizer.generateSkeleton;
+
 public class AlternativeClassesDetector extends AbstractDetector {
 
-    private static final double SIMILARITY_THRESHOLD = 0.90; // 90% overall similarity
+    // total similarity threshold for volume + field + method
+    private static final double SIMILARITY_THRESHOLD = 0.90;
 
+    // weight assigned to each metric calculated when calculating
+    // the final class similarity score
     private static final double WEIGHT_FIELDS = 0.20;
     private static final double WEIGHT_VOLUME = 0.10;
     private static final double WEIGHT_METHODS = 0.70;
@@ -47,7 +51,7 @@ public class AlternativeClassesDetector extends AbstractDetector {
                 double similarityScore = calculateClassSimilarity(classA, classB);
 
                 if (similarityScore >= SIMILARITY_THRESHOLD) {
-                    String info = String.format("Matches '%s' with %.1f%% structural and logical similarity.",
+                    String info = String.format("Match: '%s', Similarity Score: %.1f%%",
                             nameB, similarityScore * 100);
 
                     ReportStruct report = new ReportStruct(getSmellName(), classA.filePath, this.inputDirPath, nameA, info);
@@ -70,6 +74,19 @@ public class AlternativeClassesDetector extends AbstractDetector {
         return new ArrayList<>();
     }
 
+    /**
+     * Calculate the Class Similarity Score for two classes
+     * The Class Similarity score is a combined metric that
+     * is calculated based on:
+     * 1. The Volume Similarity Score
+     * 2. The Method Similarity Score
+     * 3. The Field Similarity Score
+     * These scores are summed together based on the assigned weights for
+     * each metric.
+     * @param a The class to compare against
+     * @param b The other class to compare against
+     * @return The CSS
+     */
     private double calculateClassSimilarity(ClassProfile a, ClassProfile b) {
         double volumeScore = calculateVolumeSimilarity(a, b);
         if (volumeScore < 0.5) return 0.0;
@@ -82,6 +99,14 @@ public class AlternativeClassesDetector extends AbstractDetector {
                 (methodScore * WEIGHT_METHODS);
     }
 
+    /**
+     * The Volume Similarity Score is the size ratio for two classes
+     * minimum of the number of methods between A and B by the
+     * maximum of the number of methods between A and B
+     * @param a Class profile of A
+     * @param b Class profile of B
+     * @return The VSS
+     */
     private double calculateVolumeSimilarity(ClassProfile a, ClassProfile b) {
         int maxMethods = Math.max(a.methods.size(), b.methods.size());
         if (maxMethods == 0) return 1.0;
@@ -89,6 +114,19 @@ public class AlternativeClassesDetector extends AbstractDetector {
         return (double) minMethods / maxMethods;
     }
 
+    /**
+     * The Method Similarity Score is a combination of the
+     * Jaccard Similarity Index for the parameters of two methods
+     * and the Levenshtein Distance for the AST tokens of two methods
+     * at 50% weightage for each.
+     * It creates 1-1 pairs of methods between two classes based
+     * on the two metrics above and then returns the
+     * sum of all the scores divided by the maximum number of methods
+     * in the class
+     * @param methodsA Method A to compare
+     * @param methodsB Method B to compare
+     * @return the MSS
+     */
     private double calculateMethodSimilarity(List<MethodProfile> methodsA, List<MethodProfile> methodsB) {
         if (methodsA.isEmpty() && methodsB.isEmpty()) return 1.0;
         if (methodsA.isEmpty() || methodsB.isEmpty()) return 0.0;
@@ -103,7 +141,7 @@ public class AlternativeClassesDetector extends AbstractDetector {
             for (MethodProfile mB : poolB) {
                 double sigScore = calculateJaccard(mA.signatureTokens, mB.signatureTokens);
 
-                double astScore = calculateType3Similarity(mA.astTokens, mB.astTokens);
+                double astScore = calculateLevenshteinDistance(mA.astTokens, mB.astTokens);
 
                 double combinedScore = (sigScore * 0.5) + (astScore * 0.5);
 
@@ -123,6 +161,13 @@ public class AlternativeClassesDetector extends AbstractDetector {
         return totalScore / maxMethods;
     }
 
+    /**
+     * Calculates the Jaccard Similarity Index for two method signatures
+     * JSI is given as | A ∩ B | / | A ∪ B |
+     * @param listA Signature of method A
+     * @param listB Signature of method B
+     * @return The JSI
+     */
     private double calculateJaccard(List<String> listA, List<String> listB) {
         if (listA.isEmpty() && listB.isEmpty()) return 1.0;
         if (listA.isEmpty() || listB.isEmpty()) return 0.0;
@@ -146,7 +191,15 @@ public class AlternativeClassesDetector extends AbstractDetector {
         return (double) intersection / union;
     }
 
-    private double calculateType3Similarity(List<String> tokensA, List<String> tokensB) {
+    /**
+     * Calculate the Levenshtein Distance or Edit Distance.
+     * The fewest number of edits required to be made in the tokens of method A
+     * to achieve the tokens of method B
+     * @param tokensA The AST tokens of Method A
+     * @param tokensB The AST tokens of Method B
+     * @return the LD
+     */
+    private double calculateLevenshteinDistance(List<String> tokensA, List<String> tokensB) {
         if (tokensA.isEmpty() && tokensB.isEmpty()) return 1.0;
         if (tokensA.isEmpty() || tokensB.isEmpty()) return 0.0;
 
@@ -174,6 +227,14 @@ public class AlternativeClassesDetector extends AbstractDetector {
         return 1.0 - ((double) editDistance / maxLength);
     }
 
+    /**
+     * Builds a custom AST that is normalized based on the given Class AST.
+     * It strips away all non-functional aspects of code like comments
+     * and creates a class profile for a given class that includes
+     * fields that are easier to compare for other metrics
+     * @param ctClass The class whose custom profile needs to be created
+     * @return the ClassProfile of the class
+     */
     private ClassProfile buildProfile(CtClass<?> ctClass) {
         ClassProfile profile = new ClassProfile();
         profile.filePath = ctClass.getPosition().getFile().getPath();
@@ -207,52 +268,36 @@ public class AlternativeClassesDetector extends AbstractDetector {
         return profile;
     }
 
-    private String generateSkeleton(CtStatement stmt) {
-        String prefix = stmt.getClass().getSimpleName().replace("Impl", "") + ":";
-
-        MethodSkeletonVisitor visitor = new MethodSkeletonVisitor();
-        visitor.scan(stmt);
-        return prefix + visitor.getSkeleton();
-    }
-
+    /**
+     * Check if a method is overriding an interface or abstract method
+     * For ACDI, since they already override, a method, we do not need to add this
+     * to our comparison
+     * @param m The method to check if it is overriding
+     * @return boolean
+     */
     private boolean isOverride(CtMethod<?> m) {
         return m.getAnnotations().stream().anyMatch(a -> a.getAnnotationType().getSimpleName().equals("Override"));
     }
 
+    /**
+     * The Class profile of a class
+     * which stores important information required to calculate
+     * the metrics for Alternative Classes Detector
+     */
     private static class ClassProfile {
         String filePath;
         int lineNumber;
-        List<String> fieldTypes = new ArrayList<>();
-        List<MethodProfile> methods = new ArrayList<>();
+        final List<String> fieldTypes = new ArrayList<>();
+        final List<MethodProfile> methods = new ArrayList<>();
     }
 
+    /**
+     * The Method profile for a method
+     * which stores important information required to calculate
+     * the method similarity score
+     */
     private static class MethodProfile {
-        List<String> signatureTokens = new ArrayList<>();
-        List<String> astTokens = new ArrayList<>();
-    }
-
-    private static class MethodSkeletonVisitor extends CtScanner {
-        private final StringBuilder sb = new StringBuilder();
-
-        public String getSkeleton() { return sb.toString(); }
-
-        @Override public <T> void visitCtVariableRead(spoon.reflect.code.CtVariableRead<T> v) { sb.append("$VAR"); }
-        @Override public <T> void visitCtVariableWrite(spoon.reflect.code.CtVariableWrite<T> v) { sb.append("$VAR"); }
-        @Override public <T> void visitCtLiteral(spoon.reflect.code.CtLiteral<T> l) { sb.append("$LIT"); }
-        @Override public <T> void visitCtLocalVariable(spoon.reflect.code.CtLocalVariable<T> v) { scan(v.getDefaultExpression()); }
-
-        @Override public <T> void visitCtBinaryOperator(spoon.reflect.code.CtBinaryOperator<T> op) {
-            sb.append("(");
-            scan(op.getLeftHandOperand());
-            sb.append(op.getKind());
-            scan(op.getRightHandOperand());
-            sb.append(")");
-        }
-
-        @Override public <T> void visitCtInvocation(spoon.reflect.code.CtInvocation<T> inv) {
-            if (inv.getExecutable() != null) {
-                sb.append("CALL(").append(inv.getExecutable().getSimpleName()).append(")");
-            }
-        }
+        final List<String> signatureTokens = new ArrayList<>();
+        final List<String> astTokens = new ArrayList<>();
     }
 }
