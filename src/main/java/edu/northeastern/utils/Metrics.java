@@ -48,23 +48,31 @@ public class Metrics {
         int complexity = 1;
 
         List<Class<? extends CtElement>> decisionNodes = List.of(
-                CtIf.class,
-                CtFor.class,
-                CtForEach.class,
-                CtWhile.class,
-                CtDo.class,
-                CtCase.class,
-                CtConditional.class,
-                CtCatch.class
+                CtIf.class, CtFor.class, CtForEach.class, CtWhile.class,
+                CtDo.class, CtConditional.class, CtCatch.class, CtThrow.class
         );
 
         for (Class<? extends CtElement> node : decisionNodes) {
             complexity += method.getElements(new TypeFilter<>(node)).size();
         }
 
+        for (CtCase<?> switchCase : method.getElements(new TypeFilter<>(CtCase.class))) {
+            if (switchCase.getCaseExpression() != null) {
+                complexity++;
+            }
+        }
+
         for (CtBinaryOperator<?> op : method.getElements(new TypeFilter<>(CtBinaryOperator.class))) {
             if (op.getKind() == BinaryOperatorKind.AND || op.getKind() == BinaryOperatorKind.OR) {
-                complexity++;
+
+                CtElement parent = op.getParent();
+                while (parent != null && !(parent instanceof CtMethod)) {
+                    if (parent instanceof CtIf || parent instanceof CtLoop || parent instanceof CtConditional) {
+                        complexity++;
+                        break;
+                    }
+                    parent = parent.getParent();
+                }
             }
         }
 
