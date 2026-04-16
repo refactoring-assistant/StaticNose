@@ -13,14 +13,6 @@ import static edu.northeastern.utils.Metrics.isAccessor;
 
 /**
  * Data Class code smell detector.
- * A Data Class is a class that only acts as a store for fields.
- * It primarily sets field values and then makes them accessible through
- * getters to other classes and has no other real value besides that.
- * The metrics used to detect a Data Class are
- * 1. WOC: Weight of Class (number of functional public methods/total number of public methods)
- * 2. WMC: Weighted Methods per Class (sum of CC of all methods in class)
- * 3. NOPA: Number Of Public Attributes (non-constant public fields)
- * 4. NOAM: Number of Accessor Methods (total number of getters and setters)
  */
 public class DataClassDetector extends AbstractDetector {
 
@@ -32,13 +24,19 @@ public class DataClassDetector extends AbstractDetector {
     // should be less than 33%
     private static final double WOC_LEVEL = 1.0 / 3.0;
     // weight of methods threshold.
-    // if few fields then use this threshold
     private static final int WMC_HIGH_LEVEL = 31;
     // if many fields then use this threshold
     private static final int WMC_VERY_HIGH_LEVEL = 47;
 
+    // --- STRICT MODE FLAG ---
+    private boolean strictMode = false;
+
     public DataClassDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+    }
+
+    public void setStrictMode(boolean strictMode) {
+        this.strictMode = strictMode;
     }
 
     @Override
@@ -54,22 +52,51 @@ public class DataClassDetector extends AbstractDetector {
             return detectedLines;
         }
 
+        // --- ENHANCED STRICT MODE LOGIC ---
+        if (strictMode) {
+            boolean allStrictAccessors = true;
+            List<CtMethod<?>> methods = new ArrayList<>(type.getMethods());
+
+            // If a class has no methods but has fields, it is essentially a pure C-style struct (Data Class)
+            if (methods.isEmpty() && !type.getFields().isEmpty()) {
+                if (type.getPosition().isValidPosition()) detectedLines.add(type.getPosition().getLine());
+                return detectedLines;
+            }
+
+            // Check every single method to ensure it's a pure getter/setter
+            for (CtMethod<?> m : methods) {
+                if (isObjectBoilerplate(m)) {
+                    continue;
+                }
+
+                if (!isStrictAccessor(m, type)) {
+                    allStrictAccessors = false;
+                    break;
+                }
+            }
+
+            // If ALL methods are strict accessors, it is a data class.
+            if (allStrictAccessors && !methods.isEmpty()) {
+                if (type.getPosition().isValidPosition()) {
+                    detectedLines.add(type.getPosition().getLine());
+                }
+            }
+
+            // In strict mode, we skip the heuristic evaluation completely
+            return detectedLines;
+        }
+
+        // --- ORIGINAL HEURISTIC LOGIC ---
         int wmc = calculateWMC(type);
         int nopa = calculateNOPA(type);
         int noam = calculateNOAM(type);
         double woc = calculateWOC(type);
 
-        // sum of CC of all methods should meet WOC_LEVEL
         boolean interfaceRevealsData = woc < WOC_LEVEL;
-
-        // nopa + noam tells us how much data the class reveals about itself
-        // if a class reveals too much data about itself and lacks complexity then
-        // we can conclude that it is a data class
         boolean revealsDataAndLacksComplexity =
-                (nopa + noam > ACCESSOR_OR_FIELD_FEW_LEVEL && wmc < WMC_HIGH_LEVEL) ||
+                (nopa + noam >= ACCESSOR_OR_FIELD_FEW_LEVEL && wmc < WMC_HIGH_LEVEL) ||
                         (nopa + noam > ACCESSOR_OR_FIELD_MANY_LEVEL && wmc < WMC_VERY_HIGH_LEVEL);
 
-        // Only if both combined metrics pass (IRD and RDLC)
         if (interfaceRevealsData && revealsDataAndLacksComplexity) {
             if (type.getPosition().isValidPosition()) {
                 detectedLines.add(type.getPosition().getLine());
@@ -80,13 +107,60 @@ public class DataClassDetector extends AbstractDetector {
     }
 
     /**
-     * Number of Public Attributes (Fields)
-     * This calculated the true number of public fields a class
-     * makes available to other classes. It ignores constants
-     * which are static and final.
-     * @param type The class whose NOPA needs to be calculated
-     * @return The NOPA metric value
+     * Checks if a method is purely a getter or setter without ANY logic,
+     * mathematical operations, or parameter mutations.
      */
+    private boolean isStrictAccessor(CtMethod<?> method, CtType<?> type) {
+        if (method.getBody() == null) return false;
+
+        List<CtStatement> statements = method.getBody().getStatements();
+        // A pure accessor MUST have exactly one statement.
+        if (statements.size() != 1) return false;
+
+        CtStatement stmt = statements.get(0);
+
+        // 1. STRICT GETTER CHECK
+        if (method.getParameters().isEmpty() && !method.getType().getSimpleName().equals("void")) {
+            if (stmt instanceof CtReturn<?> retStmt) {
+                CtExpression<?> retExp = retStmt.getReturnedExpression();
+                // It must return a field access (e.g. `return this.name;` or `return name;`)
+                if (retExp instanceof CtFieldAccess<?> fieldAccess) {
+                    return isFieldBelongingToClass(fieldAccess, type);
+                }
+            }
+            return false;
+        }
+
+        // 2. STRICT SETTER CHECK
+        if (method.getParameters().size() == 1 && method.getType().getSimpleName().equals("void")) {
+            if (stmt instanceof CtAssignment<?, ?> assignStmt) {
+                CtExpression<?> lhs = assignStmt.getAssigned();
+                CtExpression<?> rhs = assignStmt.getAssignment();
+
+                // Left side must be a field, Right side must be the raw parameter variable
+                if (lhs instanceof CtFieldAccess<?> fieldAccess && rhs instanceof CtVariableRead<?> varRead) {
+                    boolean correctField = isFieldBelongingToClass(fieldAccess, type);
+                    boolean correctParam = varRead.getVariable().getSimpleName()
+                            .equals(method.getParameters().get(0).getSimpleName());
+
+                    return correctField && correctParam;
+                }
+            }
+            return false;
+        }
+
+        return false; // Not a getter or setter
+    }
+
+    /**
+     * Helper to verify that the field being accessed actually belongs to this class,
+     * and isn't a public field of some other completely unrelated object.
+     */
+    private boolean isFieldBelongingToClass(CtFieldAccess<?> fieldAccess, CtType<?> type) {
+        String fieldName = fieldAccess.getVariable().getSimpleName();
+        return type.getFields().stream().anyMatch(f -> f.getSimpleName().equals(fieldName));
+    }
+
     private int calculateNOPA(CtType<?> type) {
         int count = 0;
         for (CtField<?> field : type.getFields()) {
@@ -97,12 +171,6 @@ public class DataClassDetector extends AbstractDetector {
         return count;
     }
 
-    /**
-     * Number Of Accessor Methods
-     * The total number of getter and setter methods in a class
-     * @param type the class whose NOAM needs to be calculated
-     * @return the NOAM metric value
-     */
     private int calculateNOAM(CtType<?> type) {
         int count = 0;
         for (CtMethod<?> method : type.getMethods()) {
@@ -113,19 +181,11 @@ public class DataClassDetector extends AbstractDetector {
         return count;
     }
 
-    /**
-     * Calculate the Weight of Class metric.
-     * WOC is the ratio of functional public methods to total number of public methods
-     * in a class.
-     * Data Classes have a low WOC score since they do not contain
-     * many functional methods
-     * @param type The class whose WOC metric needs to be calculated
-     * @return the WOC metric
-     */
     private double calculateWOC(CtType<?> type) {
         List<CtMethod<?>> publicMethods = type.getMethods().stream()
                 .filter(CtMethod::isPublic)
-                .filter(m -> !m.isAbstract()) // interfaces/abstract classes check
+                .filter(m -> !m.isAbstract())
+                .filter(m -> !isObjectBoilerplate(m))
                 .toList();
 
         long totalPublicMethods = publicMethods.size();
@@ -138,4 +198,21 @@ public class DataClassDetector extends AbstractDetector {
         return (double) functionalMethods / totalPublicMethods;
     }
 
+    private boolean isObjectBoilerplate(CtMethod<?> method) {
+        String name = method.getSimpleName();
+        int paramCount = method.getParameters().size();
+
+        if (name.equals("toString") && paramCount == 0) return true;
+        if (name.equals("hashCode") && paramCount == 0) return true;
+        if (name.equals("equals") && paramCount == 1) return true;
+
+        // Add clone to the boilerplate filter
+        if (name.equals("clone") && paramCount == 0) return true;
+
+        // You can add finalize() too just to be perfectly safe,
+        // though it shouldn't be in any modern codebase.
+        if (name.equals("finalize") && paramCount == 0) return true;
+
+        return false;
+    }
 }
