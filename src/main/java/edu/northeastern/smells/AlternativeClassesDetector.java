@@ -6,6 +6,7 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.*;
 
@@ -14,7 +15,7 @@ import static edu.northeastern.utils.AstNormalizer.generateSkeleton;
 public class AlternativeClassesDetector extends AbstractDetector {
 
     // total similarity threshold for volume + field + method
-    private static final double SIMILARITY_THRESHOLD = 0.90;
+    private static final double SIMILARITY_THRESHOLD = 0.75;
 
     // weight assigned to each metric calculated when calculating
     // the final class similarity score
@@ -22,10 +23,20 @@ public class AlternativeClassesDetector extends AbstractDetector {
     private static final double WEIGHT_VOLUME = 0.10;
     private static final double WEIGHT_METHODS = 0.70;
 
+    // --- NEW FLAG ---
+    // If true, only compares classes that live in the exact same .java file
+    // If false, compares every class in the project against every other class
+    private boolean singleFileMode = true;
+
     private final Map<String, ClassProfile> registry = new HashMap<>();
 
     public AlternativeClassesDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+    }
+
+    // --- NEW SETTER ---
+    public void setSingleFileMode(boolean singleFileMode) {
+        this.singleFileMode = singleFileMode;
     }
 
     @Override
@@ -48,6 +59,13 @@ public class AlternativeClassesDetector extends AbstractDetector {
                 ClassProfile classA = registry.get(nameA);
                 ClassProfile classB = registry.get(nameB);
 
+                // --- NEW LOGIC: Enforce the boundary flag ---
+                if (singleFileMode) {
+                    if (!classA.filePath.equals(classB.filePath)) {
+                        continue; // Skip comparing if they are from different files
+                    }
+                }
+
                 double similarityScore = calculateClassSimilarity(classA, classB);
 
                 if (similarityScore >= SIMILARITY_THRESHOLD) {
@@ -65,10 +83,17 @@ public class AlternativeClassesDetector extends AbstractDetector {
 
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
-        if (type instanceof CtClass && type.getPosition().isValidPosition()) {
-            ClassProfile profile = buildProfile((CtClass<?>) type);
-            if (profile.methods.size() >= 2) {
-                registry.put(type.getQualifiedName(), profile);
+        // --- UPDATED LOGIC: Gather all nested/peer classes in the file ---
+        // This is strictly required for 'singleFileMode' to have anything to compare!
+        List<CtClass<?>> classesInFile = type.getElements(new TypeFilter<>(CtClass.class));
+
+        for (CtClass<?> ctClass : classesInFile) {
+            if (ctClass.getPosition().isValidPosition()) {
+                ClassProfile profile = buildProfile(ctClass);
+                // Only register classes with enough methods to actually compare
+                if (profile.methods.size() >= 2) {
+                    registry.put(ctClass.getQualifiedName(), profile);
+                }
             }
         }
         return new ArrayList<>();
@@ -241,15 +266,24 @@ public class AlternativeClassesDetector extends AbstractDetector {
         profile.lineNumber = ctClass.getPosition().getLine();
 
         for (CtField<?> field : ctClass.getFields()) {
+            if (field.isStatic()) continue;
             if (field.getType() != null) profile.fieldTypes.add(field.getType().getQualifiedName());
         }
 
         for (CtMethod<?> method : ctClass.getMethods()) {
-            if (method.getBody() == null || isOverride(method)) continue;
+            if (method.getBody() == null) continue;
 
             MethodProfile mp = new MethodProfile();
             mp.signatureTokens.add(method.getType().getQualifiedName());
-            method.getParameters().forEach(p -> mp.signatureTokens.add(p.getType().getQualifiedName()));
+
+            method.getParameters().forEach(p -> {
+                String typeName = p.getType().getQualifiedName();
+                if (!typeName.startsWith("java.")) {
+                    mp.signatureTokens.add("CustomObject"); // Mask it!
+                } else {
+                    mp.signatureTokens.add(typeName);
+                }
+            });
 
             if (method.getBody().getStatements() != null) {
                 for (CtStatement stmt : method.getBody().getStatements()) {
