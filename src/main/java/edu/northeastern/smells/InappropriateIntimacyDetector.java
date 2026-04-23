@@ -54,8 +54,44 @@ public class InappropriateIntimacyDetector extends AbstractDetector {
                 continue;
             }
 
+            // --- THE FIX: Evaluate the Target Expression ---
+            boolean isExternal = false;
+            spoon.reflect.code.CtExpression<?> target = access.getTarget();
+
+            if (target != null && !target.isImplicit()) {
+                if (target instanceof spoon.reflect.code.CtThisAccess ||
+                        target instanceof spoon.reflect.code.CtSuperAccess ||
+                        target instanceof spoon.reflect.code.CtTypeAccess) {
+
+                    // It is this.field, super.field, or Class.staticField
+                    if (!currentClassRef.isSubtypeOf(declaringClassRef)) {
+                        isExternal = true;
+                    }
+                } else {
+                    // It is an explicit object reference (e.g., base.ingredients)
+                    CtTypeReference<?> targetType = target.getType();
+
+                    if (targetType != null) {
+                        // Accessing another instance of the exact same class is usually valid encapsulation
+                        if (!targetType.equals(currentClassRef)) {
+                            isExternal = true;
+                        }
+                    } else {
+                        // Fallback if Spoon cannot resolve the target type
+                        if (!currentClassRef.isSubtypeOf(declaringClassRef)) {
+                            isExternal = true;
+                        }
+                    }
+                }
+            } else {
+                // Implicit target (e.g., just 'ingredients')
+                if (!currentClassRef.isSubtypeOf(declaringClassRef)) {
+                    isExternal = true;
+                }
+            }
+
             // make sure the field access is external (outside current class)
-            if (!declaringClassRef.equals(currentClassRef)) {
+            if (isExternal) {
 
                 // ignore cases of nested classes
                 if (isSameTopLevelClass(currentClassRef, declaringClassRef)) {
