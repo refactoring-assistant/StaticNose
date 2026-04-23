@@ -21,7 +21,7 @@ public class DataClumpsDetector extends AbstractDetector {
 
     // How many times the set of variables occur for it to be counted
     // as a data clump
-    private static final int CLUMP_SIZE_THRESHOLD = 3;
+    private static final int CLUMP_SIZE_THRESHOLD = 2;
 
     private final Map<String, Map<String, List<Integer>>> fileClumpUsageMap = new HashMap<>();
 
@@ -72,23 +72,76 @@ public class DataClumpsDetector extends AbstractDetector {
         return report;
     }
 
+//    @Override
+//    protected List<Integer> analyzeType(CtType<?> type) {
+//        Set<Integer> detectedLines = new HashSet<>();
+//        String filePath = type.getPosition().isValidPosition() ? type.getPosition().getFile().getPath() : "";
+//
+//        List<CtMethod<?>> methods = new ArrayList<>(type.getAllMethods());
+//
+//        for (int i = 0; i < methods.size(); i++) {
+//            CtMethod<?> m1 = methods.get(i);
+//
+//            if (m1.getParameters().size() < CLUMP_SIZE_THRESHOLD || !m1.getPosition().isValidPosition()) continue;
+//
+//            for (int j = i + 1; j < methods.size(); j++) {
+//                CtMethod<?> m2 = methods.get(j);
+//
+//                if (m2.getParameters().size() < CLUMP_SIZE_THRESHOLD || !m2.getPosition().isValidPosition()) continue;
+//
+//                if (m1.getSimpleName().equals(m2.getSimpleName())) continue;
+//
+//                if (hasMatchingParams(m1, m2)) {
+//                    detectedLines.add(m1.getPosition().getLine());
+//                    detectedLines.add(m2.getPosition().getLine());
+//                }
+//            }
+//        }
+//
+//        List<CtInvocation<?>> invocations = type.getElements(new TypeFilter<>(CtInvocation.class));
+//
+//        /*
+//        TODO: Add logic that checks if method invocations are for the same
+//        TODO: method then ignore because multiple invocations for the same
+//        TODO: method are not data clumps
+//         */
+//        for (CtInvocation<?> inv : invocations) {
+//            if (inv.getArguments().size() >= CLUMP_SIZE_THRESHOLD) {
+//
+//                List<String> argNames = extractVariableArguments(inv);
+//                if (argNames.size() < CLUMP_SIZE_THRESHOLD) continue;
+//
+//                Collections.sort(argNames);
+//                String clumpSig = String.join(", ", argNames);
+//
+//                if (!filePath.isEmpty()) {
+//                    fileClumpUsageMap.putIfAbsent(filePath, new HashMap<>());
+//                    fileClumpUsageMap.get(filePath).putIfAbsent(clumpSig, new ArrayList<>());
+//
+//                    if (inv.getPosition().isValidPosition()) {
+//                        fileClumpUsageMap.get(filePath).get(clumpSig).add(inv.getPosition().getLine());
+//                    }
+//                }
+//            }
+//        }
+//
+//        return new ArrayList<>(detectedLines);
+//    }
+
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         Set<Integer> detectedLines = new HashSet<>();
         String filePath = type.getPosition().isValidPosition() ? type.getPosition().getFile().getPath() : "";
 
+        // 1. Existing Method Parameter Analysis
         List<CtMethod<?>> methods = new ArrayList<>(type.getAllMethods());
-
         for (int i = 0; i < methods.size(); i++) {
             CtMethod<?> m1 = methods.get(i);
-
             if (m1.getParameters().size() < CLUMP_SIZE_THRESHOLD || !m1.getPosition().isValidPosition()) continue;
 
             for (int j = i + 1; j < methods.size(); j++) {
                 CtMethod<?> m2 = methods.get(j);
-
                 if (m2.getParameters().size() < CLUMP_SIZE_THRESHOLD || !m2.getPosition().isValidPosition()) continue;
-
                 if (m1.getSimpleName().equals(m2.getSimpleName())) continue;
 
                 if (hasMatchingParams(m1, m2)) {
@@ -98,29 +151,49 @@ public class DataClumpsDetector extends AbstractDetector {
             }
         }
 
+        // 2. Refined Invocation Analysis
         List<CtInvocation<?>> invocations = type.getElements(new TypeFilter<>(CtInvocation.class));
 
-        /*
-        TODO: Add logic that checks if method invocations are for the same
-        TODO: method then ignore because multiple invocations for the same
-        TODO: method are not data clumps
-         */
+        // Map: ClumpSignature -> Set of Unique Target Method Signatures
+        Map<String, Set<String>> clumpToMethodsMap = new HashMap<>();
+        // Map: ClumpSignature -> List of Line Numbers where it occurred
+        Map<String, List<Integer>> clumpToLinesMap = new HashMap<>();
+
         for (CtInvocation<?> inv : invocations) {
             if (inv.getArguments().size() >= CLUMP_SIZE_THRESHOLD) {
+
+                // IGNORE: Java Standard Library calls (String.format, etc)
+                if (inv.getExecutable().getDeclaringType() != null) {
+                    String declaringType = inv.getExecutable().getDeclaringType().getQualifiedName();
+                    if (declaringType.startsWith("java.") || declaringType.startsWith("javax.")) {
+                        continue;
+                    }
+                }
 
                 List<String> argNames = extractVariableArguments(inv);
                 if (argNames.size() < CLUMP_SIZE_THRESHOLD) continue;
 
                 Collections.sort(argNames);
                 String clumpSig = String.join(", ", argNames);
+                String targetMethodSig = inv.getExecutable().getSignature();
 
-                if (!filePath.isEmpty()) {
+                clumpToMethodsMap.putIfAbsent(clumpSig, new HashSet<>());
+                clumpToMethodsMap.get(clumpSig).add(targetMethodSig);
+
+                clumpToLinesMap.putIfAbsent(clumpSig, new ArrayList<>());
+                if (inv.getPosition().isValidPosition()) {
+                    clumpToLinesMap.get(clumpSig).add(inv.getPosition().getLine());
+                }
+            }
+        }
+
+        // Only commit to fileClumpUsageMap if the clump appears across DIFFERENT methods
+        if (!filePath.isEmpty()) {
+            for (String clumpSig : clumpToMethodsMap.keySet()) {
+                // THE FIX: Only flag if the clump is used in 2 or more DIFFERENT method signatures
+                if (clumpToMethodsMap.get(clumpSig).size() >= 2) {
                     fileClumpUsageMap.putIfAbsent(filePath, new HashMap<>());
-                    fileClumpUsageMap.get(filePath).putIfAbsent(clumpSig, new ArrayList<>());
-
-                    if (inv.getPosition().isValidPosition()) {
-                        fileClumpUsageMap.get(filePath).get(clumpSig).add(inv.getPosition().getLine());
-                    }
+                    fileClumpUsageMap.get(filePath).put(clumpSig, clumpToLinesMap.get(clumpSig));
                 }
             }
         }
