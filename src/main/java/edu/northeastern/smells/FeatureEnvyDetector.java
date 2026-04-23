@@ -7,10 +7,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.TypeFilter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class is a Feature Envy detector.
@@ -21,7 +18,7 @@ public class FeatureEnvyDetector extends AbstractDetector{
 
     // A method must access at least this many foreign fields/getters from a SINGLE
     // external class to even be considered for Feature Envy. Filters out basic comparators.
-    private static final int FOREIGN_DATA_THRESHOLD = 3;
+    private static final int FOREIGN_DATA_THRESHOLD = 2;
 
     public FeatureEnvyDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
@@ -40,10 +37,12 @@ public class FeatureEnvyDetector extends AbstractDetector{
         for(CtMethod<?> method : type.getMethods()) {
             if(method.getBody() == null) continue;
 
-            int internalAccessCount = 0;
+            // TRACK UNIQUE FEATURES
+            // Internal: Unique field names/getter signatures from this class hierarchy
+            Set<String> internalFeatures = new HashSet<>();
 
-            // Re-enabled your map! We need to track Envy towards SPECIFIC classes.
-            Map<String, Integer> externalAccessMap = new HashMap<>();
+            // External: Map of ClassName -> Set of unique features accessed in that class
+            Map<String, Set<String>> externalAccessMap = new HashMap<>();
 
             // 1. Scan for direct field accesses
             List<CtFieldAccess<?>> fieldAccesses = method.getElements(new TypeFilter<>(CtFieldAccess.class));
@@ -53,14 +52,14 @@ public class FeatureEnvyDetector extends AbstractDetector{
                 CtTypeReference<?> declaringType = access.getVariable().getDeclaringType();
                 if(declaringType == null) continue;
 
-                // FIX: Check if the current class IS A subtype of the declaring class.
-                // This covers the class itself AND all superclasses/abstract parents!
+                String fieldName = access.getVariable().getSimpleName();
+
                 if(currentTypeRef.isSubtypeOf(declaringType)) {
-                    internalAccessCount++;
+                    internalFeatures.add(fieldName);
                 } else {
                     String targetName = declaringType.getQualifiedName();
                     if(isProjectClass(targetName)) {
-                        externalAccessMap.put(targetName, externalAccessMap.getOrDefault(targetName, 0) + 1);
+                        externalAccessMap.computeIfAbsent(targetName, k -> new HashSet<>()).add(fieldName);
                     }
                 }
             }
@@ -73,30 +72,29 @@ public class FeatureEnvyDetector extends AbstractDetector{
                 CtTypeReference<?> declaringType = invocation.getExecutable().getDeclaringType();
                 if(declaringType == null) continue;
 
-                // FIX: Apply the exact same superclass check here
+                String methodSig = invocation.getExecutable().getSignature();
+
                 if(currentTypeRef.isSubtypeOf(declaringType)) {
-                    internalAccessCount++;
+                    internalFeatures.add(methodSig);
                 } else {
                     String targetName = declaringType.getQualifiedName();
                     if(isProjectClass(targetName) && isGetter(invocation)) {
-                        externalAccessMap.put(targetName, externalAccessMap.getOrDefault(targetName, 0) + 1);
+                        externalAccessMap.computeIfAbsent(targetName, k -> new HashSet<>()).add(methodSig);
                     }
                 }
             }
 
-            // 3. Calculate scores based on the most envied class
+            // 3. Calculate scores based on UNIQUE feature counts
+            int internalAccessCount = internalFeatures.size();
             int maxExternalAccessesToSingleClass = 0;
-            for (int count : externalAccessMap.values()) {
-                if (count > maxExternalAccessesToSingleClass) {
-                    maxExternalAccessesToSingleClass = count;
-                }
+
+            for (Set<String> uniqueFeatures : externalAccessMap.values()) {
+                maxExternalAccessesToSingleClass = Math.max(maxExternalAccessesToSingleClass, uniqueFeatures.size());
             }
 
-            // To be Feature Envy, it must envy a specific class MORE than itself,
-            // AND pass the minimum threshold (to avoid flagging 2-line parameter checks)
+            // Threshold Check
             if(maxExternalAccessesToSingleClass > internalAccessCount &&
                     maxExternalAccessesToSingleClass >= FOREIGN_DATA_THRESHOLD) {
-
                 detectedLines.add(method.getPosition().getLine());
             }
         }
