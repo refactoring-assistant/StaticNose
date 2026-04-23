@@ -1,6 +1,8 @@
 package edu.northeastern.smells;
 
 import spoon.reflect.code.CtInvocation;
+import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -40,48 +42,26 @@ public class DivergentChangeDetector extends AbstractDetector {
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
-        List<CtMethod<?>> methods = new ArrayList<>(type.getMethods());
-
-        // Get a list of methods ignoring getters and setters
         List<CtMethod<?>> methodsToAnalyze = new ArrayList<>();
-        for (CtMethod<?> m : methods) {
-            if (m.getBody() != null
-                    && !isAccessor(m, false)
-                    && !isOverride(m)) {
+
+        for (CtMethod<?> m : type.getMethods()) {
+            if (m.getBody() != null && !isAccessor(m, false) && !isOverride(m)) {
                 methodsToAnalyze.add(m);
             }
         }
 
-        // There should be more than 2 methods to analyze in a class
         if (methodsToAnalyze.size() < 2) return detectedLines;
 
-        // --- THE SHARED UTILITY SHORTCUT ---
-        // Instantly get the mapped fields with glue fields (like Loggers) already filtered out
-        Map<CtMethod<?>, Set<String>> methodFieldUsage = getMethodFieldUsageMap(type, methodsToAnalyze, UBIQUITY_THRESHOLD);
-
-        // checks which methods are connected to other methods through a graph
-        Map<CtMethod<?>, Set<CtMethod<?>>> adjacencyList = new HashMap<>();
-        for (CtMethod<?> m : methodsToAnalyze) {
-            adjacencyList.put(m, new HashSet<>());
+        if (type.getFields().isEmpty()) {
+            return detectedLines;
         }
 
-        for (int i = 0; i < methodsToAnalyze.size(); i++) {
-            CtMethod<?> m1 = methodsToAnalyze.get(i);
+        double dynamicThreshold = methodsToAnalyze.size() <= 3 ? 1.01 : UBIQUITY_THRESHOLD;
+        Map<CtMethod<?>, Set<String>> methodFieldUsage = getMethodFieldUsageMap(type, methodsToAnalyze, dynamicThreshold);
 
-            for (int j = i + 1; j < methodsToAnalyze.size(); j++) {
-                CtMethod<?> m2 = methodsToAnalyze.get(j);
+        boolean hasSiloedLogic = checkSiloedLogic(methodsToAnalyze, methodFieldUsage);
 
-                if (areConnected(m1, m2, methodFieldUsage)) {
-                    adjacencyList.get(m1).add(m2);
-                    adjacencyList.get(m2).add(m1);
-                }
-            }
-        }
-
-        // count the number of disjointed method groups (islands)
-        int components = countComponents(adjacencyList);
-
-        if (components > 1) {
+        if (hasSiloedLogic) {
             if (type.getPosition().isValidPosition()) {
                 detectedLines.add(type.getPosition().getLine());
             }
@@ -91,29 +71,40 @@ public class DivergentChangeDetector extends AbstractDetector {
     }
 
     /**
-     * Check if two methods are connected and a graph edge should
-     * be drawn between them. They are connected if they share the same field usage
-     * or if they call each other.
-     * (Note: Glue fields have already been filtered out by the Metrics utility).
-     * @param m1 Method 1
-     * @param m2 Method 2
-     * @param fieldUsage The fields used by methods
-     * @return boolean
+     * Checks if a class contains multiple complex methods that share fields
+     * but NEVER interact with each other (Siloed Logic).
+     * This is a classic indicator of Divergent Change, where different business rules
+     * are crammed together just because they act on the same primitive data.
      */
-    private boolean areConnected(CtMethod<?> m1, CtMethod<?> m2,
-                                 Map<CtMethod<?>, Set<String>> fieldUsage) {
+    private boolean checkSiloedLogic(List<CtMethod<?>> methods, Map<CtMethod<?>, Set<String>> fieldUsage) {
+        int siloCount = 0;
 
-        Set<String> f1 = fieldUsage.get(m1);
-        Set<String> f2 = fieldUsage.get(m2);
+        for (CtMethod<?> m : methods) {
+            // Only care about methods that actually do complex work (e.g., loops/math)
+            // A complexity of 2 or higher usually filters out simple wrappers.
+            if (calculateCyclomaticComplexity(m) >= 2) {
 
-        for (String field : f1) {
-            if (f2.contains(field)) {
-                return true;
+                boolean callsAnotherComplexMethod = false;
+
+                // Check if this complex method calls any OTHER method in the class
+                for (CtMethod<?> target : methods) {
+                    if (m != target && callsMethod(m, target)) {
+                        callsAnotherComplexMethod = true;
+                        break;
+                    }
+                }
+
+                // If it's complex but entirely isolated (doesn't delegate or share execution flow),
+                // it's a standalone business responsibility!
+                if (!callsAnotherComplexMethod) {
+                    siloCount++;
+                }
             }
         }
 
-        if (callsMethod(m1, m2)) return true;
-        return callsMethod(m2, m1);
+        // If we found 2 or more isolated complex domains (e.g., Multiplication and perform_add),
+        // the class has Divergent Change!
+        return siloCount >= 2;
     }
 
     /**
@@ -138,46 +129,6 @@ public class DivergentChangeDetector extends AbstractDetector {
     }
 
     /**
-     * Find disjointed methods groups in the graph
-     * @param graph The method graph to find islands from
-     * @return the amount of islands in a graph
-     */
-    private int countComponents(Map<CtMethod<?>, Set<CtMethod<?>>> graph) {
-        int count = 0;
-        Set<CtMethod<?>> visited = new HashSet<>();
-
-        for (CtMethod<?> node : graph.keySet()) {
-            if (!visited.contains(node)) {
-                count++;
-                bfs(node, graph, visited);
-            }
-        }
-        return count;
-    }
-
-    /**
-     * Run a breadth first search on the method graph
-     * @param start Starting node
-     * @param graph The method graph
-     * @param visited A visited method in the graph
-     */
-    private void bfs(CtMethod<?> start, Map<CtMethod<?>, Set<CtMethod<?>>> graph, Set<CtMethod<?>> visited) {
-        Queue<CtMethod<?>> queue = new LinkedList<>();
-        queue.add(start);
-        visited.add(start);
-
-        while (!queue.isEmpty()) {
-            CtMethod<?> current = queue.poll();
-            for (CtMethod<?> neighbor : graph.get(current)) {
-                if (!visited.contains(neighbor)) {
-                    visited.add(neighbor);
-                    queue.add(neighbor);
-                }
-            }
-        }
-    }
-
-    /**
      * Check if method is overidding from super class
      * @param m The method to check
      * @return boolean
@@ -186,3 +137,4 @@ public class DivergentChangeDetector extends AbstractDetector {
         return m.getAnnotations().stream().anyMatch(a -> a.getAnnotationType().getSimpleName().equals("Override"));
     }
 }
+
