@@ -46,6 +46,8 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
                 List<CtType<?>> subTypesA = hierarchyMap.get(superA);
                 List<CtType<?>> subTypesB = hierarchyMap.get(superB);
 
+                CtType<?> subTypeAFirst = hierarchyMap.get(superA).getFirst();
+
 
                 int nocA = subTypesA.size();
                 int nocB = subTypesB.size();
@@ -80,7 +82,7 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
                             "Parallel Hierarchy detected with '%s'. Shape Match (NOC: %d vs %d, DIT: %d vs %d). Structural Coupling: %.0f%%.",
                             superB, nocA, nocB, ditA, ditB, structuralCoupling * 100
                     );
-                    reports.add(createReport(superA, info));
+                    reports.add(createReport(superA, info, subTypeAFirst));
                 }
             }
         }
@@ -226,15 +228,21 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
         return maxDepth;
     }
 
-    private ReportStruct createReport(String className, String info) {
+    private ReportStruct createReport(String className, String info, CtType<?> type) {
         // Because this smell applies to the *relationship* between hierarchies,
         // we flag the root interface/superclass itself.
-        return new ReportStruct(
+        String filePath = type.getPosition().getFile().getPath();
+
+        ReportStruct report = new ReportStruct(
                 getSmellName(),
-                "Architecture-Level Smell", // Path might not be singular
+                filePath, // Path might not be singular
                 this.inputDirPath,
                 className,
                 info
         );
+
+        report.addLineNumber(1);
+
+        return report;
     }
 }
