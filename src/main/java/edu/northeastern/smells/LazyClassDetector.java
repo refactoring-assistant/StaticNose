@@ -25,33 +25,40 @@ public class LazyClassDetector extends AbstractDetector {
 
     @Override
     protected String getSmellName() {
-        return "Lazy Class (Low Value)";
+        return "Lazy Class";
     }
 
     @Override
     public List<ReportStruct> run() {
         super.run();
-
         List<ReportStruct> reports = new ArrayList<>();
 
         for (CtClass<?> ctClass : allConcreteClasses) {
-
             int weight = calculateLogicWeight(ctClass);
 
             if (weight > LOW_WEIGHT_THRESHOLD) continue;
 
+            // THE CONTRACT SHIELD: If it implements an interface or abstract method,
+            // it is structurally necessary. It is NOT a Lazy Class.
+            if (isImplementingContract(ctClass)) continue;
+
             String className = ctClass.getQualifiedName();
             Set<String> callers = dependencyGraph.getOrDefault(className, new HashSet<>());
+            int callerCount = callers.size();
 
-            if (callers.size() == 1) {
-                String caller = callers.iterator().next();
-                String info = String.format("Lazy Class: Has very little logic (Weight: %d) and is only used by '%s'. Consider 'Inline Class'.", weight, caller);
+            // RESTORED: Catch 0-caller (RGBBad) and 1-caller classes
+            if (callerCount <= 1) {
+                String callerInfo = (callerCount == 0)
+                        ? "is unused (Dead Code)"
+                        : "is only used by '" + callers.iterator().next() + "'";
+
+                String info = String.format("Lazy Class: Logic weight is %d and %s. Consider 'Inline Class' or deletion.", weight, callerInfo);
                 reports.add(createReport(ctClass, info));
             }
-
+            // Collapse Hierarchy fallback
             else if (hasMeaningfulSuperclass(ctClass)) {
                 String parent = ctClass.getSuperclass().getSimpleName();
-                String info = String.format("Lazy Class: Subclass adds almost no new logic (Weight: %d). Consider 'Collapse Hierarchy' into '%s'.", weight, parent);
+                String info = String.format("Lazy Class: Subclass adds minimal logic (Weight: %d). Consider 'Collapse Hierarchy' into '%s'.", weight, parent);
                 reports.add(createReport(ctClass, info));
             }
         }
@@ -61,9 +68,14 @@ public class LazyClassDetector extends AbstractDetector {
 
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
-        if (type instanceof CtClass<?> ctClass && type.getPosition().isValidPosition()) {
-            allConcreteClasses.add(ctClass);
+        // FIX 2: Ask Spoon to find ALL CtClasses associated with this type's context
+        // This ensures peer classes like PrintHelloUserBad are actually found.
+        List<CtClass<?>> classesInFile = type.getElements(new TypeFilter<>(CtClass.class));
 
+        for (CtClass<?> ctClass : classesInFile) {
+            if (!ctClass.getPosition().isValidPosition() || ctClass.isAbstract()) continue;
+
+            allConcreteClasses.add(ctClass);
             String currentClassName = ctClass.getQualifiedName();
 
             List<CtTypeReference<?>> references = ctClass.getElements(new TypeFilter<>(CtTypeReference.class));
@@ -95,14 +107,52 @@ public class LazyClassDetector extends AbstractDetector {
             statementCount += calculateLLOC(method);
         }
 
+        for (spoon.reflect.declaration.CtConstructor<?> constructor : ctClass.getConstructors()) {
+            if (constructor.getBody() == null || isBoilerplate(constructor)) continue;
+            statementCount += calculateLLOC(constructor);
+        }
+
         return statementCount;
     }
 
-    private boolean isBoilerplate(CtMethod<?> m) {
-        String name = m.getSimpleName();
-        return (name.startsWith("get") && m.getParameters().isEmpty()) ||
-                (name.startsWith("set") && m.getParameters().size() == 1) ||
-                name.equals("toString") || name.equals("hashCode") || name.equals("equals");
+    private boolean isBoilerplate(spoon.reflect.declaration.CtExecutable<?> e) {
+        String name = e.getSimpleName();
+
+        if (e instanceof spoon.reflect.declaration.CtConstructor) {
+            return e.getBody().getStatements().size() <= 1;
+        }
+
+        // True boilerplate getters usually only have 1 statement (return)
+        if (name.startsWith("get") && e.getParameters().isEmpty()) {
+            return e.getBody().getStatements().size() <= 1;
+        }
+
+        // True boilerplate setters usually only have 1 statement (assignment)
+        if (name.startsWith("set") && e.getParameters().size() == 1) {
+            return e.getBody().getStatements().size() == 1; // Allows setNewProductionFacility to survive!
+        }
+
+        return name.equals("toString") || name.equals("hashCode") || name.equals("equals");
+    }
+
+    /**
+     * Protects classes ONLY if they are structurally required to exist
+     * (e.g., they implement an interface or an abstract class).
+     * Normal concrete subclasses are NOT protected and will be flagged if lazy.
+     */
+    private boolean isImplementingContract(CtClass<?> ctClass) {
+        // 1. Directly implements an interface
+        if (!ctClass.getSuperInterfaces().isEmpty()) {
+            return true;
+        }
+
+        // 2. Extends an abstract class (meaning this class MUST exist to be instantiated)
+        CtTypeReference<?> superClass = ctClass.getSuperclass();
+        if (superClass != null && superClass.getTypeDeclaration() != null) {
+            return superClass.getTypeDeclaration().isAbstract();
+        }
+
+        return false;
     }
 
     private boolean hasMeaningfulSuperclass(CtClass<?> ctClass) {
