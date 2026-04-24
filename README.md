@@ -45,28 +45,27 @@ Only the source code is currently available for StaticNose. To build, please clo
 
 The following set of detectors are provided with StaticNose along with their short code for the CLI:
 
-| Code Smell Detector | CLI short code |
-| :--- | :--- |
-| AlternativeClassesDetector | alt-classes |
-| CommentsDetector | comments |
-| DataClassDetector | data-class |
-| DataClumpsDetector | data-clumps |
-| DivergentChangeDetector | divergent-change |
-| DuplicateCodeDetector | dup-code |
-| FeatureEnvyDetector | feature-envy |
-| InappropriateIntimacyDetector | intimacy |
-| LargeClassDetector | large-class |
-| LazyClassDetector | lazy-class |
-| LongMethodDetector | long-method |
-| LongParameterListDetector | long-params |
-| MessageChainsDetector | message-chains |
-| MiddleManDetector | middle-man |
-| ParallelInheritanceHierarchyDetector | parallel-hierarchy |
-| PrimitiveObsessionDetector | prim-obsession |
-| RefusedBequestDetector | refused-bequest |
-| ShotgunSurgeryDetector | shotgun |
-| SwitchStatementDetector | switch-stmts |
-| TemporaryFieldDetector | temp-field |
+| Code Smell Detector | CLI short code | Code Smell Detected |
+| :--- | :--- | :--- |
+| AlternativeClassesDetector | alt-classes | Alternative Classes with Different Interfaces |
+| CommentsDetector | comments | Comments |
+| DataClassDetector | data-class | Data Class |
+| DataClumpsDetector | data-clumps | Data Clumps |
+| DivergentChangeDetector | divergent-change | Divergent Change |
+| FeatureEnvyDetector | feature-envy | Feature Envy |
+| InappropriateIntimacyDetector | intimacy | Inappropriate Intimacy |
+| LargeClassDetector | large-class | Large Class |
+| LazyClassDetector | lazy-class | Lazy Class |
+| LongMethodDetector | long-method | Long Method |
+| LongParameterListDetector | long-params | Long Parameter List |
+| MessageChainsDetector | message-chains | Message Chains |
+| MiddleManDetector | middle-man | Middle Man |
+| ParallelInheritanceHierarchyDetector | parallel-hierarchy | Parallel Inheritance Hierarchies |
+| PrimitiveObsessionDetector | prim-obsession | Primitive Obsession |
+| RefusedBequestDetector | refused-bequest | Refused Bequest |
+| ShotgunSurgeryDetector | shotgun | Shotgun Surgery |
+| SwitchStatementDetector | switch-stmts | Switch Statements |
+| TemporaryFieldDetector | temp-field | Temporary Field |
 
 If a detector contains a threshold as a part of its algorithm, the threshold is provided as a constant field in the detector class.
 
