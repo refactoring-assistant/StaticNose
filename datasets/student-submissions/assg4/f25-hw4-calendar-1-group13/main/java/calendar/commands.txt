@@ -1,0 +1,16 @@
+create event youtoo on 2025-10-23 repeats MTWRFSU for 3 times
+create event youtoo on 2025-10-23 repeats MTWRFSU for 3 times
+create event "Hello you" from  2025-10-2312:00 to 2025-10-2314:00 repeats MTWRFSU for 3 times
+create event "hello world" from 2025-10-2312:00 to 2025-10-2412:00
+edit events subject "hello world" from 2025-10-2312:00 with "Hello World"
+create event subject from  2025-10-2312:00 to 2025-10-2314:00 repeats MTWRFSU until 2025-10-30
+create event you from  2025-10-2312:00 to 2025-10-2314:00 repeats MTWRFSU for 3 times
+print events on 2025-10-23
+show status on 2025-10-2312:00
+create event "Series check" from  2025-10-2312:00 to 2025-10-2314:00 repeats MTWRFSU until 2025-10-30
+edit series subject "Series check" from 2025-10-2312:00 with Series
+edit series subject Series from 2025-10-2512:00 with Series2
+print events from 2025-10-2312:00 to 2025-10-2412:00
+print events from 2025-10-2512:00 to 2025-10-2712:00
+export csv
+exit

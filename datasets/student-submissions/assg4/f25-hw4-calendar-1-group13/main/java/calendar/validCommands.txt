@@ -1,0 +1,14 @@
+create event "Meeting College" from 2025-10-2909:00 to 2025-10-3019:00
+edit event subject "Meeting College" from 2025-10-2909:00 to 2025-10-3019:00 with "Meeting College Modifications"
+edit events start "Meeting College Modifications" from 2025-10-2909:00 with 2025-10-30T09:00
+create event Meeting from 2025-10-2709:00 to 2025-10-2719:00 repeats MW for 3 times
+create event Gym from 2025-10-2712:00 to 2025-10-2714:00 repeats MWF until 2025-10-30
+create event "PDP ASSIGNMENT" on 2025-10-29
+create event DBMS on 2025-10-30 repeats TU for 5 times
+create event IWP on 2025-10-27 repeats RF until 2025-10-30
+edit series subject Meeting from 2025-10-2909:00 with Meeting1
+print events on 2025-10-30
+print events from 2025-10-2609:00 to 2025-10-3110:00
+show status on 2025-10-3009:00
+export cal validCommands.csv
+exit
