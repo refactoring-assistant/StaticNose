@@ -11,6 +11,9 @@ import java.util.Set;
 
 public class MiddleManDetector extends AbstractDetector {
 
+    private static final double DELEGATION_THRESHOLD = 0.5;
+    private static final int FAN_OUT_THRESHOLD = 0;
+
     public MiddleManDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
     }
@@ -34,9 +37,6 @@ public class MiddleManDetector extends AbstractDetector {
         // single line ratio
 
         Set<CtMethod<?>> methods = type.getMethods();
-        if(methods.isEmpty()) {
-            return detectedLines;
-        }
 
         int singleLineDelegates = 0;
 
@@ -48,7 +48,9 @@ public class MiddleManDetector extends AbstractDetector {
 
             if(statementCount == 1) {
                 CtStatement stmt = statements.getFirst();
-                if(isInvocation(stmt) || isReturnInvocation(stmt)) {
+
+                // FIX: Pass the 'method' variable as the second argument to both helpers
+                if(isInvocation(stmt, method) || isReturnInvocation(stmt, method)) {
                     singleLineDelegates++;
                 }
             }
@@ -66,9 +68,9 @@ public class MiddleManDetector extends AbstractDetector {
 
         double ratio = (double) singleLineDelegates / methods.size();
 
-        // code smell check
-        boolean hasCodeSmell = false;
-        if(ratio > 0.5 && fanOut > 0) {
+        boolean hasCodeSmell = (ratio >= DELEGATION_THRESHOLD) && (singleLineDelegates >= 2);
+
+        if(hasCodeSmell && fanOut > FAN_OUT_THRESHOLD) {
             if (type.getPosition().isValidPosition()) {
                 detectedLines.add(type.getPosition().getLine());
             }
@@ -77,14 +79,37 @@ public class MiddleManDetector extends AbstractDetector {
         return detectedLines;
     }
 
-    private boolean isInvocation(CtStatement stmt) {
-        return stmt instanceof CtInvocation;
+    private boolean isInvocation(CtStatement stmt, CtMethod<?> parentMethod) {
+        if (stmt instanceof CtInvocation<?> inv) {
+            return isDelegatingToField(inv, parentMethod);
+        }
+        return false;
     }
 
-    private boolean isReturnInvocation(CtStatement stmt) {
-        if(stmt instanceof CtReturn<?> ret) {
-            return ret.getReturnedExpression() instanceof CtInvocation;
+    private boolean isReturnInvocation(CtStatement stmt, CtMethod<?> parentMethod) {
+        if (stmt instanceof CtReturn<?> ret) {
+            if (ret.getReturnedExpression() instanceof CtInvocation<?> inv) {
+                return isDelegatingToField(inv, parentMethod);
+            }
         }
+        return false;
+    }
+
+    // NEW: The Surgical Delegation Target Checker
+    // Renamed helper method for clarity
+    private boolean isDelegatingToField(CtInvocation<?> inv, CtMethod<?> parentMethod) {
+        if (inv.getTarget() == null) return false;
+
+        // If the target is a variable
+        if (inv.getTarget() instanceof spoon.reflect.code.CtVariableRead<?> read) {
+            spoon.reflect.declaration.CtVariable<?> var = read.getVariable().getDeclaration();
+
+            if (var == null) return false;
+
+            // ONLY flag if it is delegating to an internal Field (Classic Middle Man)
+            return var instanceof spoon.reflect.declaration.CtField;
+        }
+
         return false;
     }
 

@@ -33,7 +33,7 @@ public class LongMethodDetector extends AbstractDetector{
             int lloc = calculateLLOC(method);
             int complexity = calculateCyclomaticComplexity(method);
 
-            if (lloc > 30 && complexity > 5) {
+            if (lloc >= 30 || complexity > 15) {
                 // Always check if the position is valid first
                 if (method.getPosition().isValidPosition()) {
 
@@ -63,3 +63,5 @@ public class LongMethodDetector extends AbstractDetector{
     }
 
 }
+
+

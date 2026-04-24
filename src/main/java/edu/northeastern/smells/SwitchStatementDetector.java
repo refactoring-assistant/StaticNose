@@ -3,13 +3,14 @@ package edu.northeastern.smells;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.visitor.CtScanner;
+import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.*;
 
 public class SwitchStatementDetector extends AbstractDetector {
 
-    private static final int MAX_SWITCH_CASES = 3;
-    private static final int MAX_IF_CHAIN_LENGTH = 3;
+    private static final int MAX_SWITCH_CASES = 2;
+    private static final int MAX_IF_CHAIN_LENGTH = 2;
 
     public SwitchStatementDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
@@ -122,19 +123,14 @@ public class SwitchStatementDetector extends AbstractDetector {
     }
 
     private String extractVariableFromCondition(CtExpression<?> condition) {
-        if (condition instanceof CtBinaryOperator<?> op) {
-            if (op.getLeftHandOperand() instanceof CtVariableRead) {
-                return ((CtVariableRead<?>) op.getLeftHandOperand()).getVariable().getSimpleName();
-            }
-            if (op.getRightHandOperand() instanceof CtVariableRead) {
-                return ((CtVariableRead<?>) op.getRightHandOperand()).getVariable().getSimpleName();
-            }
-        }
+        // Find ANY variable read happening inside this condition
+        List<CtVariableRead<?>> variableReads = condition.getElements(new TypeFilter<>(CtVariableRead.class));
 
-        if (condition instanceof CtInvocation<?> inv) {
-            if (inv.getTarget() instanceof CtVariableRead) {
-                return ((CtVariableRead<?>) inv.getTarget()).getVariable().getSimpleName();
-            }
+        if (!variableReads.isEmpty()) {
+            // Usually the first variable read in the condition is the one being tested.
+            // E.g., in `empType.equals("Professor")`, empType is the first read.
+            // E.g., in `"Professor".equals(empType)`, empType is the first read.
+            return variableReads.get(0).getVariable().getSimpleName();
         }
 
         return null;
