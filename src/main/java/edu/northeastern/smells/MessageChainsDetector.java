@@ -22,7 +22,7 @@ public class MessageChainsDetector extends AbstractDetector {
 
     @Override
     protected String getSmellName() {
-        return "Message Chain (Law of Demeter Violation)";
+        return "Message Chains";
     }
 
     @Override
