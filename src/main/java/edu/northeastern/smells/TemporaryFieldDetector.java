@@ -27,41 +27,21 @@ public class TemporaryFieldDetector extends AbstractDetector{
 
         for(CtField<?> field : type.getFields()) {
 
+            // Static or Final fields represent constants/shared state, not temporary algorithmic state.
             if(field.isStatic() || field.isFinal()) continue;
 
-            //assigned at declaration
+            // If assigned at declaration (e.g., private int count = 0;), it's persistent baseline state.
             if(field.getDefaultExpression() != null) {
                 continue;
             }
 
-            boolean inConstructor = false;
+            Set<String> writeExecutables = new HashSet<>();
+            Set<String> readExecutables = new HashSet<>();
 
-            if(type instanceof CtClass<?> clazz) {
-                @SuppressWarnings("unchecked")
-                Set<CtConstructor<?>> constructors = (Set<CtConstructor<?>>) (Set) clazz.getConstructors();
-
-                if(!constructors.isEmpty()) {
-                    boolean allConstructorsInit = true;
-                    for(CtConstructor<?> constructor : constructors) {
-                        // start of recursion to check all branches and method invocations in constructor
-                        if(!isGuaranteedAssignment(constructor.getBody(), field, new HashSet<>())) {
-                            allConstructorsInit = false;
-                            break;
-                        }
-                    }
-
-                    inConstructor = allConstructorsInit;
-                }
-            } else {
-                inConstructor = true;
-            }
-
-            Set<String> usageMethods = new HashSet<>();
-
+            // Find ALL usages of this specific field across the entire class
             List<CtFieldAccess<?>> globalAccesses = field.getFactory().getModel().getElements(new TypeFilter<>(CtFieldAccess.class) {
                 @Override
                 public boolean matches(CtFieldAccess<?> element) {
-                    // Make sure we are talking about THIS exact field declaration
                     return super.matches(element) &&
                             element.getVariable().getDeclaration() != null &&
                             element.getVariable().getDeclaration().equals(field);
@@ -69,23 +49,53 @@ public class TemporaryFieldDetector extends AbstractDetector{
             });
 
             for(CtFieldAccess<?> access : globalAccesses) {
-                CtMethod<?> method = access.getParent(CtMethod.class);
-                if(method != null) {
-                    // Use getSignature() to uniquely identify methods across different classes
-                    usageMethods.add(method.getParent(CtType.class).getQualifiedName() + "#" + method.getSignature());
+                // Use CtExecutable to capture BOTH methods and constructors
+                CtExecutable<?> executable = access.getParent(CtExecutable.class);
+
+                if(executable != null) {
+                    String execName = executable.getSimpleName();
+
+                    if (access instanceof spoon.reflect.code.CtFieldWrite) {
+                        boolean isAssigningNull = false;
+
+                        // Verify they aren't just clearing the field (assigning 'null')
+                        if (access.getParent() instanceof CtAssignment<?,?> assign) {
+                            if (assign.getAssignment() instanceof CtLiteral<?> literal && literal.getValue() == null) {
+                                isAssigningNull = true;
+                            }
+                        }
+
+                        // If it's a real value assignment, log where it happened
+                        if (!isAssigningNull) {
+                            writeExecutables.add(execName);
+                        }
+                    } else if (access instanceof spoon.reflect.code.CtFieldRead) {
+                        // Log where the field was read from
+                        readExecutables.add(execName);
+                    }
                 }
             }
 
+            // --- SMELL EVALUATION ---
             boolean hasCodeSmell = false;
 
-            if (usageMethods.size() == 1) {
-                if (!inConstructor) {
+            // THE RULE FOR TEMPORARY FIELDS:
+            // It is written to in exactly ONE location (which is an algorithm, not a constructor or setter),
+            // and it is actually read from (meaning it's not just dead code).
+            if (writeExecutables.size() == 1 && !readExecutables.isEmpty()) {
+
+                String theOnlyWriter = writeExecutables.iterator().next();
+
+                // 1. If the only writer is a constructor ("<init>"), it's standard persistent state.
+                // 2. If the only writer is a setter ("setX"), it's a standard POJO/DTO field.
+                // 3. If the writer is anything else (e.g., "calculateTaxes"), it is acting as an
+                //    elevated local variable for that specific algorithm!
+                if (!theOnlyWriter.equals("<init>") && !theOnlyWriter.startsWith("set")) {
                     hasCodeSmell = true;
                 }
-            } else if (usageMethods.isEmpty() && !inConstructor) {
-                hasCodeSmell = true;
             }
 
+            // Flag the line number of the field declaration if it violates the rule
             if(hasCodeSmell) {
                 if(field.getPosition().isValidPosition()) {
                     detectedLines.add(field.getPosition().getLine());
@@ -94,89 +104,5 @@ public class TemporaryFieldDetector extends AbstractDetector{
         }
 
         return detectedLines;
-    }
-
-    private boolean isGuaranteedAssignment(CtElement element, CtField<?> targetField, Set<String> visitedMethods) {
-        if(element == null) return false;
-
-        // check statement in block
-        if(element instanceof CtBlock<?> block) {
-            for(CtStatement stmt : block.getStatements()) {
-                if(isGuaranteedAssignment(stmt, targetField, visitedMethods)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // check if the actual assignment
-        if(element instanceof CtAssignment<?, ?> assign) {
-            CtExpression<?> assigned = assign.getAssigned();
-            if(assigned instanceof CtFieldAccess<?> access) {
-                return access.getVariable().getSimpleName().equals(targetField.getSimpleName());
-            }
-            return false;
-        }
-
-        // check method invocations
-        if(element instanceof CtInvocation<?> invocation) {
-            CtExecutable<?> executable = invocation.getExecutable().getDeclaration();
-
-            if(executable == null || executable.getBody() == null) return false;
-
-            String sig = executable.getSignature();
-
-            if(visitedMethods.contains(sig)) return false;
-
-            Set<String> newVisited = new HashSet<>(visitedMethods);
-            newVisited.add(sig);
-            return isGuaranteedAssignment(executable.getBody(), targetField, newVisited);
-        }
-
-        // check inside if
-        if(element instanceof CtIf ifStmt) {
-            CtStatement thenStmt = ifStmt.getThenStatement();
-            CtStatement elseStmt = ifStmt.getElseStatement();
-
-            if(elseStmt == null) return false;
-
-            return isGuaranteedAssignment(thenStmt, targetField, visitedMethods) &&
-                    isGuaranteedAssignment(elseStmt, targetField, visitedMethods);
-        }
-
-        // check inside switch
-        if(element instanceof CtSwitch<?> switchStmt) {
-            boolean hasDefault = false;
-
-            for(CtCase<?> c : switchStmt.getCases()) {
-                if(c.getCaseExpression() == null) hasDefault = true;
-
-                if(!isGuaranteedAssignment(c, targetField, visitedMethods)) {
-                    return false;
-                }
-            }
-
-            return hasDefault;
-        }
-
-        // check inside case of switch
-        if(element instanceof CtCase<?> c) {
-            for (CtStatement stmt : c.getStatements()) {
-                if(isGuaranteedAssignment(stmt, targetField, visitedMethods)) return true;
-            }
-            return false;
-        }
-
-        // if inside loop, execution is not guaranteed, so it might be a temporary field
-        if(element instanceof CtLoop) {
-            return false;
-        }
-
-        // check inside try statements (less strict check)
-        if(element instanceof CtTry tryStmt) {
-            return isGuaranteedAssignment(tryStmt.getBody(), targetField, visitedMethods);
-        }
-
-        return false;
     }
 }
