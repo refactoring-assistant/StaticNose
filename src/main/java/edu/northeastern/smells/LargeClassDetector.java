@@ -2,6 +2,7 @@ package edu.northeastern.smells;
 
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -34,13 +35,24 @@ public class LargeClassDetector extends AbstractDetector{
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
 
+        if (type.isEnum() || type.isInterface() || type.isAnnotationType() || type.getMethods().isEmpty()) {
+            return detectedLines;
+        }
+
         int wmc = calculateWMC(type);
 
         double tcc = calculateTCC(type);
 
+        int fieldCount = type.getFields().size();
+
+        // 2. Count Logical Lines of Code (if you have calculateLLOC in Metrics)
+         int lloc = calculateLLOC(type);
+
         boolean isGodClass = (wmc >= WMC_THRESHOLD && tcc < TCC_THRESHOLD);
 
-        if (isGodClass) {
+        boolean isDataHeavyClass = (fieldCount >= 8);
+
+        if (isGodClass || isDataHeavyClass) {
             if (type.getPosition().isValidPosition()) {
                 detectedLines.add(type.getPosition().getLine());
             }
@@ -88,4 +100,6 @@ public class LargeClassDetector extends AbstractDetector{
         }
         return false;
     }
+
+
 }
