@@ -28,56 +28,203 @@ public class OracleEvaluator {
         this.outputDirPath = outputDirPath;
     }
 
-    public void evaluateAndReport() {
-        Map<String, Set<String>> expectedMap = parseOracleFile();
-        Map<String, Set<String>> detectedMap = parseDetectedReports();
+//    public void evaluateAndReport() {
+//        Map<String, Set<String>> expectedMap = parseOracleFile();
+//        Map<String, Set<String>> detectedMap = parseDetectedReports();
+//
+//        // 1. Generate the side-by-side CSV
+//        generateComparisonCSV(expectedMap, detectedMap);
+//
+//        // 2. Setup global aggregators
+//        // Use TreeSet so the printed list of files is alphabetically sorted
+//        Set<String> allFiles = new TreeSet<>(expectedMap.keySet());
+//        allFiles.addAll(detectedMap.keySet());
+//
+//        // REMOVE EMPTY KEYS: Prevent overcounting if a blank line was parsed
+//        allFiles.remove("");
+//
+//        int totalTp = 0, totalFp = 0, totalFn = 0, totalTn = 0;
+//
+//        // 3. Calculate Global TP, FP, FN, TN
+//        for (String fileName : allFiles) {
+//            Set<String> expected = expectedMap.getOrDefault(fileName, Collections.emptySet());
+//            Set<String> detected = detectedMap.getOrDefault(fileName, Collections.emptySet());
+//
+//            Set<String> truePositives = new HashSet<>(expected);
+//            truePositives.retainAll(detected);
+//            totalTp += truePositives.size();
+//
+//            Set<String> falsePositives = new HashSet<>(detected);
+//            falsePositives.removeAll(expected);
+//            totalFp += falsePositives.size();
+//
+//            Set<String> falseNegatives = new HashSet<>(expected);
+//            falseNegatives.removeAll(expected); // Note: Fix logic here to match your specific set math
+//            totalFn += (expected.size() - truePositives.size());
+//
+//            if (expected.isEmpty() && detected.isEmpty()) {
+//                totalTn++;
+//            }
+//        }
+//
+//        // 4. Calculate Master Metrics
+//        double precision = (totalTp + totalFp == 0) ? 0.0 : (double) totalTp / (totalTp + totalFp);
+//        double recall = (totalTp + totalFn == 0) ? 0.0 : (double) totalTp / (totalTp + totalFn);
+//        double f1 = (precision + recall == 0) ? 0.0 : 2 * ((precision * recall) / (precision + recall));
+//
+//        // 5. Print the Global Report
+//        System.out.println("\n========================================");
+//        System.out.println("   STATICNOSE GLOBAL METRICS REPORT     ");
+//        System.out.println("========================================");
+//        System.out.printf("  Total Files Analyzed : %d\n", allFiles.size());
+//        System.out.println("----------------------------------------");
+//        System.out.printf("  Total TP: %-4d Total FP: %-4d\n", totalTp, totalFp);
+//        System.out.printf("  Total FN: %-4d Total TN: %-4d\n", totalFn, totalTn);
+//        System.out.println("----------------------------------------");
+//        System.out.printf("  Overall Precision : %.2f%%\n", precision * 100);
+//        System.out.printf("  Overall Recall    : %.2f%%\n", recall * 100);
+//        System.out.printf("  Overall F1-Score  : %.2f\n", f1);
+//        System.out.println("----------------------------------------");
+////
+////        // 6. Print the list of all files
+////        System.out.println("  FILES INCLUDED IN ANALYSIS:");
+////        int count = 1;
+////        for (String file : allFiles) {
+////            System.out.printf("  %3d. %s\n", count++, file);
+////        }
+////        System.out.println("========================================\n");
+//    }
 
-        // 1. Generate the side-by-side CSV
-        generateComparisonCSV(expectedMap, detectedMap);
 
-        // 2. Setup global aggregators
-        Set<String> allFiles = new HashSet<>(expectedMap.keySet());
-        allFiles.addAll(detectedMap.keySet());
+public void evaluateAndReport() {
+    Map<String, Set<String>> expectedMap = parseOracleFile();
+    Map<String, Set<String>> detectedMap = parseDetectedReports();
 
-        Set<String> allSmellNames = new HashSet<>();
-        for (Set<String> smells : expectedMap.values()) allSmellNames.addAll(smells);
-        for (Set<String> smells : detectedMap.values()) allSmellNames.addAll(smells);
+    generateComparisonCSV(expectedMap, detectedMap);
 
-        int totalTp = 0, totalFp = 0, totalFn = 0, totalTn = 0;
+    Set<String> allFiles = new TreeSet<>(expectedMap.keySet());
+    allFiles.addAll(detectedMap.keySet());
+    allFiles.remove("");
 
-        // 3. Calculate Global TP, FP, FN, TN
-        for (String fileName : allFiles) {
-            Set<String> expected = expectedMap.getOrDefault(fileName, Collections.emptySet());
-            Set<String> detected = detectedMap.getOrDefault(fileName, Collections.emptySet());
+    // Collect all unique smells dynamically from both expected and detected datasets
+    Set<String> allSmells = new TreeSet<>();
+    expectedMap.values().forEach(allSmells::addAll);
+    detectedMap.values().forEach(allSmells::addAll);
 
-            for (String smellName : allSmellNames) {
-                boolean isExpected = expected.contains(smellName);
-                boolean isDetected = detected.contains(smellName);
+    // Map to hold per-smell metrics: int array holds [TP, FP, FN, TN]
+    Map<String, int[]> smellMetrics = new HashMap<>();
+    for (String smell : allSmells) {
+        smellMetrics.put(smell, new int[4]);
+    }
 
-                if (isExpected && isDetected) totalTp++;
-                else if (!isExpected && isDetected) totalFp++;
-                else if (isExpected && !isDetected) totalFn++;
-                else totalTn++;
+    int totalTp = 0, totalFp = 0, totalFn = 0, totalTn = 0;
+
+    // To track detailed misses for the final report
+    List<String> missedSmellDetails = new ArrayList<>();
+
+    for (String fileName : allFiles) {
+        Set<String> expected = expectedMap.getOrDefault(fileName, Collections.emptySet());
+        Set<String> detected = detectedMap.getOrDefault(fileName, Collections.emptySet());
+
+        // 1. True Positives: Intersection
+        Set<String> truePositives = new HashSet<>(expected);
+        truePositives.retainAll(detected);
+        totalTp += truePositives.size();
+
+        // 2. False Positives: Detected but not expected
+        Set<String> falsePositives = new HashSet<>(detected);
+        falsePositives.removeAll(expected);
+        totalFp += falsePositives.size();
+
+        // 3. False Negatives: Expected but not detected
+        Set<String> falseNegatives = new HashSet<>(expected);
+        falseNegatives.removeAll(detected);
+
+        if (!falseNegatives.isEmpty()) {
+            for (String smell : falseNegatives) {
+                missedSmellDetails.add(String.format("  - %-20s : Missing [%s]", fileName, smell));
             }
         }
+        totalFn += falseNegatives.size();
 
-        // 4. Calculate Master Metrics
-        double precision = (totalTp + totalFp == 0) ? 0.0 : (double) totalTp / (totalTp + totalFp);
-        double recall = (totalTp + totalFn == 0) ? 0.0 : (double) totalTp / (totalTp + totalFn);
-        double f1 = (precision + recall == 0) ? 0.0 : 2 * ((precision * recall) / (precision + recall));
+        // 4. True Negatives (Global): Both sets completely empty
+        if (expected.isEmpty() && detected.isEmpty()) {
+            totalTn++;
+        }
 
-        // 5. Print the Global Report
-        System.out.println("\n========================================");
-        System.out.println("   STATICNOSE GLOBAL METRICS REPORT     ");
-        System.out.println("========================================");
-        System.out.printf("  Total TP: %-4d Total FP: %-4d\n", totalTp, totalFp);
-        System.out.printf("  Total FN: %-4d Total TN: %-4d\n", totalFn, totalTn);
-        System.out.println("----------------------------------------");
-        System.out.printf("  Overall Precision : %.2f%%\n", precision * 100);
-        System.out.printf("  Overall Recall    : %.2f%%\n", recall * 100);
-        System.out.printf("  Overall F1-Score  : %.2f\n", f1);
-        System.out.println("========================================\n");
+        // --- PER-SMELL METRICS CALCULATION ---
+        for (String smell : allSmells) {
+            boolean isExpected = expected.contains(smell);
+            boolean isDetected = detected.contains(smell);
+
+            int[] metrics = smellMetrics.get(smell);
+
+            if (isExpected && isDetected) {
+                metrics[0]++; // TP
+            } else if (!isExpected && isDetected) {
+                metrics[1]++; // FP
+            } else if (isExpected && !isDetected) {
+                metrics[2]++; // FN
+            } else {
+                metrics[3]++; // TN
+            }
+        }
     }
+
+    // Master Metrics
+    double precision = (totalTp + totalFp == 0) ? 0.0 : (double) totalTp / (totalTp + totalFp);
+    double recall = (totalTp + totalFn == 0) ? 0.0 : (double) totalTp / (totalTp + totalFn);
+    double f1 = (precision + recall == 0) ? 0.0 : 2 * ((precision * recall) / (precision + recall));
+
+    // 1. Print Global Report
+    System.out.println("\n========================================");
+    System.out.println("   STATICNOSE GLOBAL METRICS REPORT     ");
+    System.out.println("========================================");
+    System.out.printf("  Total Files Analyzed : %d\n", allFiles.size());
+    System.out.println("----------------------------------------");
+    System.out.printf("  Total TP: %-4d Total FP: %-4d\n", totalTp, totalFp);
+    System.out.printf("  Total FN: %-4d Total TN: %-4d\n", totalFn, totalTn);
+    System.out.println("----------------------------------------");
+    System.out.printf("  Overall Precision : %.2f%%\n", precision * 100);
+    System.out.printf("  Overall Recall    : %.2f%%\n", recall * 100);
+    System.out.printf("  Overall F1-Score  : %.2f\n", f1);
+    System.out.println("----------------------------------------");
+
+    // 2. Print Per-Smell Report
+    System.out.println("\n=========================================================================================");
+    System.out.println("                         STATICNOSE PER-SMELL METRICS REPORT");
+    System.out.println("=========================================================================================");
+    // Added 'Samples' to the header format
+    System.out.printf("  %-24s | %7s | %4s | %4s | %4s | %4s | %9s | %8s | %4s\n",
+            "Smell Name", "Samples", "TP", "FP", "FN", "TN", "Precision", "Recall", "F1");
+    System.out.println("-----------------------------------------------------------------------------------------");
+
+    for (String smell : allSmells) {
+        int[] m = smellMetrics.get(smell);
+        int tp = m[0], fp = m[1], fn = m[2], tn = m[3];
+
+        // The number of actual occurrences in the Oracle (Support)
+        int samples = tp + fn;
+
+        double prec = (tp + fp == 0) ? 0.0 : (double) tp / (tp + fp);
+        double rec = (tp + fn == 0) ? 0.0 : (double) tp / (tp + fn);
+        double f1Smell = (prec + rec == 0) ? 0.0 : 2 * ((prec * rec) / (prec + rec));
+
+        // Added 'samples' to the row format
+        System.out.printf("  %-24s | %7d | %4d | %4d | %4d | %4d | %8.2f%% | %7.2f%% | %4.2f\n",
+                smell, samples, tp, fp, fn, tn, prec * 100, rec * 100, f1Smell);
+    }
+    System.out.println("=========================================================================================\n");
+
+    // 3. Print Detailed Misses
+    if (!missedSmellDetails.isEmpty()) {
+        System.out.println("  DETAILED FALSE NEGATIVES (MISSED):");
+        missedSmellDetails.forEach(System.out::println);
+    } else {
+        System.out.println("  Perfect Recall! No smells were missed.");
+    }
+    System.out.println("========================================\n");
+}
 
     private Map<String, Set<String>> parseOracleFile() {
         Map<String, Set<String>> map = new HashMap<>();
