@@ -2,6 +2,7 @@ package edu.northeastern.utils;
 
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -118,12 +119,15 @@ public class Metrics {
     /**
      * Calculate the number of Logical Lines of Code
      * A Logical Line of Code is code that is a statement in Java
-     * @param method The method to check
+     * @param executable The class body to check
      * @return the number of LLOC
      */
-    public static int calculateLLOC(CtMethod<?> method) {
+    public static int calculateLLOC(CtExecutable<?> executable) {
+        if (executable.getBody() == null) {
+            return 0;
+        }
         // 1. Use getElements() to recursively grab ALL statements, no matter how deeply nested
-        List<CtStatement> statements = method.getElements(new TypeFilter<>(CtStatement.class));
+        List<CtStatement> statements = executable.getBody().getElements(new TypeFilter<>(CtStatement.class));
 
         int lloc = 0;
         for(CtStatement stmt : statements) {
@@ -134,6 +138,20 @@ public class Metrics {
         }
 
         return lloc;
+    }
+
+    public static int calculateLLOC(CtType<?> type) {
+        int totalLLOC = 0;
+
+        // Grab every method and constructor in the class
+        List<CtExecutable<?>> executables = type.getElements(new TypeFilter<>(CtExecutable.class));
+
+        for (CtExecutable<?> executable : executables) {
+            // Re-use your existing method to count each block!
+            totalLLOC += calculateLLOC(executable);
+        }
+
+        return totalLLOC;
     }
 
     /**
