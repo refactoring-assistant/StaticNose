@@ -1,0 +1,10 @@
+File Name,Expected Code Smells
+CommandParser,"['Switch Statements', 'Large Class', 'Long Method']"
+CalendarModel,[]
+TimedEvent,[]
+IcalendarModel,[]
+Event,[]
+CalendarManager,[]
+IcsExporter,[]
+AllDayEvent,[]
+CalendarRunner,[]

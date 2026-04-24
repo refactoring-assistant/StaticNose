@@ -1,0 +1,15 @@
+File Name,Expected Code Smells
+CalendarController,"['Switch Statements', 'Large Class', 'Data Class']"
+DummyCalendar,[]
+Calendar,[]
+CalendarSystem,[]
+Icalendar,[]
+RecurringEvent,[]
+Ievent,[]
+Event,[]
+RecurrencePattern,[]
+IcalendarView,[]
+IcalExporter,[]
+CalendarView,[]
+CsvExporter,[]
+CalendarRunner,[]

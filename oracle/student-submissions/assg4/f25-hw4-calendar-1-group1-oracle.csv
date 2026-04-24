@@ -1,0 +1,9 @@
+File Name,Expected Code Smells
+CalendarController,['Switch Statements']
+Calendar,['Switch Statements']
+Icalendar,[]
+Ievent,['Long Parameter List']
+Event,[]
+IcalendarView,[]
+CalendarConsoleView,[]
+CalendarRunner,[]

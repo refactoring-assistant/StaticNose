@@ -1,0 +1,11 @@
+File Name,Expected Code Smells
+CalendarModel,[]
+EventSeries,[]
+CommandParser,['Long Method']
+CalendarModelImpl,[]
+CalendarController,[]
+CalendarView,[]
+DummyCalendar,[]
+Event,[]
+CalendarViewImpl,[]
+CalendarRunner,[]
