@@ -92,7 +92,7 @@ It will prompt you to upload a folder. You will be required to upload the entire
 An oracle is a CSV file that contains two columns, "File Name" and "Expected Code Smells". 
 The File Name column must contain unique class names, which is a current limitation of the project.
 
-> [!INFO]
+> [!NOTE]
 > The "File Name" column is a misnomer. It is actually the name of a Class.
 
 Once an oracle is configured for a project by labelling each file with the code smells it contains, the `-t` option can be used when running the program and supplying the oracle to it. 
