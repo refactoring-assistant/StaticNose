@@ -13,7 +13,7 @@ Only the source code is currently available for StaticNose. To build, please clo
 ## Usage
 
 > [!WARNING]
-> A current limitation of the project is that each Class in the Java project to be examined must have a unique name across the entire project.
+> A current limitation of the project is that each Java file in the Java project to be examined must have a unique name across the entire project.
 
 ### Arguments for common usages
 
@@ -89,10 +89,7 @@ It will prompt you to upload a folder. You will be required to upload the entire
 ### Configuring Oracles
 
 An oracle is a CSV file that contains two columns, "File Name" and "Expected Code Smells". 
-The File Name column must contain unique class names, which is a current limitation of the project.
+The File Name column must contain unique file names, which is a current limitation of the project.
 
-> [!NOTE]
-> The "File Name" column is a misnomer. It is actually the name of a Class.
-
-Once an oracle is configured for a project by labelling each file with the code smells it contains, the `-t` option can be used when running the program and supplying the oracle to it. 
+Once an oracle is configured for a project by labeling each file with the code smells it contains, the `-t` option can be used when running the program and supplying the oracle to it. 
 Per file results and overall results will be provided in the terminal output.
