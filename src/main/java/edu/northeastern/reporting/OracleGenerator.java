@@ -12,6 +12,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Class used to generate an oracle from a valid java project.
+ */
 public class OracleGenerator {
 
     private final File sourceFolder;
@@ -20,10 +23,14 @@ public class OracleGenerator {
         this.sourceFolder = sourceFolder;
     }
 
+    /**
+     * Generates the oracle file for a valid java project.
+     * Since files are named after the public class in a file,
+     * the public class is used to name the file name column.
+     */
     public void generate() {
         List<File> javaFiles = findJavaFiles(sourceFolder);
 
-        // Dynamically name the file based on the input folder
         String folderName = sourceFolder.getName();
         String outputFileName = folderName + "-oracle.csv";
 
@@ -35,15 +42,12 @@ public class OracleGenerator {
             writer.append("File Name,Expected Code Smells\n");
 
             for (File file : javaFiles) {
-                // In Java, the public class name matches the file name
                 String className = file.getName().replace(".java", "");
 
-                // Throw an exception if a duplicate is found
                 if (!uniqueClassNames.add(className)) {
                     throw new IllegalStateException("Error: Duplicate class name found across directories: '" + className + "'. Oracle generation aborted.");
                 }
 
-                // Write the row with the empty array
                 writer.append(className)
                         .append(",")
                         .append("[]\n");

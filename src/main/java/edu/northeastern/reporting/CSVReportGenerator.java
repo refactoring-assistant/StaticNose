@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This class generates CSV reports.
+ * CSV reports are used for generating oracles and oracle evaluations.
+ */
 public class CSVReportGenerator extends AbstractReportGenerator {
 
     public CSVReportGenerator(String outputPath) {
@@ -23,19 +27,16 @@ public class CSVReportGenerator extends AbstractReportGenerator {
 
     @Override
     public void generate(List<ReportStruct> reportStructList) {
-        // 1. Updated headers: Dropped "Class Name" for a purely file-based report
         String[] HEADERS = { "File Path", "Detected Smells" };
 
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
 
-        // 2. Group strictly by File Path
         Map<String, List<ReportStruct>> groupedReports = reportStructList.stream()
                 .collect(Collectors.groupingBy(ReportStruct::getFilePath));
 
         File outputFile = new File(outputPath);
         File parentDir = outputFile.getParentFile();
 
-        // Ensure directories exist
         if (parentDir != null) {
             try {
                 FileUtils.safeCreateDir(parentDir.getAbsolutePath());
@@ -48,13 +49,11 @@ public class CSVReportGenerator extends AbstractReportGenerator {
         try (FileWriter out = new FileWriter(outputFile);
              CSVPrinter printer = new CSVPrinter(out, csvFormat)) {
 
-            // Iterate through the grouped file map
             for (Map.Entry<String, List<ReportStruct>> entry : groupedReports.entrySet()) {
 
                 String filePath = entry.getKey();
                 List<ReportStruct> fileReports = entry.getValue();
 
-                // 3. Extract unique smells for the ENTIRE file and format them
                 String smellsFormatted = fileReports.stream()
                         .map(ReportStruct::getSmellName)
                         .distinct()
@@ -63,7 +62,6 @@ public class CSVReportGenerator extends AbstractReportGenerator {
 
                 System.out.println(filePath + " -> " + smellsFormatted);
 
-                // 4. Print the single file-level record
                 printer.printRecord(
                         filePath,
                         smellsFormatted

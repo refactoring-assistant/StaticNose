@@ -126,12 +126,10 @@ public class Metrics {
         if (executable.getBody() == null) {
             return 0;
         }
-        // 1. Use getElements() to recursively grab ALL statements, no matter how deeply nested
         List<CtStatement> statements = executable.getBody().getElements(new TypeFilter<>(CtStatement.class));
 
         int lloc = 0;
         for(CtStatement stmt : statements) {
-            // 2. Ignore structural blocks (like {} itself) and compiler-generated implicit code
             if(!(stmt instanceof CtBlock) && !stmt.isImplicit()) {
                 lloc++;
             }
@@ -143,11 +141,9 @@ public class Metrics {
     public static int calculateLLOC(CtType<?> type) {
         int totalLLOC = 0;
 
-        // Grab every method and constructor in the class
         List<CtExecutable<?>> executables = type.getElements(new TypeFilter<>(CtExecutable.class));
 
         for (CtExecutable<?> executable : executables) {
-            // Re-use your existing method to count each block!
             totalLLOC += calculateLLOC(executable);
         }
 
@@ -171,7 +167,6 @@ public class Metrics {
         Map<CtMethod<?>, Set<String>> methodFieldUsage = new HashMap<>();
         Map<String, Integer> fieldUsageCounts = new HashMap<>();
 
-        // 1. Map all internal field accesses (Large Class Logic)
         for (CtMethod<?> m : methodsToAnalyze) {
             Set<String> accessedFields = new HashSet<>();
             List<CtFieldAccess<?>> accesses = m.getElements(new TypeFilter<>(CtFieldAccess.class));
@@ -193,7 +188,6 @@ public class Metrics {
             }
         }
 
-        // 2. Identify and remove Glue Fields (Divergent Change Logic)
         int totalMethods = methodsToAnalyze.size();
         Set<String> glueFields = new HashSet<>();
         for (Map.Entry<String, Integer> entry : fieldUsageCounts.entrySet()) {

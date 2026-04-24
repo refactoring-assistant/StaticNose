@@ -1,5 +1,8 @@
 package edu.northeastern.cli;
 
+/**
+ * Enum to store types of report formats.
+ */
 public enum ReportFormat {
     CSV("csv"),
     JSON("json");

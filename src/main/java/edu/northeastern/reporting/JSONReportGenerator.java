@@ -7,6 +7,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * This class generates a report of the file type JSON.
+ * JSON reports can be used with the report viewer tool provided with this tool.
+ */
 public class JSONReportGenerator extends AbstractReportGenerator{
 
     public JSONReportGenerator(String outputPath) {
