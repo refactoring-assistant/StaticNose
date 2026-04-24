@@ -107,3 +107,4 @@ build/
 
 /test-smells/
 /results/
+**/staticnose-report/
