@@ -18,11 +18,9 @@ import java.util.concurrent.Callable;
         description = "Detect code smells using Static Analysis.")
 public class CommandLineInterface implements Callable<Integer> {
 
-    // The folder is required universally for both modes
     @Option(names = {"-f", "--folder"}, converter = DirectoryValidator.class, required = true, description = "The folder to detect code smells in.")
     private File sourceFolder;
 
-    // Mutually Exclusive Group: The user MUST choose exactly ONE of the nested modes
     @ArgGroup(multiplicity = "1")
     private ExecutionMode mode;
 
@@ -34,7 +32,6 @@ public class CommandLineInterface implements Callable<Integer> {
         OracleGenMode oracleGenMode;
     }
 
-    // ALL options related to scanning for code smells live here
     static class AnalysisMode {
         @Option(names = {"-s", "--smell"}, split = ",", converter = CodeSmellConverter.class, required = true, description = "The code smells to detect. Separate with commas or use multiple -s flags. Valid values: ${COMPLETION-CANDIDATES}")
         private List<CodeSmell> codeSmells;
@@ -49,7 +46,6 @@ public class CommandLineInterface implements Callable<Integer> {
         private File oracleFile;
     }
 
-    // Options related purely to generating the CSV template live here
     static class OracleGenMode {
         @Option(names = {"-g", "--gen-oracle"}, required = true, description = "Generate a template test oracle file for the given.")
         boolean generateOracle;
@@ -58,18 +54,15 @@ public class CommandLineInterface implements Callable<Integer> {
     @Override
     public Integer call() {
 
-        // Check which mode the user selected
         boolean isOracleGenMode = mode != null && mode.oracleGenMode != null && mode.oracleGenMode.generateOracle;
 
         if(isOracleGenMode) {
             System.out.println("Generating oracle for: " + sourceFolder);
             edu.northeastern.reporting.OracleGenerator generator = new edu.northeastern.reporting.OracleGenerator(sourceFolder);
 
-            // Start the generation process
             generator.generate();
 
         } else {
-            // Because they aren't in GenMode, PicoCLI guarantees analysisMode is populated
             List<CodeSmell> codeSmells = mode.analysisMode.codeSmells;
             ReportFormat reportFormat = mode.analysisMode.reportFormat;
             File oracleFile = mode.analysisMode.oracleFile;
@@ -85,7 +78,6 @@ public class CommandLineInterface implements Callable<Integer> {
                 System.out.println("Verbose mode is on");
             }
 
-            // Start analysis
             IReportGenerator reportGenerator;
 
             if(reportFormat == ReportFormat.JSON) {
@@ -96,16 +88,13 @@ public class CommandLineInterface implements Callable<Integer> {
 
             AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmells, reportGenerator);
 
-            // 1. Capture the generated reports from the analysis
             List<ReportStruct> generatedReports = analysisGenerator.start();
 
-            // 2. Hook in the Oracle Evaluator if the -t flag was provided
             if (oracleFile != null) {
                 System.out.println("\nStarting Oracle Evaluation...");
                 OracleEvaluator evaluator = new OracleEvaluator(
                         oracleFile,
                         generatedReports,
-                        codeSmells,
                         sourceFolder.toString()
                 );
                 evaluator.evaluateAndReport();
