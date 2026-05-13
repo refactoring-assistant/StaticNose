@@ -9,11 +9,18 @@ Only the source code is currently available for StaticNose. To build, please clo
 ### Requirements
 - Java 25 is required to build and run the program
 - Maven is the build tool
+- JAVA_HOME environment variable points to JDK 25
 
 ## Usage
 
 > [!WARNING]
 > A current limitation of the project is that each Java file in the Java project to be examined must have a unique name across the entire project.
+
+Build the source using the command:
+
+`$ mvn clean package`
+
+This should generate *StaticNose-1.0.jar* file in *target/*. Run the jar file using `java -jar path/to/JAR` command.
 
 ### Arguments for common usages
 
