@@ -18,9 +18,11 @@ import java.util.stream.Stream;
 public class OracleGenerator {
 
     private final File sourceFolder;
+    private final List<String> ignoreDirectories;
 
-    public OracleGenerator(File sourceFolder) {
+    public OracleGenerator(File sourceFolder, List<String> ignoreDirectories) {
         this.sourceFolder = sourceFolder;
+        this.ignoreDirectories = ignoreDirectories == null ? new java.util.ArrayList<>() : ignoreDirectories;
     }
 
     /**
@@ -68,6 +70,7 @@ public class OracleGenerator {
             return paths
                     .filter(Files::isRegularFile)
                     .filter(p -> p.toString().endsWith(".java"))
+                    .filter(p -> ignoreDirectories.stream().noneMatch(ignored -> p.toString().contains(ignored)))
                     .map(Path::toFile)
                     .collect(Collectors.toList());
         } catch (IOException e) {

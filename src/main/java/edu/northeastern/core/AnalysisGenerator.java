@@ -13,6 +13,7 @@ public class AnalysisGenerator {
     private final File sourceFolder;
     private final List<CodeSmell> codeSmells;
     private final IReportGenerator reportGenerator;
+    private final List<String> ignoreDirectories;
 
     private static final Map<String, BiFunction<List<String>, String, IDetector>> DETECTORS = new HashMap<>();
 
@@ -39,10 +40,11 @@ public class AnalysisGenerator {
         DETECTORS.put("temp-field", TemporaryFieldDetector::new);
     }
 
-    public AnalysisGenerator(File sourceFolder, List<CodeSmell> codeSmells, IReportGenerator reportGenerator) {
+    public AnalysisGenerator(File sourceFolder, List<CodeSmell> codeSmells, IReportGenerator reportGenerator, List<String> ignoreDirectories) {
         this.sourceFolder = sourceFolder;
         this.codeSmells = codeSmells;
         this.reportGenerator = reportGenerator;
+        this.ignoreDirectories = ignoreDirectories == null ? new ArrayList<>() : ignoreDirectories;
     }
 
     public List<ReportStruct> start() {
@@ -72,6 +74,11 @@ public class AnalysisGenerator {
     }
 
     protected void collectJavaFilePaths(File file, List<String> result) {
+        for (String ignored : ignoreDirectories) {
+            if (file.getAbsolutePath().contains(ignored)) {
+                return;
+            }
+        }
 
         if (file.isDirectory()) {
             for (File f : Objects.requireNonNull(file.listFiles())) {
