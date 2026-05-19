@@ -10,14 +10,15 @@ import java.util.*;
 
 public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
 
-    private static final int MIN_SUBCLASSES = 2;
-
-    private static final int PARALLEL_LINK_THRESHOLD = 2;
+    private final int MIN_SUBCLASSES;
+    private final int PARALLEL_LINK_THRESHOLD;
 
     private final Map<String, List<CtType<?>>> hierarchyMap = new HashMap<>();
 
     public ParallelInheritanceHierarchyDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        MIN_SUBCLASSES = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "MIN_SUBCLASSES", 2);
+        PARALLEL_LINK_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "PARALLEL_LINK_THRESHOLD", 2);
     }
 
     @Override

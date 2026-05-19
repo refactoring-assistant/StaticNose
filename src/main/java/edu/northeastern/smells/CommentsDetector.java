@@ -24,13 +24,16 @@ import static edu.northeastern.utils.Metrics.calculateLLOC;
  */
 public class CommentsDetector extends AbstractDetector{
 
-    private static final int WORD_COUNT_TRESHOLD_BELOW_MIN = 3;
-    private static final int WORD_COUNT_ABOVE_MAX = 5;
-    private static final double COMMENT_TO_LLOC_RATIO = 0.3;
+    private final int WORD_COUNT_TRESHOLD_BELOW_MIN;
+    private final int WORD_COUNT_ABOVE_MAX;
+    private final double COMMENT_TO_LLOC_RATIO;
 
 
     public CommentsDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        WORD_COUNT_TRESHOLD_BELOW_MIN = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "WORD_COUNT_TRESHOLD_BELOW_MIN", 3);
+        WORD_COUNT_ABOVE_MAX = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "WORD_COUNT_ABOVE_MAX", 5);
+        COMMENT_TO_LLOC_RATIO = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "COMMENT_TO_LLOC_RATIO", 0.3);
     }
 
     @Override

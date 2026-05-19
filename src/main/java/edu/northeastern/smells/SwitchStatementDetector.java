@@ -9,11 +9,13 @@ import java.util.*;
 
 public class SwitchStatementDetector extends AbstractDetector {
 
-    private static final int MAX_SWITCH_CASES = 2;
-    private static final int MAX_IF_CHAIN_LENGTH = 2;
+    private final int MAX_SWITCH_CASES;
+    private final int MAX_IF_CHAIN_LENGTH;
 
     public SwitchStatementDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        MAX_SWITCH_CASES = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "MAX_SWITCH_CASES", 2);
+        MAX_IF_CHAIN_LENGTH = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "MAX_IF_CHAIN_LENGTH", 2);
     }
 
     @Override

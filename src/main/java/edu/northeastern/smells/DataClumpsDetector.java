@@ -21,12 +21,13 @@ public class DataClumpsDetector extends AbstractDetector {
 
     // How many times the set of variables occur for it to be counted
     // as a data clump
-    private static final int CLUMP_SIZE_THRESHOLD = 2;
+    private final int CLUMP_SIZE_THRESHOLD;
 
     private final Map<String, Map<String, List<Integer>>> fileClumpUsageMap = new HashMap<>();
 
     public DataClumpsDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        CLUMP_SIZE_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "CLUMP_SIZE_THRESHOLD", 2);
     }
 
     @Override

@@ -13,8 +13,13 @@ import static edu.northeastern.utils.Metrics.calculateLLOC;
 
 public class LongMethodDetector extends AbstractDetector{
 
+    private final int MAX_LLOC;
+    private final int MAX_COMPLEXITY;
+
     public LongMethodDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        this.MAX_LLOC = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "MAX_LLOC", 30);
+        this.MAX_COMPLEXITY = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "MAX_COMPLEXITY", 15);
     }
 
     @Override
@@ -33,7 +38,7 @@ public class LongMethodDetector extends AbstractDetector{
             int lloc = calculateLLOC(method);
             int complexity = calculateCyclomaticComplexity(method);
 
-            if (lloc >= 30 || complexity > 15) {
+            if (lloc >= MAX_LLOC || complexity > MAX_COMPLEXITY) {
                 // Always check if the position is valid first
                 if (method.getPosition().isValidPosition()) {
 

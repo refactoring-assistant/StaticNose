@@ -24,6 +24,9 @@ public class CommandLineInterface implements Callable<Integer> {
     @Option(names = {"-i", "--ignore"}, split = ",", description = "Directories to ignore when running the analysis.")
     private List<String> ignoreDirectories;
 
+    @Option(names = {"-c", "--config"}, converter = FileValidator.class, description = "Path to a JSON configuration file for custom detector thresholds.")
+    private File configFile;
+
     @ArgGroup(multiplicity = "1")
     private ExecutionMode mode;
 
@@ -64,6 +67,10 @@ public class CommandLineInterface implements Callable<Integer> {
 
     @Override
     public Integer call() {
+
+        if (configFile != null) {
+            edu.northeastern.core.ConfigurationManager.getInstance().loadConfig(configFile);
+        }
 
         boolean isOracleGenMode = mode != null && mode.oracleGenMode != null && mode.oracleGenMode.generateOracle;
 

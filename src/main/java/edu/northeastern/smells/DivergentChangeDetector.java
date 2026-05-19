@@ -28,10 +28,11 @@ public class DivergentChangeDetector extends AbstractDetector {
     // this is for glue fields like Loggers. if a field touches
     // more than 70% of methods, it is likely required in those methods
     // and is a utility field.
-    private static final double UBIQUITY_THRESHOLD = 0.70;
+    private final double UBIQUITY_THRESHOLD;
 
     public DivergentChangeDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        UBIQUITY_THRESHOLD = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "UBIQUITY_THRESHOLD", 0.70);
     }
 
     @Override

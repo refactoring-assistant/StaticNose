@@ -20,12 +20,13 @@ public class DuplicateCodeDetector extends AbstractDetector {
 
     // the size of the sliding window. it will only check pairs of 5 lines and
     // match them together
-    private static final int WINDOW_SIZE = 5;
+    private final int WINDOW_SIZE;
 
     private final Map<String, List<Location>> globalSequenceMap = new HashMap<>();
 
     public DuplicateCodeDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        WINDOW_SIZE = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "WINDOW_SIZE", 5);
     }
 
     @Override

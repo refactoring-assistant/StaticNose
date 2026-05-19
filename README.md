@@ -4,8 +4,6 @@ StaticNose is a program that uses static analysis to detect code smells. It can 
 
 ## Installation
 
-Only the source code is currently available for StaticNose. To build, please clone this repository.
-
 ### Requirements
 - Java 25 is required to build and run the program
 - Maven is the build tool
@@ -74,7 +72,65 @@ The following set of detectors are provided with StaticNose along with their sho
 | SwitchStatementDetector | switch-stmts | Switch Statements |
 | TemporaryFieldDetector | temp-field | Temporary Field |
 
-If a detector contains a threshold as a part of its algorithm, the threshold is provided as a constant field in the detector class.
+### Configuring Thresholds
+
+Thresholds for the various code smell detectors can be customized by providing a JSON configuration file using the `-c` or `--config` flag. If a threshold is not provided in the configuration file, the default value is used.
+
+An example of a threshold configuration file is given below and a sample config is provided at `config.json`.
+
+The key of the code smell should exactly match the name of the code smell as seen in the "Code Smell" column in the table below.
+
+```json
+{
+    "Comments": {
+        "WORD_COUNT_TRESHOLD_BELOW_MIN": 3,
+        "WORD_COUNT_ABOVE_MAX": 5,
+        "COMMENT_TO_LLOC_RATIO": 0.3
+    },
+}
+```
+
+Here are the available thresholds and their default values:
+
+| Code Smell | Threshold Name | Default Value |
+| :--- | :--- | :--- |
+| Alternative Classes with Different Interfaces | SIMILARITY_THRESHOLD | 0.75 |
+| Alternative Classes with Different Interfaces | WEIGHT_FIELDS | 0.20 |
+| Alternative Classes with Different Interfaces | WEIGHT_VOLUME | 0.10 |
+| Alternative Classes with Different Interfaces | WEIGHT_METHODS | 0.70 |
+| Comments | WORD_COUNT_TRESHOLD_BELOW_MIN | 3 |
+| Comments | WORD_COUNT_ABOVE_MAX | 5 |
+| Comments | COMMENT_TO_LLOC_RATIO | 0.3 |
+| Data Class | ACCESSOR_OR_FIELD_FEW_LEVEL | 3 |
+| Data Class | ACCESSOR_OR_FIELD_MANY_LEVEL | 5 |
+| Data Class | WOC_LEVEL | 0.33 |
+| Data Class | WMC_HIGH_LEVEL | 31 |
+| Data Class | WMC_VERY_HIGH_LEVEL | 47 |
+| Data Clumps | CLUMP_SIZE_THRESHOLD | 2 |
+| Divergent Change | UBIQUITY_THRESHOLD | 0.70 |
+| Duplicate Code | WINDOW_SIZE | 5 |
+| Feature Envy | FOREIGN_DATA_THRESHOLD | 2 |
+| Large Class | WMC_THRESHOLD | 47 |
+| Large Class | TCC_THRESHOLD | 0.33 |
+| Lazy Class | LOW_WEIGHT_THRESHOLD | 5 |
+| Long Method | MAX_LLOC | 30 |
+| Long Method | MAX_COMPLEXITY | 15 |
+| Long Parameter List | MAX_METHOD_PARAMS | 3 |
+| Long Parameter List | MAX_CONSTRUCTOR_PARAMS | 5 |
+| Message Chains | CHAIN_THRESHOLD | 3 |
+| Middle Man | DELEGATION_THRESHOLD | 0.5 |
+| Middle Man | FAN_OUT_THRESHOLD | 0 |
+| Parallel Inheritance Hierarchies | MIN_SUBCLASSES | 2 |
+| Parallel Inheritance Hierarchies | PARALLEL_LINK_THRESHOLD | 2 |
+| Primitive Obsession | VALIDATION_DISTRIBUTION_THRESHOLD | 2 |
+| Primitive Obsession | MAX_PRIMITIVE_FIELDS | 3 |
+| Primitive Obsession | COHESION_CANDIDATE_FIELDS | 3 |
+| Primitive Obsession | MAX_DISJOINT_RATIO | 0.5 |
+| Shotgun Surgery | THRESHOLD_CM | 2 |
+| Shotgun Surgery | THRESHOLD_CC | 2 |
+| Shotgun Surgery | THRESHOLD_FAN_OUT | 0 |
+| Switch Statements | MAX_SWITCH_CASES | 2 |
+| Switch Statements | MAX_IF_CHAIN_LENGTH | 2 |
 
 ### Report Generation
 

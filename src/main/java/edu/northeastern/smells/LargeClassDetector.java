@@ -19,11 +19,13 @@ import static edu.northeastern.utils.Metrics.*;
  */
 public class LargeClassDetector extends AbstractDetector{
 
-    private static final int WMC_THRESHOLD = 47;
-    private static final double TCC_THRESHOLD = 0.33;
+    private final int WMC_THRESHOLD;
+    private final double TCC_THRESHOLD;
 
     public LargeClassDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        WMC_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "WMC_THRESHOLD", 47);
+        TCC_THRESHOLD = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "TCC_THRESHOLD", 0.33);
     }
 
     @Override

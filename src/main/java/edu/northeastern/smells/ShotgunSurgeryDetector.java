@@ -13,9 +13,9 @@ import java.util.*;
 
 public class ShotgunSurgeryDetector extends AbstractDetector {
 
-    private static final int THRESHOLD_CM = 2; // Changing Methods
-    private static final int THRESHOLD_CC = 2; // Changing Classes
-    private static final int THRESHOLD_FAN_OUT = 0; // Dropped for toy examples
+    private final int THRESHOLD_CM; // Changing Methods
+    private final int THRESHOLD_CC; // Changing Classes
+    private final int THRESHOLD_FAN_OUT; // Dropped for toy examples
 
     private final Map<String, MethodMetrics> methodRegistry = new HashMap<>();
     private final Map<String, Set<String>> incomingMethodMap = new HashMap<>();
@@ -23,6 +23,9 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
 
     public ShotgunSurgeryDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        THRESHOLD_CM = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "THRESHOLD_CM", 2);
+        THRESHOLD_CC = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "THRESHOLD_CC", 2);
+        THRESHOLD_FAN_OUT = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "THRESHOLD_FAN_OUT", 0);
     }
 
     @Override

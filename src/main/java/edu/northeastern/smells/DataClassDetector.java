@@ -17,22 +17,27 @@ import static edu.northeastern.utils.Metrics.isAccessor;
 public class DataClassDetector extends AbstractDetector {
 
     // few fields threshold
-    private static final int ACCESSOR_OR_FIELD_FEW_LEVEL = 3;
+    private final int ACCESSOR_OR_FIELD_FEW_LEVEL;
     // many fields threshold
-    private static final int ACCESSOR_OR_FIELD_MANY_LEVEL = 5;
+    private final int ACCESSOR_OR_FIELD_MANY_LEVEL;
     // percentage of weight of class (functional/total methods)
     // should be less than 33%
-    private static final double WOC_LEVEL = 1.0 / 3.0;
+    private final double WOC_LEVEL;
     // weight of methods threshold.
-    private static final int WMC_HIGH_LEVEL = 31;
+    private final int WMC_HIGH_LEVEL;
     // if many fields then use this threshold
-    private static final int WMC_VERY_HIGH_LEVEL = 47;
+    private final int WMC_VERY_HIGH_LEVEL;
 
     // --- STRICT MODE FLAG ---
     private boolean strictMode = false;
 
     public DataClassDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        ACCESSOR_OR_FIELD_FEW_LEVEL = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "ACCESSOR_OR_FIELD_FEW_LEVEL", 3);
+        ACCESSOR_OR_FIELD_MANY_LEVEL = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "ACCESSOR_OR_FIELD_MANY_LEVEL", 5);
+        WOC_LEVEL = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "WOC_LEVEL", 1.0 / 3.0);
+        WMC_HIGH_LEVEL = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "WMC_HIGH_LEVEL", 31);
+        WMC_VERY_HIGH_LEVEL = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "WMC_VERY_HIGH_LEVEL", 47);
     }
 
     public void setStrictMode(boolean strictMode) {

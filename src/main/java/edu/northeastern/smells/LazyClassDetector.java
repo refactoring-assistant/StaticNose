@@ -14,13 +14,14 @@ import static edu.northeastern.utils.Metrics.calculateLLOC;
 
 public class LazyClassDetector extends AbstractDetector {
 
-    private static final int LOW_WEIGHT_THRESHOLD = 5;
+    private final int LOW_WEIGHT_THRESHOLD;
 
     private final Map<String, Set<String>> dependencyGraph = new HashMap<>();
     private final List<CtClass<?>> allConcreteClasses = new ArrayList<>();
 
     public LazyClassDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        LOW_WEIGHT_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "LOW_WEIGHT_THRESHOLD", 5);
     }
 
     @Override

@@ -11,11 +11,13 @@ import java.util.Set;
 
 public class MiddleManDetector extends AbstractDetector {
 
-    private static final double DELEGATION_THRESHOLD = 0.5;
-    private static final int FAN_OUT_THRESHOLD = 0;
+    private final double DELEGATION_THRESHOLD;
+    private final int FAN_OUT_THRESHOLD;
 
     public MiddleManDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        DELEGATION_THRESHOLD = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "DELEGATION_THRESHOLD", 0.5);
+        FAN_OUT_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "FAN_OUT_THRESHOLD", 0);
     }
 
     @Override

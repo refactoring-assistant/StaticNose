@@ -9,15 +9,19 @@ import java.util.*;
 
 public class PrimitiveObsessionDetector extends AbstractDetector{
 
-    private static final int VALIDATION_DISTRIBUTION_THRESHOLD = 2;
-    private static final int MAX_PRIMITIVE_FIELDS = 3;
-    private static final int COHESION_CANDIDATE_FIELDS = 3;
+    private final int VALIDATION_DISTRIBUTION_THRESHOLD;
+    private final int MAX_PRIMITIVE_FIELDS;
+    private final int COHESION_CANDIDATE_FIELDS;
 
     // If more than 50% of method pairs share ZERO primitive fields, the class is highly separable.
-    private static final double MAX_DISJOINT_RATIO = 0.5;
+    private final double MAX_DISJOINT_RATIO;
 
     public PrimitiveObsessionDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        VALIDATION_DISTRIBUTION_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "VALIDATION_DISTRIBUTION_THRESHOLD", 2);
+        MAX_PRIMITIVE_FIELDS = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "MAX_PRIMITIVE_FIELDS", 3);
+        COHESION_CANDIDATE_FIELDS = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "COHESION_CANDIDATE_FIELDS", 3);
+        MAX_DISJOINT_RATIO = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "MAX_DISJOINT_RATIO", 0.5);
     }
 
     @Override

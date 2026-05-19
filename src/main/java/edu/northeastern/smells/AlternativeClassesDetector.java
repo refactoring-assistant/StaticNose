@@ -15,13 +15,13 @@ import static edu.northeastern.utils.AstNormalizer.generateSkeleton;
 public class AlternativeClassesDetector extends AbstractDetector {
 
     // total similarity threshold for volume + field + method
-    private static final double SIMILARITY_THRESHOLD = 0.75;
+    private final double SIMILARITY_THRESHOLD;
 
     // weight assigned to each metric calculated when calculating
     // the final class similarity score
-    private static final double WEIGHT_FIELDS = 0.20;
-    private static final double WEIGHT_VOLUME = 0.10;
-    private static final double WEIGHT_METHODS = 0.70;
+    private final double WEIGHT_FIELDS;
+    private final double WEIGHT_VOLUME;
+    private final double WEIGHT_METHODS;
 
     // --- NEW FLAG ---
     // If true, only compares classes that live in the exact same .java file
@@ -32,6 +32,10 @@ public class AlternativeClassesDetector extends AbstractDetector {
 
     public AlternativeClassesDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        SIMILARITY_THRESHOLD = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "SIMILARITY_THRESHOLD", 0.75);
+        WEIGHT_FIELDS = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "WEIGHT_FIELDS", 0.20);
+        WEIGHT_VOLUME = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "WEIGHT_VOLUME", 0.10);
+        WEIGHT_METHODS = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "WEIGHT_METHODS", 0.70);
     }
 
     // --- NEW SETTER ---

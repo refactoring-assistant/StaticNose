@@ -18,10 +18,11 @@ public class FeatureEnvyDetector extends AbstractDetector{
 
     // A method must access at least this many foreign fields/getters from a SINGLE
     // external class to even be considered for Feature Envy. Filters out basic comparators.
-    private static final int FOREIGN_DATA_THRESHOLD = 2;
+    private final int FOREIGN_DATA_THRESHOLD;
 
     public FeatureEnvyDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
+        FOREIGN_DATA_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "FOREIGN_DATA_THRESHOLD", 2);
     }
 
     @Override

@@ -1,0 +1,11 @@
+{
+    "Comments": {
+        "WORD_COUNT_TRESHOLD_BELOW_MIN": 1,
+        "WORD_COUNT_ABOVE_MAX": 1,
+        "COMMENT_TO_LLOC_RATIO": 0.3
+    },
+    "Large Class": {
+        "WMC_THRESHOLD": 0,
+        "TCC_THRESHOLD": 1.0
+    }
+}
