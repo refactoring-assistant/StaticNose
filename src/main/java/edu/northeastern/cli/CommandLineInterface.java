@@ -21,6 +21,9 @@ public class CommandLineInterface implements Callable<Integer> {
     @Option(names = {"-f", "--folder"}, converter = DirectoryValidator.class, required = true, description = "The folder to detect code smells in.")
     private File sourceFolder;
 
+    @Option(names = {"-i", "--ignore"}, split = ",", description = "Directories to ignore when running the analysis.")
+    private List<String> ignoreDirectories;
+
     @ArgGroup(multiplicity = "1")
     private ExecutionMode mode;
 
@@ -33,8 +36,16 @@ public class CommandLineInterface implements Callable<Integer> {
     }
 
     static class AnalysisMode {
-        @Option(names = {"-s", "--smell"}, split = ",", converter = CodeSmellConverter.class, required = true, description = "The code smells to detect. Separate with commas or use multiple -s flags. Valid values: ${COMPLETION-CANDIDATES}")
-        private List<CodeSmell> codeSmells;
+        @ArgGroup(exclusive = true, multiplicity = "1")
+        SmellSelection smellSelection;
+
+        static class SmellSelection {
+            @Option(names = {"-s", "--smell"}, split = ",", converter = CodeSmellConverter.class, required = true, description = "The code smells to detect. Separate with commas or use multiple -s flags. Valid values: ${COMPLETION-CANDIDATES}")
+            private List<CodeSmell> codeSmells;
+
+            @Option(names = {"-a", "--all"}, required = true, description = "Detect all available code smells.")
+            boolean allSmells;
+        }
 
         @Option(names = {"-r", "--report-format"}, description = "Format of the report. (default: CSV)")
         private ReportFormat reportFormat = ReportFormat.CSV;
@@ -58,12 +69,17 @@ public class CommandLineInterface implements Callable<Integer> {
 
         if(isOracleGenMode) {
             System.out.println("Generating oracle for: " + sourceFolder);
-            edu.northeastern.reporting.OracleGenerator generator = new edu.northeastern.reporting.OracleGenerator(sourceFolder);
+            edu.northeastern.reporting.OracleGenerator generator = new edu.northeastern.reporting.OracleGenerator(sourceFolder, ignoreDirectories);
 
             generator.generate();
 
         } else {
-            List<CodeSmell> codeSmells = mode.analysisMode.codeSmells;
+            List<CodeSmell> codeSmells;
+            if (mode.analysisMode.smellSelection.allSmells) {
+                codeSmells = java.util.Arrays.asList(CodeSmell.values());
+            } else {
+                codeSmells = mode.analysisMode.smellSelection.codeSmells;
+            }
             ReportFormat reportFormat = mode.analysisMode.reportFormat;
             File oracleFile = mode.analysisMode.oracleFile;
             boolean verbose = mode.analysisMode.verbose;
@@ -86,7 +102,7 @@ public class CommandLineInterface implements Callable<Integer> {
                 reportGenerator = new CSVReportGenerator(sourceFolder.toString());
             }
 
-            AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmells, reportGenerator);
+            AnalysisGenerator analysisGenerator = new AnalysisGenerator(sourceFolder, codeSmells, reportGenerator, ignoreDirectories);
 
             List<ReportStruct> generatedReports = analysisGenerator.start();
 
