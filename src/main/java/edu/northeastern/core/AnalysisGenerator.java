@@ -51,6 +51,8 @@ public class AnalysisGenerator {
         List<String> javaFilePaths = new ArrayList<>();
         collectJavaFilePaths(sourceFolder, javaFilePaths);
 
+        checkForDuplicateClasses(javaFilePaths);
+
         List<ReportStruct> masterReportList = new ArrayList<>();
 
         for (CodeSmell smell : codeSmells) {
@@ -89,4 +91,54 @@ public class AnalysisGenerator {
         }
     }
 
+    private void checkForDuplicateClasses(List<String> javaFilePaths) {
+        Map<String, List<String>> fqnToFiles = new HashMap<>();
+
+        for (String filePath : javaFilePaths) {
+            try {
+                String pkg = "";
+                for (String line : java.nio.file.Files.readAllLines(java.nio.file.Paths.get(filePath))) {
+                    line = line.trim();
+                    if (line.startsWith("package ") && line.endsWith(";")) {
+                        pkg = line.substring(8, line.length() - 1).trim() + ".";
+                        break;
+                    }
+                    if (line.startsWith("public class") || line.startsWith("class") || line.startsWith("public interface") || line.startsWith("interface")) {
+                        break;
+                    }
+                }
+                
+                String fileName = new File(filePath).getName();
+                if (fileName.endsWith(".java")) {
+                    fileName = fileName.substring(0, fileName.length() - 5);
+                }
+                
+                String fqn = pkg + fileName;
+                fqnToFiles.computeIfAbsent(fqn, k -> new ArrayList<>()).add(filePath);
+
+            } catch (Exception e) {
+                // Ignore read errors here, Spoon will catch them later
+            }
+        }
+
+        StringBuilder errorMessage = new StringBuilder();
+        boolean hasDuplicates = false;
+        
+        for (Map.Entry<String, List<String>> entry : fqnToFiles.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                if (!hasDuplicates) {
+                    errorMessage.append("Invalid Java Project: Duplicate class definitions found in the same package. Please provide a valid Java project.\n");
+                    hasDuplicates = true;
+                }
+                errorMessage.append("  Class: ").append(entry.getKey()).append("\n");
+                for (String path : entry.getValue()) {
+                    errorMessage.append("    - ").append(path).append("\n");
+                }
+            }
+        }
+        
+        if (hasDuplicates) {
+            throw new IllegalStateException(errorMessage.toString().trim());
+        }
+    }
 }

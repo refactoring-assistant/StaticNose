@@ -11,9 +11,6 @@ StaticNose is a program that uses static analysis to detect code smells. It can 
 
 ## Usage
 
-> [!WARNING]
-> A current limitation of the project is that each Java file in the Java project to be examined must have a unique name across the entire project.
-
 Build the source using the command:
 
 `$ mvn clean package`

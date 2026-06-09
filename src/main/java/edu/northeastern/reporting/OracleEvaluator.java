@@ -188,11 +188,7 @@ public class OracleEvaluator {
         Map<String, Set<String>> map = new HashMap<>();
 
         for (ReportStruct report : detectedReports) {
-            String fileName = Paths.get(report.getFilePath()).getFileName().toString();
-
-            if (fileName.endsWith(".java")) {
-                fileName = fileName.substring(0, fileName.length() - 5);
-            }
+            String fileName = report.getFilePath().replace("\\", "/");
 
             map.putIfAbsent(fileName, new HashSet<>());
             map.get(fileName).add(report.getSmellName());
