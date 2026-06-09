@@ -88,6 +88,10 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
             for (CtMethod<?> method : ctClass.getMethods()) {
                 if (method.getBody() == null) continue;
 
+                if (method.isImplicit() || !method.getPosition().isValidPosition()) {
+                    continue;
+                }
+
                 // FIX 1: Make the current method signature truly unique
                 String currentMethodSignature = currentClassName + "#" + method.getSignature();
 
