@@ -42,8 +42,16 @@ public class CommandLineInterface implements Callable<Integer> {
             @Option(names = {"-s", "--smell"}, split = ",", converter = CodeSmellConverter.class, required = true, description = "The code smells to detect. Separate with commas or use multiple -s flags. Valid values: ${COMPLETION-CANDIDATES}")
             private List<CodeSmell> codeSmells;
 
+            @ArgGroup(exclusive = false, multiplicity = "1")
+            AllSmellsSelection allSmellsSelection;
+        }
+
+        static class AllSmellsSelection {
             @Option(names = {"-a", "--all"}, required = true, description = "Detect all available code smells.")
             boolean allSmells;
+
+            @Option(names = {"-e", "--exclude-smell"}, split = ",", converter = CodeSmellConverter.class, description = "Code smells to exclude from detection. Valid values: ${COMPLETION-CANDIDATES}")
+            private List<CodeSmell> excludedSmells;
         }
 
         @Option(names = {"-r", "--report-format"}, description = "Format of the report. (default: CSV)")
@@ -78,10 +86,13 @@ public class CommandLineInterface implements Callable<Integer> {
 
         } else {
             List<CodeSmell> codeSmells;
-            if (mode.analysisMode.smellSelection.allSmells) {
-                codeSmells = java.util.Arrays.asList(CodeSmell.values());
+            if (mode.analysisMode.smellSelection.allSmellsSelection != null && mode.analysisMode.smellSelection.allSmellsSelection.allSmells) {
+                codeSmells = new java.util.ArrayList<>(java.util.Arrays.asList(CodeSmell.values()));
+                if (mode.analysisMode.smellSelection.allSmellsSelection.excludedSmells != null) {
+                    codeSmells.removeAll(mode.analysisMode.smellSelection.allSmellsSelection.excludedSmells);
+                }
             } else {
-                codeSmells = mode.analysisMode.smellSelection.codeSmells;
+                codeSmells = new java.util.ArrayList<>(mode.analysisMode.smellSelection.codeSmells);
             }
             ReportFormat reportFormat = mode.analysisMode.reportFormat;
             File oracleFile = mode.analysisMode.oracleFile;
