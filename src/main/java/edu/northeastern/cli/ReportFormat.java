@@ -5,7 +5,8 @@ package edu.northeastern.cli;
  */
 public enum ReportFormat {
     CSV("csv"),
-    JSON("json");
+    JSON("json"),
+    HTML("html");
 
     private final String format;
 

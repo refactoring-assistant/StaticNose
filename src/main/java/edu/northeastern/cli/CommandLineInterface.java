@@ -1,11 +1,7 @@
 package edu.northeastern.cli;
 
 import edu.northeastern.core.AnalysisGenerator;
-import edu.northeastern.reporting.CSVReportGenerator;
-import edu.northeastern.reporting.IReportGenerator;
-import edu.northeastern.reporting.JSONReportGenerator;
-import edu.northeastern.reporting.OracleEvaluator;
-import edu.northeastern.reporting.ReportStruct;
+import edu.northeastern.reporting.*;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ArgGroup;
@@ -51,7 +47,7 @@ public class CommandLineInterface implements Callable<Integer> {
         }
 
         @Option(names = {"-r", "--report-format"}, description = "Format of the report. (default: CSV)")
-        private ReportFormat reportFormat = ReportFormat.CSV;
+        private final ReportFormat reportFormat = ReportFormat.CSV;
 
         @Option(names = {"-v", "--verbose"}, description = "Print metrics in report.")
         boolean verbose;
@@ -105,6 +101,8 @@ public class CommandLineInterface implements Callable<Integer> {
 
             if(reportFormat == ReportFormat.JSON) {
                 reportGenerator = new JSONReportGenerator(sourceFolder.toString());
+            } else if(reportFormat == ReportFormat.HTML) {
+                reportGenerator = new HTMLReportGenerator(sourceFolder.toString());
             } else {
                 reportGenerator = new CSVReportGenerator(sourceFolder.toString());
             }
