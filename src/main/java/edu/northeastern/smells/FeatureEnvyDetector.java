@@ -32,6 +32,7 @@ public class FeatureEnvyDetector extends AbstractDetector{
 
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
+
         List<Integer> detectedLines = new ArrayList<>();
         CtTypeReference<?> currentTypeRef = type.getReference();
 
@@ -56,7 +57,12 @@ public class FeatureEnvyDetector extends AbstractDetector{
                 String fieldName = access.getVariable().getSimpleName();
 
                 if(currentTypeRef.isSubtypeOf(declaringType)) {
-                    internalFeatures.add(fieldName);
+                    CtTypeReference<?> fieldType = access.getVariable().getType();
+                    if (fieldType != null && !currentTypeRef.isSubtypeOf(fieldType) && isProjectClass(fieldType.getQualifiedName())) {
+                        externalAccessMap.computeIfAbsent(fieldType.getQualifiedName(), k -> new HashSet<>()).add("ref:" + fieldName);
+                    } else {
+                        internalFeatures.add(fieldName);
+                    }
                 } else {
                     String targetName = declaringType.getQualifiedName();
                     if(isProjectClass(targetName)) {
@@ -112,12 +118,5 @@ public class FeatureEnvyDetector extends AbstractDetector{
         if(returnType != null && returnType.getSimpleName().equals("void")) return false;
 
         return name.startsWith("get") || name.startsWith("is") || name.startsWith("has");
-    }
-
-    private boolean isProjectClass(String qualifiedName) {
-        return !qualifiedName.startsWith("java.") &&
-                !qualifiedName.startsWith("javax.") &&
-                !qualifiedName.startsWith("sun.") &&
-                !qualifiedName.startsWith("jdk.");
     }
 }
