@@ -4,7 +4,15 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-class BankAccount {
+interface IBankAccount {
+    public void deposit(double depositAmount) throws IllegalArgumentException;
+
+    public void getBalance();
+
+    public void printAccountDetails();
+}
+
+class BankAccount implements IBankAccount {
     private String name;
     private int id;
     private double balance;
@@ -23,6 +31,7 @@ class BankAccount {
         System.out.println("Successful deposit. New balance: " + this.balance);
     }
 
+    @Override
     public void deposit(double depositAmount) throws IllegalArgumentException {
         if (depositAmount < 0) {
             throw new IllegalArgumentException("Negative deposit amount");
@@ -31,6 +40,7 @@ class BankAccount {
         System.out.println("Successful withdrawal. New balance: " + this.balance);
     }
 
+    @Override
     public double getBalance() {
         return this.balance;
     }
@@ -39,6 +49,7 @@ class BankAccount {
         return this.id;
     }
 
+    @Override
     public void printAccountDetails() {
         System.out.println("Id: " + this.id + "\nName: " + this.name);
     }
