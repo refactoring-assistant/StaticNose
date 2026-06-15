@@ -131,13 +131,16 @@ Here are the available thresholds and their default values:
 
 ### Report Generation
 
-Two report formats are available, JSON and CSV. CSV format is primarily used for ease of reading the report directly and to generate and evaluate oracles.
+Three report formats are available, JSON, CSV and HTML. CSV format is primarily used for ease of reading the report directly and to generate and evaluate oracles.
 
-JSON format is provided to be used with custom analysis viewers. One viewer is provided with the project, located at `./index.html`.
+JSON format is provided to be used with custom analysis viewers. HTML format is used to quickly view the outcome of the analysis in an interactive view.
 
 Everytime the program is run, a `staticnose-report` folder is created at the root of the project directory examined. This folder contains all the reports in both formats ever generated for this project.
 
 ### Report Viewer
+
+> [!WARNING]
+> The report viewer is planned to be deprecated in the next major release. Please use the HTML report generator to generate .html files and view the reports through them.
 
 A report viewer for the JSON format is provided at `./index.html`. To use this viewer, open the HTML file in a browser.
 
@@ -149,7 +152,24 @@ It will prompt you to upload a folder. You will be required to upload the entire
 ### Configuring Oracles
 
 An oracle is a CSV file that contains two columns, "File Name" and "Expected Code Smells". 
-The File Name column must contain unique file names, which is a current limitation of the project.
+The File Name column must contain the complete file path, which is a current limitation of the project.
 
 Once an oracle is configured for a project by labeling each file with the code smells it contains, the `-t` option can be used when running the program and supplying the oracle to it. 
 Per file results and overall results will be provided in the terminal output.
+
+### Script usage
+
+> Please double-check the arguments passed to the program in each script before running.
+
+There are 3 scripts corresponding to the 3 assignments:
+- Assignment 4
+- Assignment 5
+- Assignment 6
+
+#### Scripts in oracle-gen
+
+These script help in generating individual oracles for each group for 1 specific assignment. It creates 1 oracle per folder found in the `BASE_DIR` directory.
+
+#### Scripts in oracle-eval
+
+These scripts help in evaluating the generated oracles. `BASE_DIR` is the directory in which all the group's folders are present. The script takes each folder and finds the corresponding oracle file from the directory given in `ORACLE_DIR`. The oracle file should match the group folder name. For example, if the group folder name is `group1`, the oracle file should be `group1-oracle.csv`.
