@@ -18,7 +18,7 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
 
     public PrimitiveObsessionDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
-        VALIDATION_DISTRIBUTION_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "VALIDATION_DISTRIBUTION_THRESHOLD", 2);
+        VALIDATION_DISTRIBUTION_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "VALIDATION_DISTRIBUTION_THRESHOLD", 1);
         MAX_PRIMITIVE_FIELDS = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "MAX_PRIMITIVE_FIELDS", 3);
         COHESION_CANDIDATE_FIELDS = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "COHESION_CANDIDATE_FIELDS", 3);
         MAX_DISJOINT_RATIO = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "MAX_DISJOINT_RATIO", 0.5);
