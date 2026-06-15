@@ -33,7 +33,7 @@ public class TemporaryFieldDetector extends AbstractDetector{
                 continue;
             }
 
-            Set<String> writeExecutables = new HashSet<>();
+            Set<CtExecutable<?>> writeExecutables = new HashSet<>();
             Set<String> readExecutables = new HashSet<>();
 
             List<CtFieldAccess<?>> globalAccesses = field.getFactory().getModel().getElements(new TypeFilter<>(CtFieldAccess.class) {
@@ -61,7 +61,7 @@ public class TemporaryFieldDetector extends AbstractDetector{
                         }
 
                         if (!isAssigningNull) {
-                            writeExecutables.add(execName);
+                            writeExecutables.add(executable);
                         }
                     } else if (access instanceof spoon.reflect.code.CtFieldRead) {
                         readExecutables.add(execName);
@@ -73,10 +73,64 @@ public class TemporaryFieldDetector extends AbstractDetector{
 
             if (writeExecutables.size() == 1 && !readExecutables.isEmpty()) {
 
-                String theOnlyWriter = writeExecutables.iterator().next();
+                CtExecutable<?> theOnlyWriterExec = writeExecutables.iterator().next();
+                String theOnlyWriter = theOnlyWriterExec.getSimpleName();
 
                 if (!theOnlyWriter.equals("<init>") && !theOnlyWriter.startsWith("set")) {
                     hasCodeSmell = true;
+
+                    if (theOnlyWriterExec instanceof CtMethod<?> method && method.isPrivate()) {
+                        CtType<?> parentType = method.getParent(CtType.class);
+                        if (parentType != null) {
+                            for (CtConstructor<?> constructor : parentType.getElements(new TypeFilter<>(CtConstructor.class))) {
+                                List<CtInvocation<?>> invocations = constructor.getElements(new TypeFilter<>(CtInvocation.class) {
+                                    @Override
+                                    public boolean matches(CtInvocation<?> element) {
+                                        return super.matches(element) && 
+                                               element.getExecutable().getDeclaration() != null && 
+                                               element.getExecutable().getDeclaration().equals(method);
+                                    }
+                                });
+                                
+                                for (CtInvocation<?> invocation : invocations) {
+                                    if (isUnconditional(invocation, constructor)) {
+                                        hasCodeSmell = false;
+                                        break;
+                                    }
+                                }
+                                if (!hasCodeSmell) break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // NEW: Multi-constructor partial initialization check
+            Set<CtConstructor<?>> allConstructors = new HashSet<>(type.getElements(new TypeFilter<>(CtConstructor.class)));
+            if (!hasCodeSmell && allConstructors.size() > 1 && !readExecutables.isEmpty()) {
+                int totalConstructors = allConstructors.size();
+                Set<CtConstructor<?>> writingConstructors = new HashSet<>();
+                boolean onlyWrittenInConstructors = true;
+
+                for (CtExecutable<?> exec : writeExecutables) {
+                    if (exec instanceof CtConstructor<?>) {
+                        writingConstructors.add((CtConstructor<?>) exec);
+                    } else {
+                        onlyWrittenInConstructors = false;
+                    }
+                }
+
+                if (onlyWrittenInConstructors && !writingConstructors.isEmpty()) {
+                    int coveredConstructors = writingConstructors.size();
+                    for (CtConstructor<?> ctor : allConstructors) {
+                        if (!writingConstructors.contains(ctor) && delegatesToThis(ctor, type)) {
+                            coveredConstructors++;
+                        }
+                    }
+
+                    if (coveredConstructors < totalConstructors) {
+                        hasCodeSmell = true;
+                    }
                 }
             }
 
@@ -88,5 +142,33 @@ public class TemporaryFieldDetector extends AbstractDetector{
         }
 
         return detectedLines;
+    }
+
+    private boolean isUnconditional(CtElement element, CtElement stopAt) {
+        CtElement current = element.getParent();
+        while (current != null && current != stopAt) {
+            if (current instanceof CtIf ||
+                current instanceof CtLoop ||
+                current instanceof CtSwitch ||
+                current instanceof CtConditional ||
+                current instanceof CtLambda ||
+                current instanceof CtType ||
+                current instanceof CtCatch) {
+                return false;
+            }
+            current = current.getParent();
+        }
+        return true;
+    }
+
+    private boolean delegatesToThis(CtConstructor<?> ctor, CtType<?> currentType) {
+        if (ctor.getBody() == null || ctor.getBody().getStatements().isEmpty()) return false;
+        CtStatement first = ctor.getBody().getStatements().get(0);
+        if (first instanceof CtInvocation<?> inv) {
+            if (inv.getExecutable() != null && inv.getExecutable().isConstructor()) {
+                return currentType.getReference().equals(inv.getExecutable().getDeclaringType());
+            }
+        }
+        return false;
     }
 }
