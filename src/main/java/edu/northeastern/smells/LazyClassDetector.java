@@ -74,7 +74,9 @@ public class LazyClassDetector extends AbstractDetector {
         List<CtClass<?>> classesInFile = type.getElements(new TypeFilter<>(CtClass.class));
 
         for (CtClass<?> ctClass : classesInFile) {
-            if (!ctClass.getPosition().isValidPosition() || ctClass.isAbstract()) continue;
+            if (!ctClass.getPosition().isValidPosition() || ctClass.isAbstract() || ctClass.isAnonymous() || !ctClass.isTopLevel()) continue;
+
+            if (isUtilityOrConstantsClass(ctClass)) continue;
 
             allConcreteClasses.add(ctClass);
             String currentClassName = ctClass.getQualifiedName();
@@ -82,7 +84,7 @@ public class LazyClassDetector extends AbstractDetector {
             List<CtTypeReference<?>> references = ctClass.getElements(new TypeFilter<>(CtTypeReference.class));
 
             for (CtTypeReference<?> ref : references) {
-                if (!ref.isPrimitive() && !ref.getQualifiedName().startsWith("java.")) {
+                if (!ref.isPrimitive() && isProjectClass(ref.getQualifiedName())) {
                     String referencedClass = ref.getQualifiedName();
 
                     if (!referencedClass.equals(currentClassName)) {
@@ -159,6 +161,34 @@ public class LazyClassDetector extends AbstractDetector {
     private boolean hasMeaningfulSuperclass(CtClass<?> ctClass) {
         CtTypeReference<?> superClass = ctClass.getSuperclass();
         return superClass != null && !superClass.getSimpleName().equals("Object");
+    }
+
+    private boolean isUtilityOrConstantsClass(CtClass<?> ctClass) {
+        // 1. Constants Class: Has fields, NO methods, and ALL fields are static final
+        if (ctClass.getMethods().isEmpty() && !ctClass.getFields().isEmpty()) {
+            boolean onlyStaticFinal = true;
+            for (spoon.reflect.declaration.CtField<?> field : ctClass.getFields()) {
+                if (!field.isStatic() || !field.isFinal()) {
+                    onlyStaticFinal = false;
+                    break;
+                }
+            }
+            if (onlyStaticFinal) return true;
+        }
+
+        // 2. Utility Class: explicitly locks instantiation by making all constructors private
+        if (!ctClass.getConstructors().isEmpty()) {
+            boolean allPrivateConstructors = true;
+            for (spoon.reflect.declaration.CtConstructor<?> ctor : ctClass.getConstructors()) {
+                if (!ctor.isPrivate()) {
+                    allPrivateConstructors = false;
+                    break;
+                }
+            }
+            if (allPrivateConstructors) return true;
+        }
+
+        return false;
     }
 
     private ReportStruct createReport(CtClass<?> ctClass, String info) {
