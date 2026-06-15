@@ -48,23 +48,43 @@ public class MiddleManDetector extends AbstractDetector {
             List<CtStatement> statements = method.getBody().getStatements();
             int statementCount = statements.size();
 
-            if(statementCount == 1) {
-                CtStatement stmt = statements.getFirst();
+            boolean isPureDelegate = false;
 
-                // FIX: Pass the 'method' variable as the second argument to both helpers
-                if(isInvocation(stmt, method) || isReturnInvocation(stmt, method)) {
-                    singleLineDelegates++;
+            if (statementCount == 2 && isAssignInvocationAndReturn(statements.get(0), statements.get(1), method)) {
+                isPureDelegate = true;
+            } else {
+                boolean hasDelegation = false;
+                boolean hasProcessing = false;
+
+                for (CtStatement stmt : statements) {
+                    if (isInvocation(stmt, method) || isReturnInvocation(stmt, method)) {
+                        hasDelegation = true;
+                    } else if (stmt instanceof CtInvocation) {
+                        // It's an invocation (like System.out.println), but not a delegation.
+                        // We do not consider simple invocations to be "data processing".
+                    } else if (stmt instanceof CtReturn<?> ret) {
+                        // Allow empty returns. If it returns an expression that wasn't a delegation,
+                        // it must be a simple literal or variable read to not be considered processing.
+                        if (ret.getReturnedExpression() != null &&
+                            !(ret.getReturnedExpression() instanceof spoon.reflect.code.CtLiteral) &&
+                            !(ret.getReturnedExpression() instanceof spoon.reflect.code.CtVariableRead)) {
+                            hasProcessing = true;
+                            break;
+                        }
+                    } else {
+                        // Any other statement (if, for, assignment, local variable declaration) IS data processing.
+                        hasProcessing = true;
+                        break;
+                    }
+                }
+
+                if (hasDelegation && !hasProcessing) {
+                    isPureDelegate = true;
                 }
             }
 
-            // two line statements (assign and return)
-            else if (statementCount == 2) {
-                CtStatement first = statements.get(0);
-                CtStatement second = statements.get(1);
-
-                if(isAssignInvocationAndReturn(first, second)) {
-                    singleLineDelegates++;
-                }
+            if (isPureDelegate) {
+                singleLineDelegates++;
             }
         }
 
@@ -109,22 +129,30 @@ public class MiddleManDetector extends AbstractDetector {
             if (var == null) return false;
 
             // ONLY flag if it is delegating to an internal Field (Classic Middle Man)
-            return var instanceof spoon.reflect.declaration.CtField;
+            if (var instanceof spoon.reflect.declaration.CtField<?> field) {
+                // We only care if we are delegating to ANOTHER CUSTOM CLASS.
+                // Wrapping a standard library collection (like Set or List) is a valid pattern (Encapsulate Collection).
+                if (field.getType() != null) {
+                    return isProjectClass(field.getType().getQualifiedName());
+                }
+            }
         }
 
         return false;
     }
 
-    private boolean isAssignInvocationAndReturn(CtStatement first, CtStatement second) {
+    private boolean isAssignInvocationAndReturn(CtStatement first, CtStatement second, CtMethod<?> parentMethod) {
         if(!(first instanceof CtLocalVariable<?> local)) return false;
 
         if(!(second instanceof CtReturn<?> ret)) return false;
 
-        if(!(local.getDefaultExpression() instanceof CtInvocation)) return false;
+        if(!(local.getDefaultExpression() instanceof CtInvocation<?> inv)) return false;
 
         if(!(ret.getReturnedExpression() instanceof CtVariableRead<?> read)) return false;
 
-        return read.getVariable().getDeclaration() == local;
+        if(read.getVariable().getDeclaration() != local) return false;
+
+        return isDelegatingToField(inv, parentMethod);
     }
 
 }
