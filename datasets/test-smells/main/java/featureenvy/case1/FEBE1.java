@@ -1,3 +1,5 @@
+package featureenvy.case1;
+
 class Coordinates2DBad {
     private final int x;
     private final int y;

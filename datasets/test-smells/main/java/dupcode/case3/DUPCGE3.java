@@ -1,3 +1,5 @@
+package dupcode.case3;
+
 class SimpleCalculator {
     int a;
     int b;

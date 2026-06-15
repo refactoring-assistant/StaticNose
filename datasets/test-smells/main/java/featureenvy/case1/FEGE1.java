@@ -1,3 +1,5 @@
+package featureenvy.case1;
+
 class Coordinates2DGood {
   private int x;
   private int y;
