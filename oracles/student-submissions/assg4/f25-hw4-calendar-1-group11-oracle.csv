@@ -1,0 +1,11 @@
+File Name,Expected Code Smells
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarModel.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/EventSeries.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CommandParser.java,['Long Method']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarModelImpl.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarController.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarView.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/DummyCalendar.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/Event.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarViewImpl.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/CalendarRunner.java,[]

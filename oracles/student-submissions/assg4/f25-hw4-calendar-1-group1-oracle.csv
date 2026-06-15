@@ -1,0 +1,9 @@
+File Name,Expected Code Smells
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group1/main/java/calendar/controller/CalendarController.java,"['Switch Statements', 'Comments', 'Data Clumps']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group1/main/java/calendar/model/Calendar.java,"['Switch Statements', 'Comments', 'Data Clumps']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group1/main/java/calendar/model/Icalendar.java,['Data Clumps']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group1/main/java/calendar/model/Ievent.java,['Long Parameter List']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group1/main/java/calendar/model/Event.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group1/main/java/calendar/view/IcalendarView.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group1/main/java/calendar/view/CalendarConsoleView.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group1/main/java/CalendarRunner.java,[]

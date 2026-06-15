@@ -1,0 +1,10 @@
+File Name,Expected Code Smells
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/calendar/controller/CommandParser.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/calendar/controller/CalendarController.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/calendar/controller/CommandExecutor.java,"['Switch Statements', 'Long Method']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/calendar/DummyCalendar.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/calendar/model/CalendarModel.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/calendar/model/EventSeries.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/calendar/model/CalendarModelImpl.java,"['Primitive Obsession', 'Long Method']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/calendar/model/Event.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group10/main/java/CalendarRunner.java,[]
