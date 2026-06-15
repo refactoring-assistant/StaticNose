@@ -36,6 +36,7 @@ public class AnalysisGenerator {
         DETECTORS.put("prim-obsession", PrimitiveObsessionDetector::new);
         DETECTORS.put("refused-bequest", RefusedBequestDetector::new);
         DETECTORS.put("shotgun", ShotgunSurgeryDetector::new);
+        DETECTORS.put("spec-gen", SpeculativeGeneralityDetector::new);
         DETECTORS.put("switch-stmts", SwitchStatementDetector::new);
         DETECTORS.put("temp-field", TemporaryFieldDetector::new);
     }
