@@ -89,45 +89,45 @@ The key of the code smell should exactly match the name of the code smell as see
 
 Here are the available thresholds and their default values:
 
-| Code Smell | Threshold Name | Default Value |
-| :--- | :--- | :--- |
-| Alternative Classes with Different Interfaces | SIMILARITY_THRESHOLD | 0.75 |
-| Alternative Classes with Different Interfaces | WEIGHT_FIELDS | 0.20 |
-| Alternative Classes with Different Interfaces | WEIGHT_VOLUME | 0.10 |
-| Alternative Classes with Different Interfaces | WEIGHT_METHODS | 0.70 |
-| Comments | WORD_COUNT_TRESHOLD_BELOW_MIN | 3 |
-| Comments | WORD_COUNT_ABOVE_MAX | 5 |
-| Comments | COMMENT_TO_LLOC_RATIO | 0.3 |
-| Data Class | ACCESSOR_OR_FIELD_FEW_LEVEL | 3 |
-| Data Class | ACCESSOR_OR_FIELD_MANY_LEVEL | 5 |
-| Data Class | WOC_LEVEL | 0.33 |
-| Data Class | WMC_HIGH_LEVEL | 31 |
-| Data Class | WMC_VERY_HIGH_LEVEL | 47 |
-| Data Clumps | CLUMP_SIZE_THRESHOLD | 2 |
-| Divergent Change | UBIQUITY_THRESHOLD | 0.70 |
-| Duplicate Code | WINDOW_SIZE | 5 |
-| Feature Envy | FOREIGN_DATA_THRESHOLD | 2 |
-| Large Class | WMC_THRESHOLD | 47 |
-| Large Class | TCC_THRESHOLD | 0.33 |
-| Lazy Class | LOW_WEIGHT_THRESHOLD | 5 |
-| Long Method | MAX_LLOC | 30 |
-| Long Method | MAX_COMPLEXITY | 15 |
-| Long Parameter List | MAX_METHOD_PARAMS | 3 |
-| Long Parameter List | MAX_CONSTRUCTOR_PARAMS | 5 |
-| Message Chains | CHAIN_THRESHOLD | 3 |
-| Middle Man | DELEGATION_THRESHOLD | 0.5 |
-| Middle Man | FAN_OUT_THRESHOLD | 0 |
-| Parallel Inheritance Hierarchies | MIN_SUBCLASSES | 2 |
-| Parallel Inheritance Hierarchies | PARALLEL_LINK_THRESHOLD | 2 |
-| Primitive Obsession | VALIDATION_DISTRIBUTION_THRESHOLD | 2 |
-| Primitive Obsession | MAX_PRIMITIVE_FIELDS | 3 |
-| Primitive Obsession | COHESION_CANDIDATE_FIELDS | 3 |
-| Primitive Obsession | MAX_DISJOINT_RATIO | 0.5 |
-| Shotgun Surgery | THRESHOLD_CM | 2 |
-| Shotgun Surgery | THRESHOLD_CC | 2 |
-| Shotgun Surgery | THRESHOLD_FAN_OUT | 0 |
-| Switch Statements | MAX_SWITCH_CASES | 2 |
-| Switch Statements | MAX_IF_CHAIN_LENGTH | 2 |
+| Code Smell | Threshold Name | Default Value | Definition |
+| :--- | :--- |:--------------| :--- |
+| Alternative Classes with Different Interfaces | SIMILARITY_THRESHOLD | 0.75          | Total similarity threshold for class volume, fields, and methods |
+| Alternative Classes with Different Interfaces | WEIGHT_FIELDS | 0.20          | Weight assigned to the field similarity score |
+| Alternative Classes with Different Interfaces | WEIGHT_VOLUME | 0.10          | Weight assigned to the volume similarity score |
+| Alternative Classes with Different Interfaces | WEIGHT_METHODS | 0.70          | Weight assigned to the method similarity score |
+| Comments | WORD_COUNT_TRESHOLD_BELOW_MIN | 3             | Minimum word count below which a comment is considered a ghost comment |
+| Comments | WORD_COUNT_ABOVE_MAX | 5             | Maximum word count above which a comment is considered a novel comment |
+| Comments | COMMENT_TO_LLOC_RATIO | 0.3           | Maximum allowed ratio of comment lines to logical lines of code |
+| Data Class | ACCESSOR_OR_FIELD_FEW_LEVEL | 3             | Threshold for a small number of public fields or accessors |
+| Data Class | ACCESSOR_OR_FIELD_MANY_LEVEL | 5             | Threshold for a large number of public fields or accessors |
+| Data Class | WOC_LEVEL | 0.33          | Maximum weight of class (ratio of functional to total public methods) |
+| Data Class | WMC_HIGH_LEVEL | 31            | Maximum weighted method count for a class with few fields |
+| Data Class | WMC_VERY_HIGH_LEVEL | 47            | Maximum weighted method count for a class with many fields |
+| Data Clumps | CLUMP_SIZE_THRESHOLD | 2             | Minimum number of identical parameters or arguments forming a clump |
+| Divergent Change | UBIQUITY_THRESHOLD | 0.70          | Threshold above which a field is considered a ubiquitous utility/glue field |
+| Duplicate Code | WINDOW_SIZE | 5             | Minimum number of consecutive statements to be considered duplicate code |
+| Feature Envy | FOREIGN_DATA_THRESHOLD | 2             | Minimum number of accesses to a single foreign class's data |
+| Large Class | WMC_THRESHOLD | 47            | Maximum weighted method count before a class is considered too large |
+| Large Class | TCC_THRESHOLD | 0.33          | Minimum tight class cohesion below which the class is considered a large class |
+| Lazy Class | LOW_WEIGHT_THRESHOLD | 5             | Maximum weight (fields and methods) below which a class is considered lazy |
+| Long Method | MAX_LLOC | 30            | Maximum allowed logical lines of code for a single method |
+| Long Method | MAX_COMPLEXITY | 15            | Maximum allowed cyclomatic complexity for a single method |
+| Long Parameter List | MAX_METHOD_PARAMS | 3             | Maximum allowed parameters for a method |
+| Long Parameter List | MAX_CONSTRUCTOR_PARAMS | 5             | Maximum allowed parameters for a constructor |
+| Message Chains | CHAIN_THRESHOLD | 3             | Minimum depth of continuous method calls to be considered a message chain |
+| Middle Man | DELEGATION_THRESHOLD | 0.5           | Minimum ratio of delegating methods to total methods in the class |
+| Middle Man | FAN_OUT_THRESHOLD | 0             | Minimum number of unique external classes called by the delegating methods |
+| Parallel Inheritance Hierarchies | MIN_SUBCLASSES | 2             | Minimum number of subclasses required in each hierarchy |
+| Parallel Inheritance Hierarchies | PARALLEL_LINK_THRESHOLD | 2             | Minimum number of parallel links between the two hierarchies |
+| Primitive Obsession | VALIDATION_DISTRIBUTION_THRESHOLD | 1             | Minimum number of methods sharing validation logic for a primitive field |
+| Primitive Obsession | MAX_PRIMITIVE_FIELDS | 3             | Maximum allowed primitive fields in a class before considered an obsession |
+| Primitive Obsession | COHESION_CANDIDATE_FIELDS | 3             | Minimum number of primitive fields required to analyze semantic cohesion |
+| Primitive Obsession | MAX_DISJOINT_RATIO | 0.5           | Maximum allowed ratio of method pairs that do not share any primitive fields |
+| Shotgun Surgery | THRESHOLD_CM | 2             | Minimum number of changing methods that call the target method |
+| Shotgun Surgery | THRESHOLD_CC | 2             | Minimum number of changing classes that call the target method |
+| Shotgun Surgery | THRESHOLD_FAN_OUT | 0             | Minimum fan-out (number of unique external methods called) |
+| Switch Statements | MAX_SWITCH_CASES | 2             | Maximum allowed cases in a single switch statement |
+| Switch Statements | MAX_IF_CHAIN_LENGTH | 2             | Maximum allowed branches in a single if-else chain |
 
 ### Report Generation
 
