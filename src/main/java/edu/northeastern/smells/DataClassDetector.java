@@ -29,7 +29,7 @@ public class DataClassDetector extends AbstractDetector {
     private final int WMC_VERY_HIGH_LEVEL;
 
     // --- STRICT MODE FLAG ---
-    private boolean strictMode = false;
+    private boolean strictMode = true;
 
     public DataClassDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
@@ -53,9 +53,31 @@ public class DataClassDetector extends AbstractDetector {
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
 
-        if (type.isInterface() || type.isEnum()) {
+        if (type.isInterface() || type.isEnum() || type.getModifiers().contains(spoon.reflect.declaration.ModifierKind.ABSTRACT)) {
             return detectedLines;
         }
+//
+//        if(type.getActualClass().isRecord()) {
+//            return detectedLines;
+//        }
+
+        // --- IGNORE CLASSES WITH ONLY PRIVATE CONSTRUCTORS (e.g. Utility Classes) ---
+        List<spoon.reflect.declaration.CtConstructor<?>> constructors = type.getElements(new spoon.reflect.visitor.filter.TypeFilter<>(spoon.reflect.declaration.CtConstructor.class));
+        if (!constructors.isEmpty()) {
+            boolean allPrivateConstructors = true;
+            for (spoon.reflect.declaration.CtConstructor<?> ctor : constructors) {
+                if (!ctor.isPrivate()) {
+                    allPrivateConstructors = false;
+                    break;
+                }
+            }
+            if (allPrivateConstructors) {
+                return detectedLines;
+            }
+        }
+
+        // if a class has only public fields and no getters and setters and no methods
+        // if a class only has private/public fields and only getters and setters
 
         // --- ENHANCED STRICT MODE LOGIC ---
         if (strictMode) {
@@ -63,7 +85,8 @@ public class DataClassDetector extends AbstractDetector {
             List<CtMethod<?>> methods = new ArrayList<>(type.getMethods());
 
             // If a class has no methods but has fields, it is essentially a pure C-style struct (Data Class)
-            if (methods.isEmpty() && !type.getFields().isEmpty()) {
+            long nonStaticFieldCount = type.getFields().stream().filter(f -> !f.isStatic()).count();
+            if (methods.isEmpty() && nonStaticFieldCount > 0) {
                 if (type.getPosition().isValidPosition()) detectedLines.add(type.getPosition().getLine());
                 return detectedLines;
             }
