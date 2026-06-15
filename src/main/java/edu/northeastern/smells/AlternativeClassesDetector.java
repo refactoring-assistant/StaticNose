@@ -70,6 +70,21 @@ public class AlternativeClassesDetector extends AbstractDetector {
                     }
                 }
 
+                // --- NEW LOGIC: Prevent punishing polymorphism ---
+                // If they share a common interface or superclass, they are explicitly designed
+                // to be polymorphic. Therefore, they are NOT "Alternative Classes with DIFFERENT Interfaces"
+                boolean shareSuperType = false;
+                for (String sType : classA.superTypes) {
+                    if (classB.superTypes.contains(sType) && !sType.equals("java.lang.Object")) {
+                        shareSuperType = true;
+                        break;
+                    }
+                }
+
+                if (shareSuperType) {
+                    continue; 
+                }
+
                 double similarityScore = calculateClassSimilarity(classA, classB);
 
                 if (similarityScore >= SIMILARITY_THRESHOLD) {
@@ -269,6 +284,13 @@ public class AlternativeClassesDetector extends AbstractDetector {
         profile.filePath = ctClass.getPosition().getFile().getPath();
         profile.lineNumber = ctClass.getPosition().getLine();
 
+        if (ctClass.getSuperclass() != null) {
+            profile.superTypes.add(ctClass.getSuperclass().getQualifiedName());
+        }
+        for (spoon.reflect.reference.CtTypeReference<?> ref : ctClass.getSuperInterfaces()) {
+            profile.superTypes.add(ref.getQualifiedName());
+        }
+
         for (CtField<?> field : ctClass.getFields()) {
             if (field.isStatic()) continue;
             if (field.getType() != null) profile.fieldTypes.add(field.getType().getQualifiedName());
@@ -282,7 +304,7 @@ public class AlternativeClassesDetector extends AbstractDetector {
 
             method.getParameters().forEach(p -> {
                 String typeName = p.getType().getQualifiedName();
-                if (!typeName.startsWith("java.")) {
+                if (isProjectClass(typeName)) {
                     mp.signatureTokens.add("CustomObject"); // Mask it!
                 } else {
                     mp.signatureTokens.add(typeName);
@@ -327,6 +349,7 @@ public class AlternativeClassesDetector extends AbstractDetector {
         int lineNumber;
         final List<String> fieldTypes = new ArrayList<>();
         final List<MethodProfile> methods = new ArrayList<>();
+        final Set<String> superTypes = new HashSet<>();
     }
 
     /**
