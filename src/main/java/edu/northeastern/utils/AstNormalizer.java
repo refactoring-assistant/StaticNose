@@ -1,6 +1,7 @@
 package edu.northeastern.utils;
 
 import spoon.reflect.code.*;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.visitor.CtScanner;
 
 /**
@@ -17,10 +18,20 @@ public class AstNormalizer {
      * @return the normalized String
      */
     public static String generateSkeleton(CtStatement stmt) {
-        String prefix = stmt.getClass().getSimpleName().replace("Impl", "") + ":";
+        return generateSkeleton(stmt, false);
+    }
 
-        SkeletonVisitor visitor = new SkeletonVisitor();
-        visitor.scan(stmt);
+    /**
+     * Returns the string that is normalized AST code for any element, optionally including arguments
+     * @param element code that needs to be normalized
+     * @param includeArguments whether to include method arguments
+     * @return the normalized String
+     */
+    public static String generateSkeleton(CtElement element, boolean includeArguments) {
+        String prefix = element.getClass().getSimpleName().replace("Impl", "") + ":";
+
+        SkeletonVisitor visitor = new SkeletonVisitor(includeArguments);
+        visitor.scan(element);
         return prefix + visitor.getSkeleton();
     }
 
@@ -31,6 +42,15 @@ public class AstNormalizer {
      */
     private static class SkeletonVisitor extends CtScanner {
         private final StringBuilder sb = new StringBuilder();
+        private final boolean includeArguments;
+
+        public SkeletonVisitor() {
+            this.includeArguments = false;
+        }
+
+        public SkeletonVisitor(boolean includeArguments) {
+            this.includeArguments = includeArguments;
+        }
 
         public String getSkeleton() { return sb.toString(); }
 
@@ -50,6 +70,13 @@ public class AstNormalizer {
         @Override public <T> void visitCtInvocation(CtInvocation<T> inv) {
             if (inv.getExecutable() != null) {
                 sb.append("CALL(").append(inv.getExecutable().getSimpleName()).append(")");
+            }
+            if (includeArguments) {
+                sb.append("[");
+                for (CtExpression<?> arg : inv.getArguments()) {
+                    scan(arg);
+                }
+                sb.append("]");
             }
         }
     }
