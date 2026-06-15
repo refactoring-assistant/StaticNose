@@ -114,7 +114,7 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
                     if (targetExec != null && targetExec.getDeclaringType() != null) {
                         String targetClass = targetExec.getDeclaringType().getQualifiedName();
 
-                        if (!targetClass.startsWith("java.") && !targetClass.equals(currentClassName)) {
+                        if (isProjectClass(targetClass) && !targetClass.equals(currentClassName)) {
 
                             // FIX 2: Make the target method signature truly unique
                             String targetMethodSig = targetClass + "#" + targetExec.getSignature();
@@ -150,7 +150,7 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
         for (CtInvocation<?> inv : invocations) {
             if (inv.getExecutable() != null && inv.getExecutable().getDeclaringType() != null) {
                 String targetClass = inv.getExecutable().getDeclaringType().getQualifiedName();
-                if (!targetClass.startsWith("java.") && !targetClass.equals(currentClassName)) {
+                if (isProjectClass(targetClass) && !targetClass.equals(currentClassName)) {
                     // FIX 3: Fully qualify the fan-out set to prevent deduplication
                     uniqueCalled.add(targetClass + "#" + inv.getExecutable().getSignature());
                 }

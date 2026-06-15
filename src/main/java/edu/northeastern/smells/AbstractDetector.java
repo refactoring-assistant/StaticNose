@@ -7,12 +7,16 @@ import spoon.reflect.declaration.CtType;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import spoon.reflect.visitor.filter.TypeFilter;
 
 public abstract class AbstractDetector implements IDetector{
 
     protected final List<String> javaFilePaths;
     protected final String inputDirPath;
+    protected Set<String> projectClassNames = null;
 
     public AbstractDetector(List<String> javaFilePaths, String inputDirPath) {
         this.javaFilePaths = javaFilePaths;
@@ -42,6 +46,12 @@ public abstract class AbstractDetector implements IDetector{
         }
 
         CtModel model = launcher.getModel();
+        
+        projectClassNames = new HashSet<>();
+        for (CtType<?> t : model.getElements(new TypeFilter<>(CtType.class))) {
+            projectClassNames.add(t.getQualifiedName());
+        }
+
         List<ReportStruct> reportStructList = new ArrayList<>();
 
         for(CtType<?> type : model.getAllTypes()) {
@@ -78,4 +88,8 @@ public abstract class AbstractDetector implements IDetector{
 
     protected abstract List<Integer> analyzeType(CtType<?> type);
 
+    protected boolean isProjectClass(String qualifiedName) {
+        if (qualifiedName == null || projectClassNames == null) return false;
+        return projectClassNames.contains(qualifiedName);
+    }
 }

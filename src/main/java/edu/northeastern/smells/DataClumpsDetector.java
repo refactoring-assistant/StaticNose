@@ -163,10 +163,10 @@ public class DataClumpsDetector extends AbstractDetector {
         for (CtInvocation<?> inv : invocations) {
             if (inv.getArguments().size() >= CLUMP_SIZE_THRESHOLD) {
 
-                // IGNORE: Java Standard Library calls (String.format, etc)
+                // IGNORE: Non-project library calls (String.format, etc)
                 if (inv.getExecutable().getDeclaringType() != null) {
                     String declaringType = inv.getExecutable().getDeclaringType().getQualifiedName();
-                    if (declaringType.startsWith("java.") || declaringType.startsWith("javax.")) {
+                    if (!isProjectClass(declaringType)) {
                         continue;
                     }
                 }
