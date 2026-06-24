@@ -1,11 +1,11 @@
 File Name,Expected Code Smells
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarModel.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/EventSeries.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CommandParser.java,['Long Method']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarModelImpl.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarModel.java,"['Data Clumps', 'Long Parameter List']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/EventSeries.java,"['Data Class', 'Primitive Obsession']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CommandParser.java,"['Long Method', 'Data Clumps', 'Divergent Change', 'Large Class', 'Long Parameter List', 'Switch Statements']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarModelImpl.java,"['Data Clumps', 'Divergent Change', 'Feature Envy', 'Large Class', 'Long Method', 'Long Parameter List', 'Message Chains', 'Switch Statements']"
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarController.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarView.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/DummyCalendar.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/Event.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarViewImpl.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/CalendarRunner.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/DummyCalendar.java,['Lazy Class']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/Event.java,"['Data Class', 'Primitive Obsession', 'Shotgun Surgery']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/calendar/CalendarViewImpl.java,['Message Chains']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group11/main/java/CalendarRunner.java,"['Long Method', 'Switch Statements']"

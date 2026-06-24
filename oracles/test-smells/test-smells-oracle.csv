@@ -1,18 +1,18 @@
 File Name,Expected Code Smells
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case1/CGE1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case1/CBE1.java,['Comments']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case6/CGE6.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case1/CGE1.java,['Divergent Change']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case1/CBE1.java,"['Comments', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case6/CGE6.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case6/CBE6.java,['Comments']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case8/CBE8.java,"['Comments', 'Long Method', 'Data Clumps', 'Feature Envy']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case8/CGE8.java,"['Data Class', 'Feature Envy']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case8/CBE8.java,"['Comments', 'Long Method', 'Data Clumps', 'Feature Envy', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case8/CGE8.java,"['Data Class', 'Feature Envy', 'Data Clumps', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case7/CGE7.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case7/CBE7.java,['Comments']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case5/CBE5.java,['Comments']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case5/CGE5.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case5/CGE5.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case2/CBE2.java,['Comments']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case2/CGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case3/CBE3.java,['Comments']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case4/CBE4.java,"['Comments', 'Feature Envy']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case4/CBE4.java,"['Comments', 'Feature Envy', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/comments/case4/CGE4.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/tempfield/case2bad/TFBE2.java,"['Temporary Field', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/tempfield/case2good/TFGE2.java,['Divergent Change']
@@ -20,8 +20,8 @@ File Name,Expected Code Smells
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/tempfield/case3bad/TFBE3.java,"['Temporary Field', 'Long Method']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/tempfield/case1good/TFGE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/tempfield/case1bad/TFBE1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case1/LZCBE1.java,['Lazy Class']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case1/LZCGE1.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case1/LZCBE1.java,"['Lazy Class', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case1/LZCGE1.java,['Divergent Change;]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case5/LZCGE5.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case5/LZCBE5.java,['Lazy Class']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case2/LZCGE2.java,[]
@@ -33,64 +33,64 @@ File Name,Expected Code Smells
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case4good/RBGE4.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case2good/RBGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case3good/RBGE3.java,"['Long Parameter List', 'Divergent Change']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case3bad/RBBE3.java,"['Refused Bequest', 'Long Parameter List']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case1good/RBGE1.java,"['Temporary Field', 'Middle Man']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case3bad/RBBE3.java,"['Refused Bequest', 'Long Parameter List', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case1good/RBGE1.java,"['Temporary Field', 'Middle Man', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case4bad/RBBE4.java,['Refused Bequest']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case1bad/RBBE1.java,"['Refused Bequest', 'Temporary Field']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/refusedbequest/case1bad/RBBE1.java,"['Refused Bequest', 'Temporary Field', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/shotgun/case2bad/SSBE2.java,['Shotgun Surgery']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/shotgun/case2good/SSGE2.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/shotgun/case3good/SSGE3.java,"['Primitive Obsession', 'Data Clumps']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/shotgun/case3good/SSGE3.java,"['Primitive Obsession', 'Data Clumps', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/shotgun/case3bad/SSBE3.java,"['Shotgun Surgery', 'Feature Envy', 'Primitive Obsession', 'Divergent Change', 'Data Clumps']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/shotgun/case1good/SSGE1.java,"['Switch Statements', 'Middle Man', 'Alternative Classes with Different Interfaces']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/shotgun/case1bad/SSBE1.java,"['Shotgun Surgery', 'Switch Statements', 'Alternative Classes with Different Interfaces']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/featureenvy/case3bad/FEBE3.java,['Feature Envy']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/featureenvy/case1/FEGE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/featureenvy/case1/FEBE1.java,"['Feature Envy', 'Data Class']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/featureenvy/case2/FEBE2.java,"['Feature Envy', 'Long Method']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/featureenvy/case2/FEBE2.java,"['Feature Envy', 'Long Method', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/featureenvy/case2/FEGE2.java,['Long Method']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/featureenvy/case3/FEGE3.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case1/LCBE1.java,"['Large Class', 'Long Parameter List']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case1/LCBE1.java,"['Large Class', 'Long Parameter List', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case1/LCGE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case2/LCGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case2/LCBE2.java,['Large Class']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case3/LCGE3.java,"['Primitive Obsession', 'Long Parameter List']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case3/LCGE3.java,"['Primitive Obsession', 'Long Parameter List', 'Refused Bequest']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case3/LCBE3.java,"['Large Class', 'Primitive Obsession', 'Long Parameter List', 'Temporary Field']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case4/LCGE4.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case4/LCBE4.java,['Large Class']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/largeclass/case4/LCBE4.java,"['Large Class', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/intimacy/case1/IIGE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/intimacy/case1/IIBE1.java,['Inappropriate Intimacy']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/intimacy/case2/IIBE2.java,['Inappropriate Intimacy']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/intimacy/case2/IIGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/intimacy/case3/IIBE3.java,"['Inappropriate Intimacy', 'Feature Envy']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/intimacy/case3/IIGE3.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/middleman/case2bad/MMBE2.java,"['Middle Man', 'Feature Envy']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/middleman/case2good/MMGE2.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/middleman/case2bad/MMBE2.java,"['Middle Man', 'Feature Envy', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/middleman/case2good/MMGE2.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/middleman/case1good/MMGE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/middleman/case3ignore/MMIE1.java,['Middle Man']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/middleman/case1bad/MMBE1.java,['Middle Man']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case2bad/SGBE2.java,"['Speculative Generality', 'Switch Statements', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case2bad/SGBE2.java,"['Switch Statements', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case2good/SGGE2.java,"['Switch Statements', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case3good/SGGE3.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case3bad/SGBE3.java,"['Speculative Generality, 'Refused Bequest', 'Comments']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case1good/SGGE1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case1bad/SGBE1.java,['Speculative Generality']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case3bad/SGBE3.java,"['Refused Bequest', 'Comments']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case1good/SGGE1.java,['Divergent Change']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/specgen/case1bad/SGBE1.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case1/DCGE1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case1/DCBE1.java,"['Data Clumps', 'Long Parameter List', 'Large Class', 'Primitive Obsession', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case1/DCBE1.java,"['Data Clumps', 'Long Parameter List', 'Large Class', 'Primitive Obsession', 'Divergent Change', 'Large Class']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case5/DCBE5.java,"['Data Clumps', 'Long Parameter List', 'Divergent Change']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case5/DCGE5.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case5/DCGE5.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case2/DCBE2.java,['Data Clumps']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case2/DCGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case3/DCBE3.java,['Data Clumps']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case4/DCBE4.java,"['Data Clumps', 'Primitive Obsession', 'Long Parameter List', 'Temporary Field', 'Feature Envy']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case4/DCGE4.java,"['Primitive Obsession', 'Feature Envy', 'Long Parameter List', 'Feature Envy']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case1/LMGE1.java,"['Data Class', 'Data Clumps']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case1/LMBE1.java,"['Long Method', 'Switch Statements', 'Data Class']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclumps/case4/DCGE4.java,"['Primitive Obsession', 'Feature Envy', 'Long Parameter List', 'Feature Envy', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case1/LMGE1.java,"['Data Clumps', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case1/LMBE1.java,"['Long Method', 'Switch Statements']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case2/LMBE2.java,['Long Method']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case2/LMGE2.java,['Data Clumps']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case2/LMGE2.java,"['Data Clumps', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case3/LMBE3.java,"['Long Method', 'Primitive Obsession']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case3/LMGE3.java,['Primitive Obsession']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case3/LMGE3.java,"['Primitive Obsession', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case4/LMBE4.java,"['Long Method', 'Temporary Field', 'Feature Envy']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case4/LMGE4.java,"['Temporary Field, 'Feature Envy']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longmethod/case4/LMGE4.java,"['Temporary Field, 'Feature Envy', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/parallelhierarchy/case2bad/PIHBE2.java,['Parallel Inheritance Hierarchies']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/parallelhierarchy/case2good/PIHGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/parallelhierarchy/case3good/PIHGE3.java,[]
@@ -101,21 +101,21 @@ File Name,Expected Code Smells
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case4good/SWSGE4.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case2good/SWSGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case3good/SWSGE3.java,['Feature Envy']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case3bad/SWSBE3.java,"['Switch Statements', 'Primitive Obsession', 'Long Method', 'Feature Envy']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case3bad/SWSBE3.java,"['Switch Statements', 'Long Method', 'Feature Envy']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case1good/SWSGE1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case4bad/SWSBE4.java,"['Switch Statements', 'Long Method']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case4bad/SWSBE4.java,"['Switch Statements', 'Long Method', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/switchstmts/case1bad/SWSBE1.java,['Switch Statements']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/deadcode/case1/DEDCGE1.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/deadcode/case1/DEDCGE1.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/deadcode/case1/DEDCBE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/deadcode/case2/DEDCBE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/deadcode/case2/DEDCGE2.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/deadcode/case3/DEDCBE3.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/deadcode/case3/DEDCBE3.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/deadcode/case3/DEDCGE3.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/altclasses/case2bad/ACDIBE2.java,"['Long Method', 'Alternative Classes with Different Interfaces', 'Primitive Obsession', 'Shotgun Surgery', 'Feature Envy']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/altclasses/case2bad/ACDIBE2.java,"['Long Method', 'Alternative Classes with Different Interfaces', 'Primitive Obsession', 'Shotgun Surgery', 'Feature Envy', 'Large Class']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/altclasses/case3bad/ACDIBE3.java,"['Alternative Classes with Different Interfaces', 'Primitive Obsession']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/altclasses/case1/ACDIGE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/altclasses/case1/ACDIBE1.java,['Alternative Classes with Different Interfaces']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/altclasses/case2/ACDIGE2.java,"['Long Method', 'Primitive Obsession']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/altclasses/case2/ACDIGE2.java,['Long Method']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/altclasses/case3/ACDIGE3.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/divergentchange/case1/DVCHGE1.java,['Switch Statements']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/divergentchange/case1/DVCHBE1.java,"['Divergent Change', 'Switch Statements']"
@@ -133,31 +133,31 @@ File Name,Expected Code Smells
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longparams/case2/LPLGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longparams/case3/LPLBE3.java,['Long Parameter List']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longparams/case3/LPLGE3.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longparams/case4/LPLBE4.java,"['Long Parameter List', 'Switch Statements']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longparams/case4/LPLGE4.java,['Switch Statements']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longparams/case4/LPLBE4.java,"['Long Parameter List', 'Switch Statements', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/longparams/case4/LPLGE4.java,"['Switch Statements', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclass/case1/DCLSGE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclass/case1/DCLSBE1.java,['Data Class']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclass/case2/DCLSBE2.java,"['Data Class', 'Feature Envy']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclass/case2/DCLSGE2.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclass/case3/DCLSBE3.java,"['Data Class', 'Inappropriate Intimacy', 'Feature Envy']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclass/case3/DCLSGE3.java,['Feature Envy']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclass/case3/DCLSBE3.java,"['Data Class', 'Inappropriate Intimacy', 'Feature Envy', 'Divergent Change']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dataclass/case3/DCLSGE3.java,"['Feature Envy', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case3bad/DUPCBE3.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case1/DUPCBE1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case1/DUPCGE1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case2/DUPCGE2.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case2/DUPCBE2.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case1/DUPCBE1.java,['Divergent Change']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case1/DUPCGE1.java,['Divergent Change']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case2/DUPCGE2.java,['Divergent Change']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case2/DUPCBE2.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/dupcode/case3/DUPCGE3.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case2bad/POBE2.java,"['Primitive Obsession', 'Switch Statements']"
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case2bad/POBE2.java,"['Primitive Obsession', 'Switch Statements', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case4good/POGE4.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case2good/POGE2.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case3good/POGE3.java,['Primitive Obsession']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case3bad/POBE3.java,['Primitive Obsession']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case1good/POGE1.java,"['Data Class', 'Feature Envy']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case4bad/POBE4.java,['Primitive Obsession']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case1bad/POBE1.java,['Primitive Obsession']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case1bad/POBE1.java,"['Primitive Obsession', 'Large Class', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/primobsession/case5bad/POBE5.java,['Primitive Obsession']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/messagechains/case2bad/MCBE2.java,['Message Chains']
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/messagechains/case2good/MCGE2.java,['Data Clumps']
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/messagechains/case2good/MCGE2.java,"['Data Clumps', 'Divergent Change']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/messagechains/case3good/MCGE3.java,['Primitive Obsession']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/messagechains/case3bad/MCBE3.java,"['Message Chains', 'Primitive Obsession']"
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/messagechains/case1good/MCGE1.java,[]

@@ -14,14 +14,14 @@ File Name,Expected Code Smells
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/controller/commands/create/CreateOnRepeatsForCommand.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/controller/commands/create/CreateOnCommand.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/controller/commands/Icommands.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/controller/commands/CommandUtils.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/controller/commands/CommandFactory.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/controller/commands/CommandUtils.java,['Shotgun Surgery']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/controller/commands/CommandFactory.java,['Comments']
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/controller/Icontroller.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/model/EventStatus.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/model/EventInterface.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/model/CalendarModelImpl.java,"['Primitive Obsession', 'Long Method', 'Large Class']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/model/CalendarInterface.java,['Long Parameter List']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/model/Event.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/model/CalendarModelImpl.java,"['Primitive Obsession', 'Long Method', 'Large Class', 'Data Clumps', 'Divergent Change', 'Long Parameter List', 'Message Chains']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/model/CalendarInterface.java,"['Long Parameter List', 'Data Clumps']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/model/Event.java,"['Long Parameter List', 'Primitive Obsession']"
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/view/IviewImpl.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/calendar/view/Iview.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/CalendarRunner.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group16/main/java/CalendarRunner.java,"['Comments', 'Long Method']"

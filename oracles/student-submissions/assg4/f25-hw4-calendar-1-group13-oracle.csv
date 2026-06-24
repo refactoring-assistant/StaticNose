@@ -1,10 +1,10 @@
 File Name,Expected Code Smells
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/EventSeries.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/Calendar.java,['Primitive Obsession']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/Icalender.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/Event.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/EventSeries.java,"['Data Clumps', 'Long Method', 'Long Parameter List', 'Primitive Obsession', 'Switch Statements']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/Calendar.java,"['Primitive Obsession', 'Data Clumps', 'Divergent Change', 'Feature Envy', 'Large Class', 'Long Parameter List']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/Icalender.java,"['Data Clumps', 'Long Parameter List']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/Event.java,"['Long Method', 'Switch Statements']"
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/IcalendarController.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/IcalenderView.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/CalenderController.java,"['Long Parameter List', 'Switch Statements', 'Large Class']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/CalenderController.java,"['Long Parameter List', 'Switch Statements', 'Large Class', 'Data Clumps', 'Divergent Change', 'Long Method']"
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/calendar/CalenderView.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/CalendarRunner.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group13/main/java/CalendarRunner.java,['Comments']

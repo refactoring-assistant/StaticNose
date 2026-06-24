@@ -6,8 +6,8 @@ File Name,Expected Code Smells
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/parser/PrintCommandParser.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/parser/ExportCommandParser.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/parser/AbstractParser.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/parser/CreateCommandParser.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/parser/EditCommandParser.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/parser/CreateCommandParser.java,['Switch Statements']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/parser/EditCommandParser.java,"['Data Clumps', 'Switch Statements]"
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/parser/ShowStatusCommandParser.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/Controller.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/CreateSeriesWithRepetitionCommand.java,[]
@@ -16,20 +16,20 @@ File Name,Expected Code Smells
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/ExportCommand.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/CreateSeriesUntilCommand.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/EditScope.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/EditCommand.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/EditCommand.java,"['Data Clumps', 'Switch Statements']"
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/EditProperty.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/ShowStatus.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/commands/PrintCommand.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/controller/ControllerV1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/ModelV1.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/EventV1.java,['Long Parameter List']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/ModelV1.java,"['Comments', 'Divergent Change', 'Large Class', 'Long Method', 'Long Parameter List', 'Message Chains', 'Switch Statements']"
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/EventV1.java,"['Long Parameter List', 'Large Class', 'Long Parameter List', 'Primitive Obsession']"
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/InMemRepository.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/Status.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/util/SeriesDatesGenerator.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/Status.java,['Switch Statements']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/util/SeriesDatesGenerator.java,"['Long Method', 'Long Parameter List']"
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/Event.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/Repository.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/Location.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/Model.java,[]
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/Location.java,['Switch Statements']
+/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/model/Model.java,['Data Clumps']
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/view/AppendableView.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/calendar/view/View.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group5/main/java/CalendarRunner.java,[]
