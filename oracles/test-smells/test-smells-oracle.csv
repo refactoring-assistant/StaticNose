@@ -21,7 +21,7 @@ File Name,Expected Code Smells
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/tempfield/case1good/TFGE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/tempfield/case1bad/TFBE1.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case1/LZCBE1.java,"['Lazy Class', 'Divergent Change']"
-/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case1/LZCGE1.java,['Divergent Change;]
+/Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case1/LZCGE1.java,['Divergent Change']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case5/LZCGE5.java,[]
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case5/LZCBE5.java,['Lazy Class']
 /Users/yashburshe/Developer/StaticNose/datasets/test-smells/main/java/lazyclass/case2/LZCGE2.java,[]
