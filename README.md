@@ -104,7 +104,6 @@ Here are the available thresholds and their default values:
 | Data Class | WMC_HIGH_LEVEL | 31            | Maximum weighted method count for a class with few fields |
 | Data Class | WMC_VERY_HIGH_LEVEL | 47            | Maximum weighted method count for a class with many fields |
 | Data Clumps | CLUMP_SIZE_THRESHOLD | 2             | Minimum number of identical parameters or arguments forming a clump |
-| Divergent Change | UBIQUITY_THRESHOLD | 0.70          | Threshold above which a field is considered a ubiquitous utility/glue field |
 | Duplicate Code | WINDOW_SIZE | 5             | Minimum number of consecutive statements to be considered duplicate code |
 | Feature Envy | FOREIGN_DATA_THRESHOLD | 2             | Minimum number of accesses to a single foreign class's data |
 | Large Class | WMC_THRESHOLD | 47            | Maximum weighted method count before a class is considered too large |
