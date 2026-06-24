@@ -60,6 +60,7 @@ class ImageBufferVariation {
         } else {
             throw new IllegalArgumentException("Coordinates out of bounds");
         }
+        return pixels[x][y];
     }
 
     /**
