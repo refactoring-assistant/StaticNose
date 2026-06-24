@@ -12,8 +12,6 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
     private final int VALIDATION_DISTRIBUTION_THRESHOLD;
     private final int MAX_PRIMITIVE_FIELDS;
     private final int COHESION_CANDIDATE_FIELDS;
-
-    // If more than 50% of method pairs share ZERO primitive fields, the class is highly separable.
     private final double MAX_DISJOINT_RATIO;
 
     public PrimitiveObsessionDetector(List<String> javaFilePaths, String inputDirPath) {
@@ -33,31 +31,29 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
     protected List<Integer> analyzeType(CtType<?> topLevelType) {
         Set<Integer> detectedLines = new HashSet<>();
 
-        // THE FIX: Grab the top-level class AND all nested classes (like LeaseRecord)
         List<CtType<?>> allTypesToAnalyze = topLevelType.getElements(new TypeFilter<>(CtType.class));
 
-        // Loop through every class found in the file
         for (CtType<?> type : allTypesToAnalyze) {
 
             List<CtField<?>> candidateFields = new ArrayList<>();
             for (CtField<?> field : type.getFields()) {
+                if (field.isStatic()) {
+                    continue;
+                }
+
                 if (isPrimitiveOrString(field.getType())) {
                     candidateFields.add(field);
                 }
             }
 
-            // If this specific inner/outer class has no primitives, skip to the next one
             if (candidateFields.isEmpty()) continue;
 
-            // 1. Traditional Volume Check (Data Clumps)
-            // (Using your updated >= 3 threshold)
             if (candidateFields.size() >= MAX_PRIMITIVE_FIELDS) {
                 if (type.getPosition().isValidPosition()) {
                     detectedLines.add(type.getPosition().getLine());
                 }
             }
 
-            // 2. Leaking Validation Check (Behavioral)
             for (CtField<?> field : candidateFields) {
                 if (isFieldValidationLeaking(field, type)) {
                     if (field.getPosition().isValidPosition()) {
@@ -66,7 +62,6 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
                 }
             }
 
-            // 3. Semantic Cohesion Analysis
             checkPrimitiveCohesion(type, candidateFields, detectedLines);
 
             if (isArrayUsedAsStruct(type)) {
@@ -84,12 +79,10 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
      * accessed across all methods to determine if the class contains separable concepts.
      */
     private void checkPrimitiveCohesion(CtType<?> type, List<CtField<?>> candidateFields, Set<Integer> detectedLines) {
-        // We need at least 2 primitive fields to even consider them "separable"
         if (candidateFields.size() < COHESION_CANDIDATE_FIELDS) return;
 
         Map<CtMethod<?>, Set<CtField<?>>> methodFieldUsage = new HashMap<>();
 
-        // Step A: Map which primitive fields are used by which methods
         for (CtMethod<?> method : type.getMethods()) {
             if (method.getBody() == null) continue;
 
@@ -103,35 +96,31 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
                 }
             }
 
-            // Only track methods that actually touch primitive fields
             if (!usedPrimitives.isEmpty()) {
                 methodFieldUsage.put(method, usedPrimitives);
             }
         }
 
         List<CtMethod<?>> methods = new ArrayList<>(methodFieldUsage.keySet());
-        if (methods.size() < 2) return; // Need at least two methods to compare
+        if (methods.size() < 2) return;
 
         int disjointPairs = 0;
         int totalPairs = 0;
         double totalJaccardScore = 0.0;
 
-        // Step B: Compare every method against every other method (Bipartite Graph Analysis)
         for (int i = 0; i < methods.size(); i++) {
             for (int j = i + 1; j < methods.size(); j++) {
                 Set<CtField<?>> setA = methodFieldUsage.get(methods.get(i));
                 Set<CtField<?>> setB = methodFieldUsage.get(methods.get(j));
 
-                // Intersection: Fields used by BOTH methods
                 Set<CtField<?>> intersection = new HashSet<>(setA);
                 intersection.retainAll(setB);
 
-                // Union: Total unique fields used by EITHER method
                 Set<CtField<?>> union = new HashSet<>(setA);
                 union.addAll(setB);
 
                 if (intersection.isEmpty()) {
-                    disjointPairs++; // They touch completely different primitive data
+                    disjointPairs++;
                 }
 
                 totalJaccardScore += (double) intersection.size() / union.size();
@@ -144,13 +133,8 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
         double avgJaccardScore = totalJaccardScore / totalPairs;
         double disjointRatio = (double) disjointPairs / totalPairs;
 
-        // Step C: The Dynamic Threshold Evaluation
-        // If a class has 10 primitive fields, we expect lower cohesion naturally.
-        // Therefore, the threshold scales dynamically: 1.0 / (number of primitive fields).
         double dynamicJaccardThreshold = 1.0 / candidateFields.size();
 
-        // Flag as a smell if the cohesion is mathematically terrible, OR
-        // if more than half of the methods don't share ANY primitive data with each other.
         if (avgJaccardScore < dynamicJaccardThreshold || disjointRatio > MAX_DISJOINT_RATIO) {
             if (type.getPosition().isValidPosition()) {
                 detectedLines.add(type.getPosition().getLine());
@@ -167,8 +151,6 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
         }
         return null;
     }
-
-    // --- Existing Helper Methods Below ---
 
     private boolean isFieldValidationLeaking(CtField<?> field, CtType<?> type) {
         Set<String> validatingMethods = new HashSet<>();
@@ -240,27 +222,22 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
     private boolean isPrimitiveOrString(CtTypeReference<?> typeRef) {
         if (typeRef == null) return false;
 
-        // 1. Standard Primitives and Strings
         if (typeRef.isPrimitive() || "String".equals(typeRef.getSimpleName())) {
             return true;
         }
 
-        // 2. Unwrap Arrays (e.g., String[], int[][])
         if (typeRef.isArray()) {
-            // Cast to array reference and check what is inside the array
             spoon.reflect.reference.CtArrayTypeReference<?> arrayRef =
                     (spoon.reflect.reference.CtArrayTypeReference<?>) typeRef;
             return isPrimitiveOrString(arrayRef.getComponentType());
         }
 
-        // 3. Unwrap standard Java Collections (e.g., Set<String>, List<Integer>)
         if (typeRef.getQualifiedName().startsWith("java.util.")) {
             List<CtTypeReference<?>> generics = typeRef.getActualTypeArguments();
             if (!generics.isEmpty()) {
                 CtTypeReference<?> innerType = generics.get(0);
                 String innerName = innerType.getSimpleName();
 
-                // Check if the generic is a String or a Wrapper (Integer, Boolean, etc.)
                 return "String".equals(innerName) || innerType.unbox().isPrimitive();
             }
         }
@@ -275,19 +252,15 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
      * rather than through a dynamic loop variable.
      */
     private boolean isArrayUsedAsStruct(CtType<?> type) {
-        // Find every array access in the class (e.g., boxDimensions[0])
         List<CtArrayAccess<?, ?>> arrayAccesses = type.getElements(new TypeFilter<>(CtArrayAccess.class));
 
-        // Keep track of which hardcoded indices are used for each field
         Map<String, Set<Integer>> fieldToIndices = new HashMap<>();
 
         for (CtArrayAccess<?, ?> access : arrayAccesses) {
 
-            // 1. Is the target of the array access a class field?
             if (access.getTarget() instanceof CtFieldAccess<?> fieldAccess) {
                 String fieldName = fieldAccess.getVariable().getSimpleName();
 
-                // 2. Is the index a hardcoded number? (Not a variable 'i' from a loop)
                 if (access.getIndexExpression() instanceof CtLiteral<?> literal) {
                     Object value = literal.getValue();
 
@@ -299,12 +272,9 @@ public class PrimitiveObsessionDetector extends AbstractDetector{
             }
         }
 
-        // 3. Evaluate the usage
         for (Map.Entry<String, Set<Integer>> entry : fieldToIndices.entrySet()) {
             Set<Integer> distinctHardcodedIndices = entry.getValue();
 
-            // If a single array field is accessed using 2 or more DIFFERENT hardcoded numbers
-            // across the class, it is definitively acting as a struct!
             if (distinctHardcodedIndices.size() >= 2) {
                 return true;
             }
