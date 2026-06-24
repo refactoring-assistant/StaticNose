@@ -28,15 +28,12 @@ public class MiddleManDetector extends AbstractDetector {
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
-        // fan out
 
         Set<CtTypeReference<?>> referencedTypes = type.getReferencedTypes();
         long fanOut = referencedTypes.stream()
                 .filter(ref -> !ref.isPrimitive())
                 .filter(ref -> !ref.getQualifiedName().equals(type.getQualifiedName()))
                 .count();
-
-        // single line ratio
 
         Set<CtMethod<?>> methods = type.getMethods();
 
@@ -60,11 +57,7 @@ public class MiddleManDetector extends AbstractDetector {
                     if (isInvocation(stmt, method) || isReturnInvocation(stmt, method)) {
                         hasDelegation = true;
                     } else if (stmt instanceof CtInvocation) {
-                        // It's an invocation (like System.out.println), but not a delegation.
-                        // We do not consider simple invocations to be "data processing".
                     } else if (stmt instanceof CtReturn<?> ret) {
-                        // Allow empty returns. If it returns an expression that wasn't a delegation,
-                        // it must be a simple literal or variable read to not be considered processing.
                         if (ret.getReturnedExpression() != null &&
                             !(ret.getReturnedExpression() instanceof spoon.reflect.code.CtLiteral) &&
                             !(ret.getReturnedExpression() instanceof spoon.reflect.code.CtVariableRead)) {
@@ -72,7 +65,6 @@ public class MiddleManDetector extends AbstractDetector {
                             break;
                         }
                     } else {
-                        // Any other statement (if, for, assignment, local variable declaration) IS data processing.
                         hasProcessing = true;
                         break;
                     }
@@ -117,21 +109,15 @@ public class MiddleManDetector extends AbstractDetector {
         return false;
     }
 
-    // NEW: The Surgical Delegation Target Checker
-    // Renamed helper method for clarity
     private boolean isDelegatingToField(CtInvocation<?> inv, CtMethod<?> parentMethod) {
         if (inv.getTarget() == null) return false;
 
-        // If the target is a variable
         if (inv.getTarget() instanceof spoon.reflect.code.CtVariableRead<?> read) {
             spoon.reflect.declaration.CtVariable<?> var = read.getVariable().getDeclaration();
 
             if (var == null) return false;
 
-            // ONLY flag if it is delegating to an internal Field (Classic Middle Man)
             if (var instanceof spoon.reflect.declaration.CtField<?> field) {
-                // We only care if we are delegating to ANOTHER CUSTOM CLASS.
-                // Wrapping a standard library collection (like Set or List) is a valid pattern (Encapsulate Collection).
                 if (field.getType() != null) {
                     return isProjectClass(field.getType().getQualifiedName());
                 }

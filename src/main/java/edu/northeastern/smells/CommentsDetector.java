@@ -28,7 +28,6 @@ public class CommentsDetector extends AbstractDetector{
     private final int WORD_COUNT_ABOVE_MAX;
     private final double COMMENT_TO_LLOC_RATIO;
 
-
     public CommentsDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
         WORD_COUNT_TRESHOLD_BELOW_MIN = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "WORD_COUNT_TRESHOLD_BELOW_MIN", 3);
@@ -50,29 +49,17 @@ public class CommentsDetector extends AbstractDetector{
     protected List<Integer> analyzeType(CtType<?> type) {
         Set<Integer> detectedLines = new HashSet<>();
 
-        // ==========================================
-        // 1. CLASS & FIELD LEVEL COMMENTS
-        // ==========================================
-        // Grab all comments directly attached to the class or its fields
         List<CtComment> classLevelComments = type.getElements(new TypeFilter<>(CtComment.class));
         for (CtComment comment : classLevelComments) {
 
-            // IGNORE JAVADOCS: Standard documentation is not a smell
             if (comment.getCommentType() == CtComment.CommentType.JAVADOC) {
                 continue;
             }
-
-            // Make sure we only process comments that are OUTSIDE of methods/constructors
-            // (We will handle internal comments in step 2)
             if (comment.getParent(CtExecutable.class) == null) {
                 analyzeIndividualComment(comment, detectedLines);
             }
         }
 
-        // ==========================================
-        // 2. METHOD & CONSTRUCTOR LEVEL COMMENTS
-        // ==========================================
-        // CtExecutable catches BOTH CtMethod and CtConstructor
         List<CtExecutable<?>> executables = type.getElements(new TypeFilter<>(CtExecutable.class));
 
         for(CtExecutable<?> executable : executables) {
@@ -86,12 +73,10 @@ public class CommentsDetector extends AbstractDetector{
 
             for(CtComment comment : comments) {
 
-                // IGNORE JAVADOCS INSIDE METHODS TOO
                 if(comment.getCommentType() == CtComment.CommentType.JAVADOC) {
                     continue;
                 }
 
-                // Call our extracted analysis logic
                 boolean isSmelly = analyzeIndividualComment(comment, detectedLines);
 
                 if (!isSmelly) {
@@ -101,9 +86,8 @@ public class CommentsDetector extends AbstractDetector{
                 }
             }
 
-            int LLOC = calculateLLOC(executable); // Make sure your LLOC method accepts CtExecutable!
+            int LLOC = calculateLLOC(executable);
 
-            // Density Check: If the ratio of comments to code is too high
             if(LLOC > 0) {
                 double ratio = (double) commentLineCount / LLOC;
 
@@ -131,22 +115,18 @@ public class CommentsDetector extends AbstractDetector{
         String cleanContent = commentContent.trim();
         if (cleanContent.isEmpty()) return false;
 
-        // statement ending
         if (cleanContent.endsWith(";")) {
             return true;
         }
 
-        // structural java chars.
         if (cleanContent.contains(";") && (cleanContent.contains("=") || cleanContent.contains("."))) {
             return true;
         }
 
-        // method signature or control flow
         if (cleanContent.matches(".*\\b(if|for|while|switch|catch)\\s*\\(.*")) {
             return true;
         }
 
-        // braces in code context
         if (cleanContent.contains("{") && cleanContent.contains("}")) {
             return true;
         }
@@ -163,7 +143,7 @@ public class CommentsDetector extends AbstractDetector{
         String upperContent = content.toUpperCase();
 
         if (upperContent.startsWith("TODO") || upperContent.startsWith("FIXME")) {
-            return false; // Not a smell, just technical debt marker
+            return false;
         }
 
         if (isCommentedOutCode(content)) {
@@ -173,13 +153,11 @@ public class CommentsDetector extends AbstractDetector{
 
         int wordCount = content.split("\\s+").length;
 
-        // "Ghost" comments that are too short (e.g. "// a")
         if(wordCount < WORD_COUNT_TRESHOLD_BELOW_MIN) {
             addLineIfValid(comment, detectedLines);
             return true;
         }
 
-        // "Novel" comments that are too long (e.g. your RGBColor example)
         if(wordCount > WORD_COUNT_ABOVE_MAX) {
             addLineIfValid(comment, detectedLines);
             return true;

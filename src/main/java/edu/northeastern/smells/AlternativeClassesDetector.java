@@ -14,21 +14,14 @@ import static edu.northeastern.utils.AstNormalizer.generateSkeleton;
 
 public class AlternativeClassesDetector extends AbstractDetector {
 
-    // total similarity threshold for volume + field + method
     private final double SIMILARITY_THRESHOLD;
-
-    // weight assigned to each metric calculated when calculating
-    // the final class similarity score
     private final double WEIGHT_FIELDS;
     private final double WEIGHT_VOLUME;
     private final double WEIGHT_METHODS;
+    private final Map<String, ClassProfile> registry = new HashMap<>();
 
-    // --- NEW FLAG ---
-    // If true, only compares classes that live in the exact same .java file
-    // If false, compares every class in the project against every other class
     private boolean singleFileMode = true;
 
-    private final Map<String, ClassProfile> registry = new HashMap<>();
 
     public AlternativeClassesDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
@@ -36,11 +29,6 @@ public class AlternativeClassesDetector extends AbstractDetector {
         WEIGHT_FIELDS = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "WEIGHT_FIELDS", 0.20);
         WEIGHT_VOLUME = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "WEIGHT_VOLUME", 0.10);
         WEIGHT_METHODS = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "WEIGHT_METHODS", 0.70);
-    }
-
-    // --- NEW SETTER ---
-    public void setSingleFileMode(boolean singleFileMode) {
-        this.singleFileMode = singleFileMode;
     }
 
     @Override
@@ -63,16 +51,12 @@ public class AlternativeClassesDetector extends AbstractDetector {
                 ClassProfile classA = registry.get(nameA);
                 ClassProfile classB = registry.get(nameB);
 
-                // --- NEW LOGIC: Enforce the boundary flag ---
                 if (singleFileMode) {
                     if (!classA.filePath.equals(classB.filePath)) {
-                        continue; // Skip comparing if they are from different files
+                        continue;
                     }
                 }
 
-                // --- NEW LOGIC: Prevent punishing polymorphism ---
-                // If they share a common interface or superclass, they are explicitly designed
-                // to be polymorphic. Therefore, they are NOT "Alternative Classes with DIFFERENT Interfaces"
                 boolean shareSuperType = false;
                 for (String sType : classA.superTypes) {
                     if (classB.superTypes.contains(sType) && !sType.equals("java.lang.Object")) {
@@ -102,14 +86,11 @@ public class AlternativeClassesDetector extends AbstractDetector {
 
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
-        // --- UPDATED LOGIC: Gather all nested/peer classes in the file ---
-        // This is strictly required for 'singleFileMode' to have anything to compare!
         List<CtClass<?>> classesInFile = type.getElements(new TypeFilter<>(CtClass.class));
 
         for (CtClass<?> ctClass : classesInFile) {
             if (ctClass.getPosition().isValidPosition()) {
                 ClassProfile profile = buildProfile(ctClass);
-                // Only register classes with enough methods to actually compare
                 if (profile.methods.size() >= 2) {
                     registry.put(ctClass.getQualifiedName(), profile);
                 }
@@ -326,17 +307,6 @@ public class AlternativeClassesDetector extends AbstractDetector {
             profile.methods.add(mp);
         }
         return profile;
-    }
-
-    /**
-     * Check if a method is overriding an interface or abstract method
-     * For ACDI, since they already override, a method, we do not need to add this
-     * to our comparison
-     * @param m The method to check if it is overriding
-     * @return boolean
-     */
-    private boolean isOverride(CtMethod<?> m) {
-        return m.getAnnotations().stream().anyMatch(a -> a.getAnnotationType().getSimpleName().equals("Override"));
     }
 
     /**

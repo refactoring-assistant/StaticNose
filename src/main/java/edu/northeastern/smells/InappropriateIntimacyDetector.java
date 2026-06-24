@@ -26,7 +26,6 @@ public class InappropriateIntimacyDetector extends AbstractDetector {
         return "Inappropriate Intimacy";
     }
 
-    // TODO: Make sure field accesses from super class aren't flagged
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
         List<Integer> detectedLines = new ArrayList<>();
@@ -44,17 +43,14 @@ public class InappropriateIntimacyDetector extends AbstractDetector {
 
             CtTypeReference<?> declaringClassRef = fieldRef.getDeclaringType();
 
-            // ignore Array object field accesses
             if (declaringClassRef == null || (access.getTarget() != null && access.getTarget().getType() instanceof spoon.reflect.reference.CtArrayTypeReference)) {
                 continue;
             }
 
-            // ignore standard Java language field accesses
             if (fieldRef.getType() != null && fieldRef.getType().getQualifiedName().equals("java.lang.Class")) {
                 continue;
             }
 
-            // --- THE FIX: Evaluate the Target Expression ---
             boolean isExternal = false;
             spoon.reflect.code.CtExpression<?> target = access.getTarget();
 
@@ -63,47 +59,38 @@ public class InappropriateIntimacyDetector extends AbstractDetector {
                         target instanceof spoon.reflect.code.CtSuperAccess ||
                         target instanceof spoon.reflect.code.CtTypeAccess) {
 
-                    // It is this.field, super.field, or Class.staticField
                     if (!currentClassRef.isSubtypeOf(declaringClassRef)) {
                         isExternal = true;
                     }
                 } else {
-                    // It is an explicit object reference (e.g., base.ingredients)
                     CtTypeReference<?> targetType = target.getType();
 
                     if (targetType != null) {
-                        // Accessing another instance of the exact same class is usually valid encapsulation
                         if (!targetType.equals(currentClassRef)) {
                             isExternal = true;
                         }
                     } else {
-                        // Fallback if Spoon cannot resolve the target type
                         if (!currentClassRef.isSubtypeOf(declaringClassRef)) {
                             isExternal = true;
                         }
                     }
                 }
             } else {
-                // Implicit target (e.g., just 'ingredients')
                 if (!currentClassRef.isSubtypeOf(declaringClassRef)) {
                     isExternal = true;
                 }
             }
 
-            // make sure the field access is external (outside current class)
             if (isExternal) {
 
-                // ignore cases of nested classes
                 if (isSameTopLevelClass(currentClassRef, declaringClassRef)) {
                     continue;
                 }
 
-                // ignore constants
                 if (fieldRef.isStatic() && fieldRef.isFinal()) {
                     continue;
                 }
 
-                // ignore enums
                 if (declaringClassRef.isEnum()) {
                     continue;
                 }

@@ -39,15 +39,12 @@ public class LazyClassDetector extends AbstractDetector {
 
             if (weight > LOW_WEIGHT_THRESHOLD) continue;
 
-            // THE CONTRACT SHIELD: If it implements an interface or abstract method,
-            // it is structurally necessary. It is NOT a Lazy Class.
             if (isImplementingContract(ctClass)) continue;
 
             String className = ctClass.getQualifiedName();
             Set<String> callers = dependencyGraph.getOrDefault(className, new HashSet<>());
             int callerCount = callers.size();
 
-            // RESTORED: Catch 0-caller (RGBBad) and 1-caller classes
             if (callerCount <= 1) {
                 String callerInfo = (callerCount == 0)
                         ? "is unused (Dead Code)"
@@ -56,7 +53,6 @@ public class LazyClassDetector extends AbstractDetector {
                 String info = String.format("Lazy Class: Logic weight is %d and %s. Consider 'Inline Class' or deletion.", weight, callerInfo);
                 reports.add(createReport(ctClass, info));
             }
-            // Collapse Hierarchy fallback
             else if (hasMeaningfulSuperclass(ctClass)) {
                 String parent = ctClass.getSuperclass().getSimpleName();
                 String info = String.format("Lazy Class: Subclass adds minimal logic (Weight: %d). Consider 'Collapse Hierarchy' into '%s'.", weight, parent);
@@ -69,8 +65,6 @@ public class LazyClassDetector extends AbstractDetector {
 
     @Override
     protected List<Integer> analyzeType(CtType<?> type) {
-        // FIX 2: Ask Spoon to find ALL CtClasses associated with this type's context
-        // This ensures peer classes like PrintHelloUserBad are actually found.
         List<CtClass<?>> classesInFile = type.getElements(new TypeFilter<>(CtClass.class));
 
         for (CtClass<?> ctClass : classesInFile) {
@@ -125,14 +119,12 @@ public class LazyClassDetector extends AbstractDetector {
             return e.getBody().getStatements().size() <= 1;
         }
 
-        // True boilerplate getters usually only have 1 statement (return)
         if (name.startsWith("get") && e.getParameters().isEmpty()) {
             return e.getBody().getStatements().size() <= 1;
         }
 
-        // True boilerplate setters usually only have 1 statement (assignment)
         if (name.startsWith("set") && e.getParameters().size() == 1) {
-            return e.getBody().getStatements().size() == 1; // Allows setNewProductionFacility to survive!
+            return e.getBody().getStatements().size() == 1;
         }
 
         return name.equals("toString") || name.equals("hashCode") || name.equals("equals");
@@ -144,12 +136,10 @@ public class LazyClassDetector extends AbstractDetector {
      * Normal concrete subclasses are NOT protected and will be flagged if lazy.
      */
     private boolean isImplementingContract(CtClass<?> ctClass) {
-        // 1. Directly implements an interface
         if (!ctClass.getSuperInterfaces().isEmpty()) {
             return true;
         }
 
-        // 2. Extends an abstract class (meaning this class MUST exist to be instantiated)
         CtTypeReference<?> superClass = ctClass.getSuperclass();
         if (superClass != null && superClass.getTypeDeclaration() != null) {
             return superClass.getTypeDeclaration().isAbstract();
@@ -164,7 +154,6 @@ public class LazyClassDetector extends AbstractDetector {
     }
 
     private boolean isUtilityOrConstantsClass(CtClass<?> ctClass) {
-        // 1. Constants Class: Has fields, NO methods, and ALL fields are static final
         if (ctClass.getMethods().isEmpty() && !ctClass.getFields().isEmpty()) {
             boolean onlyStaticFinal = true;
             for (spoon.reflect.declaration.CtField<?> field : ctClass.getFields()) {
@@ -176,7 +165,6 @@ public class LazyClassDetector extends AbstractDetector {
             if (onlyStaticFinal) return true;
         }
 
-        // 2. Utility Class: explicitly locks instantiation by making all constructors private
         if (!ctClass.getConstructors().isEmpty()) {
             boolean allPrivateConstructors = true;
             for (spoon.reflect.declaration.CtConstructor<?> ctor : ctClass.getConstructors()) {

@@ -18,8 +18,6 @@ import static edu.northeastern.utils.Metrics.isAccessor;
  */
 public class DuplicateCodeDetector extends AbstractDetector {
 
-    // the size of the sliding window. it will only check pairs of 5 lines and
-    // match them together
     private final int WINDOW_SIZE;
 
     private final Map<String, List<Location>> globalSequenceMap = new HashMap<>();

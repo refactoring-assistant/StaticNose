@@ -125,13 +125,9 @@ public class SwitchStatementDetector extends AbstractDetector {
     }
 
     private String extractVariableFromCondition(CtExpression<?> condition) {
-        // Find ANY variable read happening inside this condition
         List<CtVariableRead<?>> variableReads = condition.getElements(new TypeFilter<>(CtVariableRead.class));
 
         if (!variableReads.isEmpty()) {
-            // Usually the first variable read in the condition is the one being tested.
-            // E.g., in `empType.equals("Professor")`, empType is the first read.
-            // E.g., in `"Professor".equals(empType)`, empType is the first read.
             return variableReads.get(0).getVariable().getSimpleName();
         }
 

@@ -39,25 +39,12 @@ public class LongMethodDetector extends AbstractDetector{
             int complexity = calculateCyclomaticComplexity(method);
 
             if (lloc >= MAX_LLOC || complexity > MAX_COMPLEXITY) {
-                // Always check if the position is valid first
                 if (method.getPosition().isValidPosition()) {
-
-                    // THE FIX: Use the position of the method's body (the '{')
-                    // or the return type. This completely bypasses all Javadoc
-                    // and annotations that sit above the method signature.
                     if (method.getBody() != null && method.getBody().getPosition().isValidPosition()) {
-
-                        // Points to the exact line where the actual code block starts
                         detectedLines.add(method.getBody().getPosition().getLine());
-
                     } else if (method.getType() != null && method.getType().getPosition().isValidPosition()) {
-
-                        // Fallback: Points to the return type (e.g., the 'void' in 'public void main')
                         detectedLines.add(method.getType().getPosition().getLine());
-
                     } else {
-
-                        // Absolute fallback
                         detectedLines.add(method.getPosition().getLine());
                     }
                 }

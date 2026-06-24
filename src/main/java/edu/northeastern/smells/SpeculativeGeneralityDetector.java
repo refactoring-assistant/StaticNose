@@ -101,7 +101,6 @@ public class SpeculativeGeneralityDetector extends AbstractDetector {
 
         for (CtMethod<?> method : type.getMethods()) {
             if (method.getBody() == null) continue;
-            // Rule 3: Unimplemented Method
             boolean isUnimplemented = false;
             String unimplementedReason = "";
 
@@ -210,7 +209,7 @@ public class SpeculativeGeneralityDetector extends AbstractDetector {
                 for (CtStatement stmt : constructor.getBody().getStatements()) {
                     if (stmt.isImplicit()) continue;
                     if (stmt instanceof CtInvocation<?> inv && inv.getExecutable().getSimpleName().equals("<init>")) {
-                        continue; // super() or this() call
+                        continue;
                     }
                     return false;
                 }

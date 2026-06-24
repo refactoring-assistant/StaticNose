@@ -36,7 +36,7 @@ public class JSONReportGenerator extends AbstractReportGenerator{
                 FileUtils.safeCreateDir(parentDir.getAbsolutePath());
             } catch (RuntimeException e) {
                 System.err.println("Aborting report generation: " + e.getMessage());
-                return; // Stop execution if we can't create the directory
+                return;
             }
         }
 

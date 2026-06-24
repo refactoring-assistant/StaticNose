@@ -11,14 +11,12 @@ import java.util.*;
 public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
 
     private final int MIN_SUBCLASSES;
-    private final int PARALLEL_LINK_THRESHOLD;
 
     private final Map<String, List<CtType<?>>> hierarchyMap = new HashMap<>();
 
     public ParallelInheritanceHierarchyDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
         MIN_SUBCLASSES = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "MIN_SUBCLASSES", 2);
-        PARALLEL_LINK_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "PARALLEL_LINK_THRESHOLD", 2);
     }
 
     @Override
@@ -55,7 +53,6 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
                 int ditA = getHierarchyMaxDIT(subTypesA);
                 int ditB = getHierarchyMaxDIT(subTypesB);
 
-                // If the hierarchies are fundamentally different shapes, reject them immediately.
                 if (Math.abs(nocA - nocB) > 1 || Math.abs(ditA - ditB) > 1) {
                     continue;
                 }
@@ -70,12 +67,8 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
 
                 double structuralCoupling = (double) parallelLinks / maxExpectedLinks;
 
-                // Rule A: Overwhelming Structural Evidence (e.g., > 50% coupled).
-                // Names don't matter, the code proves they are parallel.
                 boolean isStronglyCoupled = structuralCoupling >= 0.5;
 
-                // Rule B: High Suspicion + Minimum Evidence.
-                // They look identical (Shape + Name), so even a single link proves the smell.
                 boolean isSuspiciousAndLinked = isLexicalMatch && (parallelLinks > 0);
 
                 if (isStronglyCoupled || isSuspiciousAndLinked) {
@@ -95,13 +88,11 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
     protected List<Integer> analyzeType(CtType<?> type) {
         if (!type.getPosition().isValidPosition()) return new ArrayList<>();
 
-        // 1. Check Superclass
         CtTypeReference<?> superClass = type.getSuperclass();
         if (superClass != null && isProjectClass(superClass)) {
             addToHierarchy(superClass.getQualifiedName(), type);
         }
 
-        // 2. Check Super Interfaces
         for (CtTypeReference<?> superInterface : type.getSuperInterfaces()) {
             if (isProjectClass(superInterface)) {
                 addToHierarchy(superInterface.getQualifiedName(), type);
@@ -117,32 +108,26 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
     private int countParallelLinks(List<CtType<?>> subTypesA, List<CtType<?>> subTypesB) {
         int links = 0;
 
-        // Keep track of matched B-types so we ensure a 1-to-1 mapping
         Set<CtType<?>> matchedB = new HashSet<>();
 
         for (CtType<?> typeA : subTypesA) {
 
-            // Extract all the dependencies that TypeA has
             Set<String> dependenciesOfA = extractDependencies(typeA);
 
             for (CtType<?> typeB : subTypesB) {
                 if (matchedB.contains(typeB)) continue;
 
-                // Extract all the dependencies that TypeB has
                 Set<String> dependenciesOfB = extractDependencies(typeB);
 
-                // Is there a structural bridge between these two specific subclasses?
                 boolean aDependsOnB = dependenciesOfA.contains(typeB.getQualifiedName());
                 boolean bDependsOnA = dependenciesOfB.contains(typeA.getQualifiedName());
 
-                // Optional Fallback: Check if their names mirror each other (e.g. Car -> CarBuilder)
-                // This catches parallel hierarchies that might not directly reference each other yet.
                 boolean nameMirror = shareCoreConcept(typeA.getSimpleName(), typeB.getSimpleName());
 
                 if (aDependsOnB || bDependsOnA || nameMirror) {
                     links++;
                     matchedB.add(typeB);
-                    break; // Move on to the next TypeA to enforce 1-to-1 mapping
+                    break;
                 }
             }
         }
@@ -169,8 +154,6 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
      * e.g., If we strip "Impl", "Builder", "Factory", do they share a core name?
      */
     private boolean shareCoreConcept(String nameA, String nameB) {
-        // Find the longest common substring starting at the beginning
-        // (Assuming standard prefix naming like 'Car' and 'CarBuilder')
         int minLength = Math.min(nameA.length(), nameB.length());
         int matchLength = 0;
 
@@ -182,7 +165,6 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
             }
         }
 
-        // If they share at least 4 starting characters (e.g. 'User'), we count it as a name mirror.
         return matchLength >= 4;
     }
 
@@ -192,7 +174,6 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
     }
 
     private boolean isProjectClass(CtTypeReference<?> ref) {
-        // Ignore standard Java libraries to focus only on internal architecture
         return !ref.getQualifiedName().startsWith("java.");
     }
 
@@ -201,14 +182,12 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
      * Object is considered depth 0.
      */
     private int calculateDIT(CtType<?> type) {
-        int depth = 1; // Start at 1 for the class itself
+        int depth = 1;
         CtTypeReference<?> superClass = type.getSuperclass();
 
         while (superClass != null && !superClass.getSimpleName().equals("Object")) {
             depth++;
 
-            // Move up the tree. Note: In Spoon, getting the declaration of a reference
-            // can sometimes be null if the source code isn't available, so we must null-check.
             CtType<?> superDeclaration = superClass.getTypeDeclaration();
             if (superDeclaration == null) {
                 break;
@@ -230,13 +209,11 @@ public class ParallelInheritanceHierarchyDetector extends AbstractDetector {
     }
 
     private ReportStruct createReport(String className, String info, CtType<?> type) {
-        // Because this smell applies to the *relationship* between hierarchies,
-        // we flag the root interface/superclass itself.
         String filePath = type.getPosition().getFile().getPath();
 
         ReportStruct report = new ReportStruct(
                 getSmellName(),
-                filePath, // Path might not be singular
+                filePath,
                 this.inputDirPath,
                 className,
                 info

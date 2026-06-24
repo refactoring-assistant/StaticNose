@@ -13,9 +13,9 @@ import java.util.*;
 
 public class ShotgunSurgeryDetector extends AbstractDetector {
 
-    private final int THRESHOLD_CM; // Changing Methods
-    private final int THRESHOLD_CC; // Changing Classes
-    private final int THRESHOLD_FAN_OUT; // Dropped for toy examples
+    private final int THRESHOLD_CM;
+    private final int THRESHOLD_CC;
+    private final int THRESHOLD_FAN_OUT;
 
     private final Map<String, MethodMetrics> methodRegistry = new HashMap<>();
     private final Map<String, Set<String>> incomingMethodMap = new HashMap<>();
@@ -92,7 +92,6 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
                     continue;
                 }
 
-                // FIX 1: Make the current method signature truly unique
                 String currentMethodSignature = currentClassName + "#" + method.getSignature();
 
                 if (!isDefinedInInterfaceHierarchy(method)) {
@@ -116,7 +115,6 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
 
                         if (isProjectClass(targetClass) && !targetClass.equals(currentClassName)) {
 
-                            // FIX 2: Make the target method signature truly unique
                             String targetMethodSig = targetClass + "#" + targetExec.getSignature();
 
                             incomingMethodMap.putIfAbsent(targetMethodSig, new HashSet<>());
@@ -143,7 +141,6 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
         return false;
     }
 
-    // Pass in the currentClassName to make FanOut tracking accurate too!
     private int calculateFanOut(CtMethod<?> method, String currentClassName) {
         Set<String> uniqueCalled = new HashSet<>();
         List<CtInvocation<?>> invocations = method.getElements(new TypeFilter<>(CtInvocation.class));
@@ -151,7 +148,6 @@ public class ShotgunSurgeryDetector extends AbstractDetector {
             if (inv.getExecutable() != null && inv.getExecutable().getDeclaringType() != null) {
                 String targetClass = inv.getExecutable().getDeclaringType().getQualifiedName();
                 if (isProjectClass(targetClass) && !targetClass.equals(currentClassName)) {
-                    // FIX 3: Fully qualify the fan-out set to prevent deduplication
                     uniqueCalled.add(targetClass + "#" + inv.getExecutable().getSignature());
                 }
             }

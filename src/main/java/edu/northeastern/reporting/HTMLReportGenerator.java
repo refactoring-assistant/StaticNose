@@ -28,7 +28,6 @@ public class HTMLReportGenerator extends AbstractReportGenerator {
 
     @Override
     public void generate(List<ReportStruct> reportStructList) {
-        // Collect file contents
         Map<String, String> filesContentMap = new HashMap<>();
         for (ReportStruct rs : reportStructList) {
             String path = rs.getFilePath();
@@ -63,7 +62,7 @@ public class HTMLReportGenerator extends AbstractReportGenerator {
                 FileUtils.safeCreateDir(parentDir.getAbsolutePath());
             } catch (RuntimeException e) {
                 System.err.println("Aborting report generation: " + e.getMessage());
-                return; // Stop execution if we can't create the directory
+                return;
             }
         }
 

@@ -105,7 +105,6 @@ public class TemporaryFieldDetector extends AbstractDetector{
                 }
             }
 
-            // NEW: Multi-constructor partial initialization check
             Set<CtConstructor<?>> allConstructors = new HashSet<>(type.getElements(new TypeFilter<>(CtConstructor.class)));
             if (!hasCodeSmell && allConstructors.size() > 1 && !readExecutables.isEmpty()) {
                 int totalConstructors = allConstructors.size();

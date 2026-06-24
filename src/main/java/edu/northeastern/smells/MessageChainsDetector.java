@@ -13,7 +13,6 @@ import java.util.List;
 
 public class MessageChainsDetector extends AbstractDetector {
 
-    // A chain of 3 method calls (a().b().c()) is our threshold for a smell.
     private final int CHAIN_THRESHOLD;
 
     public MessageChainsDetector(List<String> javaFilePaths, String inputDirPath) {
