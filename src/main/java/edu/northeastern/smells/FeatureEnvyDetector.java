@@ -16,8 +16,6 @@ import java.util.*;
  */
 public class FeatureEnvyDetector extends AbstractDetector{
 
-    // A method must access at least this many foreign fields/getters from a SINGLE
-    // external class to even be considered for Feature Envy. Filters out basic comparators.
     private final int FOREIGN_DATA_THRESHOLD;
 
     public FeatureEnvyDetector(List<String> javaFilePaths, String inputDirPath) {
@@ -39,14 +37,10 @@ public class FeatureEnvyDetector extends AbstractDetector{
         for(CtMethod<?> method : type.getMethods()) {
             if(method.getBody() == null) continue;
 
-            // TRACK UNIQUE FEATURES
-            // Internal: Unique field names/getter signatures from this class hierarchy
             Set<String> internalFeatures = new HashSet<>();
 
-            // External: Map of ClassName -> Set of unique features accessed in that class
-            Map<String, Set<String>> externalAccessMap = new HashMap<>();
+            Map<String, Set<String>> externalInstanceAccessMap = new HashMap<>();
 
-            // 1. Scan for direct field accesses
             List<CtFieldAccess<?>> fieldAccesses = method.getElements(new TypeFilter<>(CtFieldAccess.class));
             for(CtFieldAccess<?> access : fieldAccesses) {
                 if(access.getVariable().isStatic()) continue;
@@ -59,19 +53,27 @@ public class FeatureEnvyDetector extends AbstractDetector{
                 if(currentTypeRef.isSubtypeOf(declaringType)) {
                     CtTypeReference<?> fieldType = access.getVariable().getType();
                     if (fieldType != null && !currentTypeRef.isSubtypeOf(fieldType) && isProjectClass(fieldType.getQualifiedName())) {
-                        externalAccessMap.computeIfAbsent(fieldType.getQualifiedName(), k -> new HashSet<>()).add("ref:" + fieldName);
+                        String instanceKey = fieldType.getQualifiedName() + "::" + fieldName;
+                        externalInstanceAccessMap.computeIfAbsent(instanceKey, k -> new HashSet<>()).add("ref");
                     } else {
                         internalFeatures.add(fieldName);
                     }
                 } else {
                     String targetName = declaringType.getQualifiedName();
                     if(isProjectClass(targetName)) {
-                        externalAccessMap.computeIfAbsent(targetName, k -> new HashSet<>()).add(fieldName);
+                        String instanceId = "unknown";
+                        if (access.getTarget() != null) {
+                            instanceId = access.getTarget().toString();
+                            if (instanceId.startsWith("this.")) {
+                                instanceId = instanceId.substring(5);
+                            }
+                        }
+                        String instanceKey = targetName + "::" + instanceId;
+                        externalInstanceAccessMap.computeIfAbsent(instanceKey, k -> new HashSet<>()).add(fieldName);
                     }
                 }
             }
 
-            // 2. Scan for getter invocations
             List<CtInvocation<?>> invocations = method.getElements(new TypeFilter<>(CtInvocation.class));
             for(CtInvocation<?> invocation: invocations) {
                 if(invocation.getExecutable().isStatic()) continue;
@@ -86,22 +88,28 @@ public class FeatureEnvyDetector extends AbstractDetector{
                 } else {
                     String targetName = declaringType.getQualifiedName();
                     if(isProjectClass(targetName) && isGetter(invocation)) {
-                        externalAccessMap.computeIfAbsent(targetName, k -> new HashSet<>()).add(methodSig);
+                        String instanceId = "unknown";
+                        if (invocation.getTarget() != null) {
+                            instanceId = invocation.getTarget().toString();
+                            if (instanceId.startsWith("this.")) {
+                                instanceId = instanceId.substring(5);
+                            }
+                        }
+                        String instanceKey = targetName + "::" + instanceId;
+                        externalInstanceAccessMap.computeIfAbsent(instanceKey, k -> new HashSet<>()).add(methodSig);
                     }
                 }
             }
 
-            // 3. Calculate scores based on UNIQUE feature counts
             int internalAccessCount = internalFeatures.size();
-            int maxExternalAccessesToSingleClass = 0;
+            int maxExternalAccessesToSingleInstance = 0;
 
-            for (Set<String> uniqueFeatures : externalAccessMap.values()) {
-                maxExternalAccessesToSingleClass = Math.max(maxExternalAccessesToSingleClass, uniqueFeatures.size());
+            for (Set<String> uniqueFeatures : externalInstanceAccessMap.values()) {
+                maxExternalAccessesToSingleInstance = Math.max(maxExternalAccessesToSingleInstance, uniqueFeatures.size());
             }
 
-            // Threshold Check
-            if(maxExternalAccessesToSingleClass > internalAccessCount &&
-                    maxExternalAccessesToSingleClass >= FOREIGN_DATA_THRESHOLD) {
+            if(maxExternalAccessesToSingleInstance > internalAccessCount &&
+                    maxExternalAccessesToSingleInstance >= FOREIGN_DATA_THRESHOLD) {
                 detectedLines.add(method.getPosition().getLine());
             }
         }
