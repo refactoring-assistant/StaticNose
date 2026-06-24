@@ -21,11 +21,13 @@ public class LargeClassDetector extends AbstractDetector{
 
     private final int WMC_THRESHOLD;
     private final double TCC_THRESHOLD;
+    private final int FIELD_THRESHOLD;
 
     public LargeClassDetector(List<String> javaFilePaths, String inputDirPath) {
         super(javaFilePaths, inputDirPath);
         WMC_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "WMC_THRESHOLD", 47);
         TCC_THRESHOLD = edu.northeastern.core.ConfigurationManager.getDouble(getSmellName(), "TCC_THRESHOLD", 0.33);
+        FIELD_THRESHOLD = edu.northeastern.core.ConfigurationManager.getInt(getSmellName(), "FIELD_THRESHOLD", 8);
     }
 
     @Override
@@ -42,17 +44,12 @@ public class LargeClassDetector extends AbstractDetector{
         }
 
         int wmc = calculateWMC(type);
-
         double tcc = calculateTCC(type);
-
         int fieldCount = type.getFields().size();
-
-        // 2. Count Logical Lines of Code (if you have calculateLLOC in Metrics)
-         int lloc = calculateLLOC(type);
 
         boolean isGodClass = (wmc >= WMC_THRESHOLD && tcc < TCC_THRESHOLD);
 
-        boolean isDataHeavyClass = (fieldCount >= 8);
+        boolean isDataHeavyClass = (fieldCount >= FIELD_THRESHOLD);
 
         if (isGodClass || isDataHeavyClass) {
             if (type.getPosition().isValidPosition()) {
