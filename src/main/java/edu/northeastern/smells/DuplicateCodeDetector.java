@@ -16,6 +16,7 @@ import static edu.northeastern.utils.Metrics.isAccessor;
  * It does so by doing a Type 2 check by converting AST to generics (int x = 5 to $VAR = $LIT)
  * and then performing a sliding window of the given size and scanning through the code base.
  */
+@Deprecated
 public class DuplicateCodeDetector extends AbstractDetector {
 
     private final int WINDOW_SIZE;

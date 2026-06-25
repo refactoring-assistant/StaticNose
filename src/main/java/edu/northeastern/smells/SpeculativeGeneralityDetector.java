@@ -9,6 +9,7 @@ import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.*;
 
+@Deprecated
 public class SpeculativeGeneralityDetector extends AbstractDetector {
 
     private final List<ReportStruct> customReports = new ArrayList<>();
