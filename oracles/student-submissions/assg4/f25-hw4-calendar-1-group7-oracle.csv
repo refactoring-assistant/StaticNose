@@ -1,19 +1,19 @@
 File Name,Expected Code Smells
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/ExitingTheCommand.java,['Comments']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/EditType.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/QueryEventCom.java,"['Data Clumps', 'Primitive Obsession']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/MyCalendarController.java,['Long Method']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/CreatingAnEventCommand.java,"['Long Parameter List', 'Data Clumps', 'Primitive Obsession']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/EditingAnEventCommand.java,"['Comments', 'Data Clumps', 'Long Method', 'Long Parameter List', 'Primitive Obsession', 'Switch Statements']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/MyCommandInterpreter.java,"['Large Class', 'Comments', 'Data Clumps', 'Divergent Change', 'Long Method']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/Command.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/ExportingTheCommand.java,['Long Method']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/controller/ShowStatus.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/model/Calendar.java,['Data Clumps']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/model/MyCalendarImplement.java,"['Comments', 'Data Clumps', 'Feature Envy']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/model/Event.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/model/MyEventSeries.java,"['Switch Statements', 'Divergent Change', 'Long Parameter List', 'Primitive Obsession']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/model/MyEventImplement.java,['Primitive Obsession']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/view/MyCalendarView.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/calendar/view/MyTextView.java,['Feature Envy']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group7/main/java/CalendarRunner.java,[]
+f25-hw4-calendar-1-group7/main/java/calendar/controller/ExitingTheCommand.java,['Comments']
+f25-hw4-calendar-1-group7/main/java/calendar/controller/EditType.java,[]
+f25-hw4-calendar-1-group7/main/java/calendar/controller/QueryEventCom.java,"['Data Clumps', 'Primitive Obsession']"
+f25-hw4-calendar-1-group7/main/java/calendar/controller/MyCalendarController.java,['Long Method']
+f25-hw4-calendar-1-group7/main/java/calendar/controller/CreatingAnEventCommand.java,"['Long Parameter List', 'Data Clumps', 'Primitive Obsession']"
+f25-hw4-calendar-1-group7/main/java/calendar/controller/EditingAnEventCommand.java,"['Comments', 'Data Clumps', 'Long Method', 'Long Parameter List', 'Primitive Obsession', 'Switch Statements']"
+f25-hw4-calendar-1-group7/main/java/calendar/controller/MyCommandInterpreter.java,"['Large Class', 'Comments', 'Data Clumps', 'Divergent Change', 'Long Method']"
+f25-hw4-calendar-1-group7/main/java/calendar/controller/Command.java,[]
+f25-hw4-calendar-1-group7/main/java/calendar/controller/ExportingTheCommand.java,['Long Method']
+f25-hw4-calendar-1-group7/main/java/calendar/controller/ShowStatus.java,[]
+f25-hw4-calendar-1-group7/main/java/calendar/model/Calendar.java,['Data Clumps']
+f25-hw4-calendar-1-group7/main/java/calendar/model/MyCalendarImplement.java,"['Comments', 'Data Clumps', 'Feature Envy']"
+f25-hw4-calendar-1-group7/main/java/calendar/model/Event.java,[]
+f25-hw4-calendar-1-group7/main/java/calendar/model/MyEventSeries.java,"['Switch Statements', 'Divergent Change', 'Long Parameter List', 'Primitive Obsession']"
+f25-hw4-calendar-1-group7/main/java/calendar/model/MyEventImplement.java,['Primitive Obsession']
+f25-hw4-calendar-1-group7/main/java/calendar/view/MyCalendarView.java,[]
+f25-hw4-calendar-1-group7/main/java/calendar/view/MyTextView.java,['Feature Envy']
+f25-hw4-calendar-1-group7/main/java/CalendarRunner.java,[]

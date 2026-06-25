@@ -1,16 +1,16 @@
 File Name,Expected Code Smells
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/util/DateTimeParser.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/util/Weekdays.java,['Switch Statements']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/controller/CommandProcessor.java,['Long Method']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/controller/CommandController.java,"['Data Clumps', 'Long Parameter List']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/DummyCalendar.java,['Lazy Class']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/model/CalendarModel.java,"['Data Clumps', 'Long Parameter List']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/model/CalendarModelImpl.java,"['Switch Statements', 'Data Clumps', 'Long Method', 'Message Chains']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/model/SeriesId.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/model/EditScope.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/model/CalendarEvent.java,"['Long Parameter List', 'Primitive Obsession']"
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/model/CsvExporter.java,['Message Chains']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/model/RecurrenceRule.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/view/ConsoleView.java,[]
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/calendar/view/ConsoleViewImpl.java,['Message Chains']
-/Users/yashburshe/Developer/StaticNose/datasets/student-submissions/assg4/f25-hw4-calendar-1-group6/main/java/CalendarRunner.java,['Switch Statements']
+f25-hw4-calendar-1-group6/main/java/calendar/util/DateTimeParser.java,[]
+f25-hw4-calendar-1-group6/main/java/calendar/util/Weekdays.java,['Switch Statements']
+f25-hw4-calendar-1-group6/main/java/calendar/controller/CommandProcessor.java,['Long Method']
+f25-hw4-calendar-1-group6/main/java/calendar/controller/CommandController.java,"['Data Clumps', 'Long Parameter List']"
+f25-hw4-calendar-1-group6/main/java/calendar/DummyCalendar.java,['Lazy Class']
+f25-hw4-calendar-1-group6/main/java/calendar/model/CalendarModel.java,"['Data Clumps', 'Long Parameter List']"
+f25-hw4-calendar-1-group6/main/java/calendar/model/CalendarModelImpl.java,"['Switch Statements', 'Data Clumps', 'Long Method', 'Message Chains']"
+f25-hw4-calendar-1-group6/main/java/calendar/model/SeriesId.java,[]
+f25-hw4-calendar-1-group6/main/java/calendar/model/EditScope.java,[]
+f25-hw4-calendar-1-group6/main/java/calendar/model/CalendarEvent.java,"['Long Parameter List', 'Primitive Obsession']"
+f25-hw4-calendar-1-group6/main/java/calendar/model/CsvExporter.java,['Message Chains']
+f25-hw4-calendar-1-group6/main/java/calendar/model/RecurrenceRule.java,[]
+f25-hw4-calendar-1-group6/main/java/calendar/view/ConsoleView.java,[]
+f25-hw4-calendar-1-group6/main/java/calendar/view/ConsoleViewImpl.java,['Message Chains']
+f25-hw4-calendar-1-group6/main/java/CalendarRunner.java,['Switch Statements']

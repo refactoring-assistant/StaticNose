@@ -1,0 +1,164 @@
+File Name,Expected Code Smells
+smellbench-dataset/main/java/altclasses/case1/ACDIBE1.java,['Alternative Classes with Different Interfaces']
+smellbench-dataset/main/java/altclasses/case1/ACDIGE1.java,[]
+smellbench-dataset/main/java/altclasses/case2/ACDIBE2.java,"['Long Method', 'Alternative Classes with Different Interfaces', 'Primitive Obsession', 'Shotgun Surgery', 'Feature Envy', 'Large Class']"
+smellbench-dataset/main/java/altclasses/case2/ACDIGE2.java,['Long Method']
+smellbench-dataset/main/java/altclasses/case3/ACDIBE3.java,"['Alternative Classes with Different Interfaces', 'Primitive Obsession']"
+smellbench-dataset/main/java/altclasses/case3/ACDIGE3.java,[]
+smellbench-dataset/main/java/comments/case1/CBE1.java,"['Comments', 'Divergent Change']"
+smellbench-dataset/main/java/comments/case1/CGE1.java,['Divergent Change']
+smellbench-dataset/main/java/comments/case2/CBE2.java,['Comments']
+smellbench-dataset/main/java/comments/case2/CGE2.java,[]
+smellbench-dataset/main/java/comments/case3/CBE3.java,['Comments']
+smellbench-dataset/main/java/comments/case4/CBE4.java,"['Comments', 'Feature Envy', 'Divergent Change']"
+smellbench-dataset/main/java/comments/case4/CGE4.java,[]
+smellbench-dataset/main/java/comments/case5/CBE5.java,['Comments']
+smellbench-dataset/main/java/comments/case5/CGE5.java,['Divergent Change']
+smellbench-dataset/main/java/comments/case6/CBE6.java,['Comments']
+smellbench-dataset/main/java/comments/case6/CGE6.java,['Divergent Change']
+smellbench-dataset/main/java/comments/case7/CBE7.java,['Comments']
+smellbench-dataset/main/java/comments/case7/CGE7.java,[]
+smellbench-dataset/main/java/comments/case8/CBE8.java,"['Comments', 'Long Method', 'Data Clumps', 'Feature Envy', 'Divergent Change']"
+smellbench-dataset/main/java/comments/case8/CGE8.java,"['Data Class', 'Feature Envy', 'Data Clumps', 'Divergent Change']"
+smellbench-dataset/main/java/dataclass/case1/DCLSBE1.java,['Data Class']
+smellbench-dataset/main/java/dataclass/case1/DCLSGE1.java,[]
+smellbench-dataset/main/java/dataclass/case2/DCLSBE2.java,"['Data Class', 'Feature Envy']"
+smellbench-dataset/main/java/dataclass/case2/DCLSGE2.java,[]
+smellbench-dataset/main/java/dataclass/case3/DCLSBE3.java,"['Data Class', 'Inappropriate Intimacy', 'Feature Envy', 'Divergent Change']"
+smellbench-dataset/main/java/dataclass/case3/DCLSGE3.java,"['Feature Envy', 'Divergent Change']"
+smellbench-dataset/main/java/dataclumps/case1/DCBE1.java,"['Data Clumps', 'Long Parameter List', 'Large Class', 'Primitive Obsession', 'Divergent Change', 'Large Class']"
+smellbench-dataset/main/java/dataclumps/case1/DCGE1.java,[]
+smellbench-dataset/main/java/dataclumps/case2/DCBE2.java,['Data Clumps']
+smellbench-dataset/main/java/dataclumps/case2/DCGE2.java,[]
+smellbench-dataset/main/java/dataclumps/case3/DCBE3.java,['Data Clumps']
+smellbench-dataset/main/java/dataclumps/case4/DCBE4.java,"['Data Clumps', 'Primitive Obsession', 'Long Parameter List', 'Temporary Field', 'Feature Envy']"
+smellbench-dataset/main/java/dataclumps/case4/DCGE4.java,"['Primitive Obsession', 'Feature Envy', 'Long Parameter List', 'Feature Envy', 'Divergent Change']"
+smellbench-dataset/main/java/dataclumps/case5/DCBE5.java,"['Data Clumps', 'Long Parameter List', 'Divergent Change']"
+smellbench-dataset/main/java/dataclumps/case5/DCGE5.java,['Divergent Change']
+smellbench-dataset/main/java/deadcode/case1/DEDCBE1.java,[]
+smellbench-dataset/main/java/deadcode/case1/DEDCGE1.java,['Divergent Change']
+smellbench-dataset/main/java/deadcode/case2/DEDCBE2.java,[]
+smellbench-dataset/main/java/deadcode/case2/DEDCGE2.java,[]
+smellbench-dataset/main/java/deadcode/case3/DEDCBE3.java,['Divergent Change']
+smellbench-dataset/main/java/deadcode/case3/DEDCGE3.java,[]
+smellbench-dataset/main/java/divergentchange/case1/DVCHBE1.java,"['Divergent Change', 'Switch Statements']"
+smellbench-dataset/main/java/divergentchange/case1/DVCHGE1.java,['Switch Statements']
+smellbench-dataset/main/java/divergentchange/case2/DVCHBE2.java,"['Divergent Change', 'Switch Statements', 'Long Method', 'Switch Statements', 'Feature Envy']"
+smellbench-dataset/main/java/divergentchange/case2/DVCHGE2.java,[]
+smellbench-dataset/main/java/divergentchange/case3/DVCHBE3.java,"['Divergent Change', 'Primitive Obsession']"
+smellbench-dataset/main/java/divergentchange/case3/DVCHGE3.java,['Primitive Obsession']
+smellbench-dataset/main/java/dupcode/case1/DUPCBE1.java,['Divergent Change']
+smellbench-dataset/main/java/dupcode/case1/DUPCGE1.java,['Divergent Change']
+smellbench-dataset/main/java/dupcode/case2/DUPCBE2.java,['Divergent Change']
+smellbench-dataset/main/java/dupcode/case2/DUPCGE2.java,['Divergent Change']
+smellbench-dataset/main/java/dupcode/case3/DUPCBE3.java,[]
+smellbench-dataset/main/java/dupcode/case3/DUPCGE3.java,[]
+smellbench-dataset/main/java/featureenvy/case1/FEBE1.java,"['Feature Envy', 'Data Class']"
+smellbench-dataset/main/java/featureenvy/case1/FEGE1.java,[]
+smellbench-dataset/main/java/featureenvy/case2/FEBE2.java,"['Feature Envy', 'Long Method', 'Divergent Change']"
+smellbench-dataset/main/java/featureenvy/case2/FEGE2.java,['Long Method']
+smellbench-dataset/main/java/featureenvy/case3/FEBE3.java,['Feature Envy']
+smellbench-dataset/main/java/featureenvy/case3/FEGE3.java,[]
+smellbench-dataset/main/java/intimacy/case1/IIBE1.java,['Inappropriate Intimacy']
+smellbench-dataset/main/java/intimacy/case1/IIGE1.java,[]
+smellbench-dataset/main/java/intimacy/case2/IIBE2.java,['Inappropriate Intimacy']
+smellbench-dataset/main/java/intimacy/case2/IIGE2.java,[]
+smellbench-dataset/main/java/intimacy/case3/IIBE3.java,"['Inappropriate Intimacy', 'Feature Envy']"
+smellbench-dataset/main/java/intimacy/case3/IIGE3.java,[]
+smellbench-dataset/main/java/largeclass/case1/LCBE1.java,"['Large Class', 'Long Parameter List', 'Divergent Change']"
+smellbench-dataset/main/java/largeclass/case1/LCGE1.java,[]
+smellbench-dataset/main/java/largeclass/case2/LCBE2.java,['Large Class']
+smellbench-dataset/main/java/largeclass/case2/LCGE2.java,[]
+smellbench-dataset/main/java/largeclass/case3/LCBE3.java,"['Large Class', 'Primitive Obsession', 'Long Parameter List', 'Temporary Field']"
+smellbench-dataset/main/java/largeclass/case3/LCGE3.java,"['Primitive Obsession', 'Long Parameter List', 'Refused Bequest']"
+smellbench-dataset/main/java/largeclass/case4/LCBE4.java,"['Large Class', 'Divergent Change']"
+smellbench-dataset/main/java/largeclass/case4/LCGE4.java,[]
+smellbench-dataset/main/java/lazyclass/case1/LZCBE1.java,"['Lazy Class', 'Divergent Change']"
+smellbench-dataset/main/java/lazyclass/case1/LZCGE1.java,['Divergent Change']
+smellbench-dataset/main/java/lazyclass/case2/LZCBE2.java,['Lazy Class']
+smellbench-dataset/main/java/lazyclass/case2/LZCGE2.java,[]
+smellbench-dataset/main/java/lazyclass/case3/LZCBE3.java,['Lazy Class']
+smellbench-dataset/main/java/lazyclass/case4/LZCBE4.java,"['Lazy Class', 'Long Parameter List']"
+smellbench-dataset/main/java/lazyclass/case4/LZCGE4.java,['Long Parameter List']
+smellbench-dataset/main/java/lazyclass/case5/LZCBE5.java,['Lazy Class']
+smellbench-dataset/main/java/lazyclass/case5/LZCGE5.java,[]
+smellbench-dataset/main/java/longmethod/case1/LMBE1.java,"['Long Method', 'Switch Statements']"
+smellbench-dataset/main/java/longmethod/case1/LMGE1.java,"['Data Clumps', 'Divergent Change']"
+smellbench-dataset/main/java/longmethod/case2/LMBE2.java,['Long Method']
+smellbench-dataset/main/java/longmethod/case2/LMGE2.java,"['Data Clumps', 'Divergent Change']"
+smellbench-dataset/main/java/longmethod/case3/LMBE3.java,"['Long Method', 'Primitive Obsession']"
+smellbench-dataset/main/java/longmethod/case3/LMGE3.java,"['Primitive Obsession', 'Divergent Change']"
+smellbench-dataset/main/java/longmethod/case4/LMBE4.java,"['Long Method', 'Temporary Field', 'Feature Envy']"
+smellbench-dataset/main/java/longmethod/case4/LMGE4.java,"['Temporary Field, 'Feature Envy', 'Divergent Change']"
+smellbench-dataset/main/java/longparams/case1/LPLBE1.java,['Long Parameter List']
+smellbench-dataset/main/java/longparams/case1/LPLGE1.java,[]
+smellbench-dataset/main/java/longparams/case2/LPLBE2.java,['Long Parameter List']
+smellbench-dataset/main/java/longparams/case2/LPLGE2.java,[]
+smellbench-dataset/main/java/longparams/case3/LPLBE3.java,['Long Parameter List']
+smellbench-dataset/main/java/longparams/case3/LPLGE3.java,[]
+smellbench-dataset/main/java/longparams/case4/LPLBE4.java,"['Long Parameter List', 'Switch Statements', 'Divergent Change']"
+smellbench-dataset/main/java/longparams/case4/LPLGE4.java,"['Switch Statements', 'Divergent Change']"
+smellbench-dataset/main/java/longparams/case5/LPLBE5.java,['Long Parameter List']
+smellbench-dataset/main/java/longparams/case5/LPLGE5.java,[]
+smellbench-dataset/main/java/longparams/case6/LPLBE6.java,['Long Parameter List']
+smellbench-dataset/main/java/longparams/case6/LPLGE6.java,['Feature Envy']
+smellbench-dataset/main/java/messagechains/case1/MCBE1.java,"['Message Chains', 'Feature Envy']"
+smellbench-dataset/main/java/messagechains/case1/MCGE1.java,[]
+smellbench-dataset/main/java/messagechains/case2/MCBE2.java,['Message Chains']
+smellbench-dataset/main/java/messagechains/case2/MCGE2.java,"['Data Clumps', 'Divergent Change']"
+smellbench-dataset/main/java/messagechains/case3/MCBE3.java,"['Message Chains', 'Primitive Obsession']"
+smellbench-dataset/main/java/messagechains/case3/MCGE3.java,['Primitive Obsession']
+smellbench-dataset/main/java/middleman/case1/MMBE1.java,['Middle Man']
+smellbench-dataset/main/java/middleman/case1/MMGE1.java,[]
+smellbench-dataset/main/java/middleman/case2/MMBE2.java,"['Middle Man', 'Feature Envy', 'Divergent Change']"
+smellbench-dataset/main/java/middleman/case2/MMGE2.java,['Divergent Change']
+smellbench-dataset/main/java/middleman/case3/MMIE1.java,['Middle Man']
+smellbench-dataset/main/java/parallelhierarchy/case1/PIHBE1.java,['Parallel Inheritance Hierarchies']
+smellbench-dataset/main/java/parallelhierarchy/case1/PIHGE1.java,[]
+smellbench-dataset/main/java/parallelhierarchy/case2/PIHBE2.java,['Parallel Inheritance Hierarchies']
+smellbench-dataset/main/java/parallelhierarchy/case2/PIHGE2.java,[]
+smellbench-dataset/main/java/parallelhierarchy/case3/PIHBE3.java,['Parallel Inheritance Hierarchies']
+smellbench-dataset/main/java/parallelhierarchy/case3/PIHGE3.java,[]
+smellbench-dataset/main/java/primobsession/case1/POBE1.java,"['Primitive Obsession', 'Large Class', 'Divergent Change']"
+smellbench-dataset/main/java/primobsession/case1/POGE1.java,"['Data Class', 'Feature Envy']"
+smellbench-dataset/main/java/primobsession/case2/POBE2.java,"['Primitive Obsession', 'Switch Statements', 'Divergent Change']"
+smellbench-dataset/main/java/primobsession/case2/POGE2.java,[]
+smellbench-dataset/main/java/primobsession/case3/POBE3.java,['Primitive Obsession']
+smellbench-dataset/main/java/primobsession/case3/POGE3.java,['Primitive Obsession']
+smellbench-dataset/main/java/primobsession/case4/POBE4.java,['Primitive Obsession']
+smellbench-dataset/main/java/primobsession/case4/POGE4.java,[]
+smellbench-dataset/main/java/primobsession/case5/POBE5.java,['Primitive Obsession']
+smellbench-dataset/main/java/refusedbequest/case1/RBBE1.java,"['Refused Bequest', 'Temporary Field', 'Divergent Change']"
+smellbench-dataset/main/java/refusedbequest/case1/RBGE1.java,"['Temporary Field', 'Middle Man', 'Divergent Change']"
+smellbench-dataset/main/java/refusedbequest/case2/RBBE2.java,['Refused Bequest']
+smellbench-dataset/main/java/refusedbequest/case2/RBGE2.java,[]
+smellbench-dataset/main/java/refusedbequest/case3/RBBE3.java,"['Refused Bequest', 'Long Parameter List', 'Divergent Change']"
+smellbench-dataset/main/java/refusedbequest/case3/RBGE3.java,"['Long Parameter List', 'Divergent Change']"
+smellbench-dataset/main/java/refusedbequest/case4/RBBE4.java,['Refused Bequest']
+smellbench-dataset/main/java/refusedbequest/case4/RBGE4.java,[]
+smellbench-dataset/main/java/shotgun/case1/SSBE1.java,"['Shotgun Surgery', 'Switch Statements', 'Alternative Classes with Different Interfaces']"
+smellbench-dataset/main/java/shotgun/case1/SSGE1.java,"['Switch Statements', 'Middle Man', 'Alternative Classes with Different Interfaces']"
+smellbench-dataset/main/java/shotgun/case2/SSBE2.java,['Shotgun Surgery']
+smellbench-dataset/main/java/shotgun/case2/SSGE2.java,[]
+smellbench-dataset/main/java/shotgun/case3/SSBE3.java,"['Shotgun Surgery', 'Feature Envy', 'Primitive Obsession', 'Divergent Change', 'Data Clumps']"
+smellbench-dataset/main/java/shotgun/case3/SSGE3.java,"['Primitive Obsession', 'Data Clumps', 'Divergent Change']"
+smellbench-dataset/main/java/specgen/case1/SGBE1.java,['Divergent Change']
+smellbench-dataset/main/java/specgen/case1/SGGE1.java,['Divergent Change']
+smellbench-dataset/main/java/specgen/case2/SGBE2.java,"['Switch Statements', 'Divergent Change']"
+smellbench-dataset/main/java/specgen/case2/SGGE2.java,"['Switch Statements', 'Divergent Change']"
+smellbench-dataset/main/java/specgen/case3/SGBE3.java,"['Refused Bequest', 'Comments']"
+smellbench-dataset/main/java/specgen/case3/SGGE3.java,[]
+smellbench-dataset/main/java/switchstmts/case1/SWSBE1.java,['Switch Statements']
+smellbench-dataset/main/java/switchstmts/case1/SWSGE1.java,[]
+smellbench-dataset/main/java/switchstmts/case2/SWSBE2.java,"['Switch Statements', 'Divergent Change']"
+smellbench-dataset/main/java/switchstmts/case2/SWSGE2.java,[]
+smellbench-dataset/main/java/switchstmts/case3/SWSBE3.java,"['Switch Statements', 'Long Method', 'Feature Envy']"
+smellbench-dataset/main/java/switchstmts/case3/SWSGE3.java,['Feature Envy']
+smellbench-dataset/main/java/switchstmts/case4/SWSBE4.java,"['Switch Statements', 'Long Method', 'Divergent Change']"
+smellbench-dataset/main/java/switchstmts/case4/SWSGE4.java,[]
+smellbench-dataset/main/java/tempfield/case1/TFBE1.java,[]
+smellbench-dataset/main/java/tempfield/case1/TFGE1.java,[]
+smellbench-dataset/main/java/tempfield/case2/TFBE2.java,"['Temporary Field', 'Divergent Change']"
+smellbench-dataset/main/java/tempfield/case2/TFGE2.java,['Divergent Change']
+smellbench-dataset/main/java/tempfield/case3/TFBE3.java,"['Temporary Field', 'Long Method']"
+smellbench-dataset/main/java/tempfield/case3/TFGE3.java,['Long Method']
