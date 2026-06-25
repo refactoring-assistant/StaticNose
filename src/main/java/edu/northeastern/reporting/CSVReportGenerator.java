@@ -32,7 +32,7 @@ public class CSVReportGenerator extends AbstractReportGenerator {
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
 
         Map<String, List<ReportStruct>> groupedReports = reportStructList.stream()
-                .collect(Collectors.groupingBy(ReportStruct::getFilePath));
+                .collect(Collectors.groupingBy(ReportStruct::getRelativeFilePath));
 
         File outputFile = new File(outputPath);
         File parentDir = outputFile.getParentFile();

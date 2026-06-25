@@ -44,13 +44,13 @@ public class OracleGenerator {
             writer.append("File Name,Expected Code Smells\n");
 
             for (File file : javaFiles) {
-                String absolutePath = file.getAbsolutePath().replace("\\", "/");
+                String relativePath = edu.northeastern.utils.PathHelper.getPathFromInputFolder(file.getAbsolutePath(), sourceFolder.getAbsolutePath());
 
-                if (!uniqueClassNames.add(absolutePath)) {
-                    throw new IllegalStateException("Error: Duplicate file found: '" + absolutePath + "'. Oracle generation aborted.");
+                if (!uniqueClassNames.add(relativePath)) {
+                    throw new IllegalStateException("Error: Duplicate file found: '" + relativePath + "'. Oracle generation aborted.");
                 }
 
-                writer.append(absolutePath)
+                writer.append(relativePath)
                         .append(",")
                         .append("[]\n");
             }
