@@ -187,7 +187,8 @@ public class Metrics {
   /**
    * Creates a mapped registry of which methods access which internal class fields,
    * while safely ignoring ubiquitous "glue" fields (like loggers) that artificially
-   * inflate cohesion metrics.
+   * inflate cohesion metrics. If "glue" fields are used by all methods,
+   * then they are not ignored.
    *
    * @param type              The class being analyzed.
    * @param methodsToAnalyze  The filtered list of methods to map.
@@ -232,8 +233,17 @@ public class Metrics {
       }
     }
 
-    for (Set<String> fields : methodFieldUsage.values()) {
-      fields.removeAll(glueFields);
+    boolean removingGlueWouldEraseAllUsage = methodFieldUsage.values().stream()
+        .allMatch(fields -> {
+          Set<String> remaining = new HashSet<>(fields);
+          remaining.removeAll(glueFields);
+          return remaining.isEmpty();
+        });
+
+    if (!removingGlueWouldEraseAllUsage) {
+      for (Set<String> fields : methodFieldUsage.values()) {
+        fields.removeAll(glueFields);
+      }
     }
 
     return methodFieldUsage;
